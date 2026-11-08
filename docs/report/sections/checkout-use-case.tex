@@ -61,5 +61,47 @@ late financial SUCCESS sau CANCELLED lưu evidence, không hồi sinh Order.
 \subsection{Traceability và giới hạn xác minh}
 Chi tiết mọi nhánh, mã lỗi và traceability nằm trong tệp
 \texttt{docs/requirements/A2\_T1.3\_Checkout\_Use\_Case\_Specification.md}.
-Chưa đối chiếu được A2 Task 1.2 và source \texttt{brewlite-a2/dev}; các route
-trong API Contract v4.0 là căn cứ thiết kế, không mặc định đã triển khai.
+Các mapping FR/NFR A2 Task 1.2 và bằng chứng implementation trong source\texttt{brewlite-a2/dev} còn chờ đối chiếu; các route trong API Contract v4.0 là căn cứ thiết kế, không mặc định đã triển khai.
+
+
+% R-01 — Include editable original from docs/requirements/diagrams/checkout-use-case.drawio.
+% Place this fragment in docs/report/sections/checkout-use-case.tex;
+% place the companion PDF in docs/report/assets/checkout-use-case.pdf.
+% Main report preamble must load graphicx: \usepackage{graphicx}.
+\subsection{Use Case Diagram Checkout (R-01)}
+\begin{figure}[htbp]
+\centering
+\IfFileExists{docs/report/assets/checkout-use-case.pdf}{%
+  \includegraphics[width=\linewidth]{docs/report/assets/checkout-use-case.pdf}%
+}{%
+  \fbox{\parbox{0.85\linewidth}{\centering
+  Sơ đồ Checkout nằm tại \texttt{docs/requirements/diagrams/checkout-use-case.drawio}.\\
+  Xuất PDF vào \texttt{docs/report/assets/checkout-use-case.pdf} để hiển thị.}}%
+}
+\caption{Use Case Diagram Checkout --- Customer và VNPay Sandbox là actor ngoài; các service nội bộ không phải UML actor.}
+\label{fig:a2-checkout-use-case}
+\end{figure}
+
+\subsection{Đối chiếu FR/NFR A2 Task 1.2 (R-02)}
+Mã FR/NFR chính thức của A2 Task 1.2 \textbf{chưa được cung cấp/đối chiếu}.
+Đặc tả hiện dựa trên FR-ORD-001/002/006/007, FR-PAY-010/011/012,
+US--AC Phase 2 và các quy tắc trong API Contract v4.0.
+Tác giả Task 1.2 cần chốt mapping từng FR/NFR với luồng Checkout, ghi rõ
+mức ưu tiên và link nguồn trước khi nghiệm thu Task 1.3.
+
+\subsection{Kiểm tra API và implementation (R-03)}
+Các route thiết kế bao gồm \texttt{POST /orders},
+\texttt{POST /payments/vnpay/initiate}, \texttt{GET /payments/vnpay/ipn},
+\texttt{GET /payments/:paymentId/status},
+\texttt{POST /payments/zero-amount}, và Mock legacy \texttt{POST /payments}.
+Đây là route trong tài liệu nguồn; trạng thái triển khai của controller,
+DTO, service và tests tại A1-final/A2 \textbf{chưa xác minh}.
+Chi tiết checklist đối chiếu có trong bản Markdown của Task 1.3.
+
+\subsection{Phân biệt trạng thái đối soát (R-04)}
+\texttt{REQUIRES\_REVIEW} là thông tin\emph{ reconciliation} hoặc
+\emph{resolution} cho UI; không phải trạng thái mới của Order hay
+\texttt{Payment.status}. Trong tình huống sau Grace, Order có thể
+\texttt{CANCELLED} còn Payment vẫn \texttt{PENDING}, đồng thời
+\texttt{reconciliationState=REQUIRES\_REVIEW} khi hết horizon.
+Không chuyển Payment thành FAILED chỉ vì kết quả chưa xác định.

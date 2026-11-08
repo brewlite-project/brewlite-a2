@@ -1,0 +1,18 @@
+digraph Checkout {
+  graph [rankdir=LR, splines=polyline, nodesep=.35, ranksep=.8, fontname="DejaVu Sans", label="BrewLite A2 — Checkout Use Case (mô hình nghiệp vụ)", labelloc=t, fontsize=16];
+  node [fontname="DejaVu Sans",fontsize=10]; edge [fontname="DejaVu Sans", fontsize=8, color="#555555"];
+  Customer [label="Customer", shape=plaintext, fontcolor="#333333"];
+  VNPay [label="VNPay Sandbox", shape=plaintext,fontcolor="#333333"];
+  subgraph cluster_system {
+    label="BrewLite A2"; style=rounded; color="#777777"; bgcolor="#FCFBF9";
+    checkout [label="Checkout / đặt hàng\nvà thanh toán", shape=ellipse, style=filled, fillcolor="#F5DEC9"];
+    auth [label="Xác thực Customer", shape=ellipse]; order [label="Tạo Order từ giỏ", shape=ellipse];
+    vnp [label="Khởi tạo thanh toán\nVNPay",shape=ellipse];zero [label="Thanh toán\nZERO_AMOUNT",shape=ellipse];mock [label="Thanh toán Mock\n(test/demo)",shape=ellipse];
+    verify [label="Xác minh kết quả\nIPN / QueryDR",shape=ellipse]; retry [label="Thử lại khi FAILED\nđã xác minh",shape=ellipse];expire [label="Hết hạn / đối soát",shape=ellipse];
+  }
+  Customer -> checkout [dir=none]; VNPay -> vnp [dir=none]; VNPay -> verify [dir=none];
+  checkout -> auth [style=dashed, label="«include»",arrowhead=open]; checkout -> order [style=dashed,label="«include»",arrowhead=open];
+  vnp -> checkout [style=dashed,label="«extend»",arrowhead=open];zero -> checkout [style=dashed,label="«extend»",arrowhead=open];mock -> checkout [style=dashed,label="«extend»",arrowhead=open];retry -> checkout [style=dashed,label="«extend»",arrowhead=open];
+  vnp -> verify [style=dashed,label="«include»",arrowhead=open];
+  expire -> checkout [style=dotted,dir=none,label="hỗ trợ nội bộ"];
+}
