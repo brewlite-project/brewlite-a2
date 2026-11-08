@@ -1,0 +1,65 @@
+% BrewLite A2 — Task 1.3. Fragment for inclusion into the A2 report.
+% Requires in main preamble: \usepackage[utf8]{inputenc} (pdfLaTeX, if needed),
+% \usepackage{longtable}, \usepackage{array}; Vietnamese UTF-8 engine/package per report template.
+\section{Đặc tả Use Case trọng tâm --- Checkout}
+\label{sec:a2-checkout}
+
+\subsection{Mục tiêu và phạm vi}
+Use Case \texttt{UC-A2-CHECKOUT-001} (mã đề xuất) mô tả quy trình Customer
+xác nhận giỏ, tạo Order và thanh toán đến khi nhận được kết quả đáng tin cậy,
+hoặc đến trạng thái chờ đối soát/hết hạn. Phạm vi kế thừa UC-ORD-001 và
+UC-PAY-001 của BrewLite A1, nhưng sử dụng các quy tắc Phase~2 từ Requirements
+v3.1 và API Contract v4.0. Tài liệu này không thay đổi API hay schema.
+
+\subsection{Actor, Trigger và điều kiện}
+\begin{description}
+\item[Primary actor:] Customer đã đăng nhập.
+\item[External supporting actor:] VNPay Sandbox (chỉ nhánh VNPay).
+\item[Supporting components:] Frontend, Auth, Order, Pricing, Inventory, Coupon,
+Payment, Finalization, Expiration/Reconciliation và Database.
+\item[Trigger:] Customer nhấn Đặt hàng từ giỏ, sau đó chọn thanh toán.
+\item[Precondition:] Customer có JWT hợp lệ để tạo Order và gửi được giỏ;
+điều kiện tồn kho, coupon, Order active và expiry được xác minh trong flow.
+\item[Success postcondition:] Order PAID, tối đa một Payment SUCCESS,
+coupon CONSUMED/loyalty một lần và không trừ stock lần hai.
+\item[Alternate postcondition:] Terminal FAILED trong TTL giữ tồn/coupon;
+unknown giữ Payment PENDING; Order CANCELLED khi đủ điều kiện expiry thì
+release tài nguyên đúng một lần.
+\end{description}
+
+\subsection{Main Success Flow}
+\begin{enumerate}
+\item Customer xác thực và gửi giỏ cùng coupon (nếu có) đến Order API.
+\item Backend xác minh giỏ, Order active, giá/size/topping, tồn kho và coupon.
+\item Backend tính tiền theo catalog, tạo Order PENDING cùng snapshot,
+trừ/giữ tài nguyên nguyên tử; đặt expiresAt bằng createdAt cộng 15 phút.
+\item Với totalVnd dương, Customer chọn VNPay; backend kiểm ownership,
+TTL, idempotency và attempt trạng thái hiện tại rồi khởi tạo VNPay PENDING.
+\item VNPay nhận thanh toán, gửi IPN; backend xác minh chữ ký, merchant,
+TxnRef, amount, outcome và paid time. Return URL không đủ xác nhận SUCCESS.
+\item Shared Finalization xác minh SUCCESS đúng hạn, Order chưa CANCELLED;
+Payment SUCCESS, Order PAID, coupon CONSUMED, loyalty đúng một lần.
+\item Frontend đọc Payment Status/Order History từ backend và hiển thị
+kết quả; chỉ xóa giỏ khi đã xác nhận PAID.
+\end{enumerate}
+
+\subsection{Alternative và Exception Flows}
+\begin{itemize}
+\item Zero amount: dùng ZERO\_AMOUNT nội bộ, không gọi VNPay, pointsEarned=0.
+\item Mock: chỉ khi được bật trong non-production và không có VNPay PENDING.
+\item Verified FAILED: Order PAYMENT\_FAILED khi còn hạn; retry chỉ với attempt
+mới sau xác nhận terminal failed.
+\item TTL/Grace: không initiation từ expiresAt; VNPay PENDING có grace 5 phút
+để đối soát thanh toán đã phát sinh đúng hạn. Hết grace còn unknown thì
+Order CANCELLED/release, Payment có thể vẫn PENDING.
+\item Wrong JWT/ownership: 401/404; invalid cart/stock/coupon: validation/409;
+active Order: 409 PENDING\_ORDER\_EXISTS; idempotency mismatch: 409.
+\item Invalid IPN, timeout, QueryDR unknown: không tự PAID/FAILED;
+late financial SUCCESS sau CANCELLED lưu evidence, không hồi sinh Order.
+\end{itemize}
+
+\subsection{Traceability và giới hạn xác minh}
+Chi tiết mọi nhánh, mã lỗi và traceability nằm trong tệp
+\texttt{docs/requirements/A2\_T1.3\_Checkout\_Use\_Case\_Specification.md}.
+Chưa đối chiếu được A2 Task 1.2 và source \texttt{brewlite-a2/dev}; các route
+trong API Contract v4.0 là căn cứ thiết kế, không mặc định đã triển khai.
