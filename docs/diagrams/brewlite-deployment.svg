@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1680" height="1230" viewBox="0 0 1680 1230" role="img" aria-labelledby="title desc">
 <title id="title">BrewLite target deployment: Vercel and Render</title>
-<desc id="desc">Target design, not verified live. Next.js on Vercel proxies HTTPS to NestJS on Render. PostgreSQL uses private TCP. VNPay Return uses the browser; IPN calls the backend directly. Dashed CI/CD is planned.</desc>
+<desc id="desc">Target design, not verified live. Next.js on Vercel proxies HTTPS to NestJS on Render. PostgreSQL uses private TCP. VNPay Return uses the browser; IPN calls the backend directly. Local and CI are isolated from the production target. Planned builds use Vercel prebuilt upload and Render Docker build with its managed private image registry, without a separate BrewLite registry.</desc>
 <rect width="1680" height="1230" fill="#ffffff"/>
 <g id="title">
 <text x="40" y="54" font-family="Helvetica,Arial,sans-serif" font-size="32" font-weight="bold" fill="#15253b">BrewLite | Deployment Diagram</text>
@@ -9,10 +9,9 @@
 <text x="40" y="93" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="normal" fill="#52637a">ASSIGNMENT 2 - TARGET DESIGN | Vercel Hobby + Render + VNPay Sandbox | Live verification pending</text>
 </g>
 <g id="public-boundary">
-<rect x="30" y="115" width="1620" height="390" fill="#f5f8fc" stroke="none" stroke-width="1.5"/>
 </g>
 <g id="public-label">
-<text x="50" y="141" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="bold" fill="#52637a">PUBLIC INTERNET / HTTPS</text>
+<text x="50" y="141" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="bold" fill="#52637a">PRODUCTION TARGET / PUBLIC HTTPS | Browser and VNPay are external</text>
 </g>
 <g id="browser">
 <rect x="60" y="205" width="290" height="200" fill="#ffffff" stroke="#61758e" stroke-width="2"/>
@@ -35,8 +34,8 @@
 </g>
 <g id="next-artifact">
 <rect x="500" y="265" width="430" height="85" fill="#eaf2fd" stroke="#b5cde9" stroke-width="1"/>
-<text x="510" y="292" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">&lt;&lt;artifact&gt;&gt; Next.js frontend</text>
-<text x="510" y="313.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">Static assets + server Route Handler</text>
+<text x="510" y="292" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">&lt;&lt;artifact&gt;&gt; Next.js prebuilt frontend</text>
+<text x="510" y="313.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">CI build -&gt; Vercel assets / server runtime</text>
 <text x="510" y="334.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">/api/backend/* proxy + /payment</text>
 </g>
 <g id="vercel-env">
@@ -64,7 +63,7 @@
 <rect x="455" y="550" width="1165" height="380" fill="#f5f8fc" stroke="#b9c6d7" stroke-width="1.5"/>
 </g>
 <g id="render-label">
-<text x="1225" y="577" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="bold" fill="#52637a">Render workspace / region: TBD</text>
+<text x="1225" y="577" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="bold" fill="#52637a">PRODUCTION / Render | region: TBD</text>
 </g>
 <g id="render-ingress">
 <rect x="480" y="595" width="570" height="60" fill="#eaf2fd" stroke="#2c65a2" stroke-width="2"/>
@@ -79,8 +78,8 @@
 </g>
 <g id="nest-artifact">
 <rect x="500" y="725" width="530" height="80" fill="#eaf2fd" stroke="#b5cde9" stroke-width="1"/>
-<text x="508" y="750" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">&lt;&lt;artifact&gt;&gt; NestJS + Prisma Client (dist/main.js)</text>
-<text x="508" y="771.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">IPN + shared finalization</text>
+<text x="508" y="750" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">&lt;&lt;artifact&gt;&gt; Docker runtime image (Render-built)</text>
+<text x="508" y="771.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">NestJS + Prisma Client; IPN + shared finalization</text>
 <text x="508" y="792.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">Order expiration + reconciliation timers</text>
 </g>
 <g id="render-secrets">
@@ -106,19 +105,30 @@
 <text x="1255" y="808.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#28633e">External access OFF (verify)</text>
 <text x="1255" y="829.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#28633e">Same workspace / region as API</text>
 </g>
+<g id="local-boundary">
+<rect x="60" y="440" width="270" height="125" fill="#f3f4f6" stroke="#61758e" stroke-width="1.5" stroke-dasharray="8 5"/>
+</g>
+<g id="local-heading">
+<text x="75" y="468" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="bold" fill="#52637a">LOCAL / developer</text>
+</g>
+<g id="local-body">
+<text x="75" y="497" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#52637a">Compose: web + API + DB</text>
+<text x="75" y="515.75" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#52637a">Isolated A2 DB; ignored .env</text>
+<text x="75" y="534.5" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#52637a">No production credentials</text>
+</g>
 <g id="actions">
 <rect x="60" y="595" width="310" height="310" fill="#f5f0fc" stroke="#8660ae" stroke-width="2" stroke-dasharray="8 5"/>
 </g>
 <g id="actions-heading">
-<text x="80" y="630" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="bold" fill="#67428f">&lt;&lt;external node&gt;&gt;</text>
-<text x="80" y="652.5" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="bold" fill="#67428f">GitHub / Actions runner</text>
+<text x="80" y="630" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="bold" fill="#67428f">&lt;&lt;CI environment&gt;&gt;</text>
+<text x="80" y="652.5" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="bold" fill="#67428f">GitHub Actions runner</text>
 <text x="80" y="675" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="bold" fill="#67428f">PLANNED - no workflow yet</text>
 </g>
 <g id="actions-body">
 <rect x="80" y="700" width="270" height="80" fill="#ffffff" stroke="#cab8de" stroke-width="1"/>
-<text x="88" y="724" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#67428f">Repository -&gt; CI checks</text>
-<text x="88" y="744" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#67428f">Build + test on isolated CI DB</text>
-<text x="88" y="764" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#67428f">CD only after checks pass</text>
+<text x="88" y="723" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#67428f">PR: isolated DB + build/tests</text>
+<text x="88" y="741.75" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#67428f">CD: Vercel CLI build/upload</text>
+<text x="88" y="760.5" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#67428f">CD: trigger Render Docker build</text>
 </g>
 <g id="actions-secrets">
 <rect x="80" y="795" width="270" height="90" fill="#ffffff" stroke="#cab8de" stroke-width="1"/>
@@ -171,26 +181,27 @@
 <text x="55" y="994" font-family="Helvetica,Arial,sans-serif" font-size="19" font-weight="bold" fill="#15253b">READ THIS AS A TARGET DESIGN</text>
 </g>
 <g id="legend-body">
-<text x="55" y="1033" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Solid arrows: target runtime communication (verify after deploy).</text>
-<text x="55" y="1054.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Purple dashed arrows: planned CI/CD deployment dependencies.</text>
-<text x="55" y="1075.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Green boundary: private DB path; no browser / Vercel DB link.</text>
-<text x="55" y="1096.75" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Secrets: Render server env; CI deployment keys in GitHub Secrets.</text>
-<text x="55" y="1118" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Return is navigation only. IPN / QueryDR verify before finalization.</text>
-<text x="55" y="1139.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Crossing lines without a junction do not indicate a connection.</text>
+<text x="55" y="1033" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Environments: Local, isolated CI, Production target (not verified).</text>
+<text x="55" y="1054.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Solid arrows: target runtime communication (verify after deploy).</text>
+<text x="55" y="1075.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Purple dashed arrows: planned CI/CD deployment dependencies.</text>
+<text x="55" y="1096.75" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Green boundary: private DB path; no browser / Vercel DB link.</text>
+<text x="55" y="1118" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Secrets: Render server env; CI deployment keys in GitHub Secrets.</text>
+<text x="55" y="1139.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Return is navigation only. IPN / QueryDR verify before finalization.</text>
+<text x="55" y="1160.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Crossing lines without a junction do not indicate a connection.</text>
 </g>
 <g id="gates-heading">
-<text x="930" y="994" font-family="Helvetica,Arial,sans-serif" font-size="19" font-weight="bold" fill="#15253b">OPEN ACCEPTANCE GATES</text>
+<text x="930" y="994" font-family="Helvetica,Arial,sans-serif" font-size="19" font-weight="bold" fill="#15253b">BUILD / ARTIFACT FLOW (PLANNED)</text>
 </g>
 <g id="gates-body">
-<text x="930" y="1033" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Live URLs / region / tier / environment: TBD.</text>
-<text x="930" y="1054.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Payment status route missing; full Return UI flow blocked.</text>
-<text x="930" y="1075.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Free Web tier (if chosen): sleep affects IPN + schedulers.</text>
-<text x="930" y="1096.75" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">DB Free lifecycle + private migration runner: verify.</text>
-<text x="930" y="1118" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">QueryDR Sandbox E2E: pending (see ADR).</text>
-<text x="930" y="1139.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">PR review / merge into dev: user authorization required.</text>
+<text x="930" y="1033" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Frontend: CI Vercel build -&gt; prebuilt upload to Vercel.</text>
+<text x="930" y="1054.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Backend: Git SHA + backend/Dockerfile -&gt; Render Docker build</text>
+<text x="930" y="1075.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">-&gt; Render-managed private image registry -&gt; runtime.</text>
+<text x="930" y="1096.75" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">No separate BrewLite image registry (GHCR / Docker Hub).</text>
+<text x="930" y="1118" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Task 5: tagged-image / release / rollback evidence required.</text>
+<text x="930" y="1139.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Live URLs / CI/CD / migration / payment E2E: still pending.</text>
 </g>
 <g id="footer">
-<text x="40" y="1215" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#52637a">A2-T3.2 / SCRUM-108 | Source snapshot b542ee4 | 2026-11-08 | No live secrets or credentials</text>
+<text x="40" y="1215" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#52637a">A2-T3.2 / SCRUM-108 | v1.1 | App source b542ee4 | 2026-11-08 | No live secrets or credentials</text>
 </g>
 <g id="flow-1">
 <polyline points="350,310 480,310" fill="none" stroke="#ffffff" stroke-width="6"/>

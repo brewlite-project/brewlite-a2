@@ -5,6 +5,10 @@ Trạng thái hiện tại: **TARGET DESIGN, chưa đối chiếu môi trường
 Chi tiết source, đường đi và checklist nghiệm thu:
 [deployment.md](../architecture/deployment.md).
 
+Đây là hướng dẫn riêng của Deployment Diagram. Dùng tên
+`deployment-README.md` để không cùng thêm/sửa `docs/diagrams/README.md` với
+Domain Class Diagram trong PR #5; README chung do PR đó bổ sung độc lập.
+
 | File | Vai trò |
 | --- | --- |
 | `brewlite-deployment.drawio` | Nguồn chuẩn, XML không nén, chỉnh sửa bằng diagrams.net |
@@ -19,6 +23,7 @@ Chạy từ repository root, Python 3.10+:
 
 ```powershell
 python -m pip install reportlab==5.1.0
+python -c "import reportlab; print(reportlab.Version); assert reportlab.Version == '5.1.0'"
 python docs/diagrams/render_deployment.py
 python docs/diagrams/render_deployment.py --check
 ```
@@ -57,10 +62,37 @@ Nếu compile từ repository root:
 ```
 
 Nếu compile từ `docs/report`, dùng `\input{../diagrams/deployment-figure.tex}`
-và đổi đường dẫn `\includegraphics` trong snippet thành
-`../diagrams/brewlite-deployment.pdf`. PDF chứa chữ chọn được, không raster hóa.
+và khai báo trước khi input:
+
+```latex
+\newcommand{\BrewLiteDiagramDir}{../diagrams}
+\input{../diagrams/deployment-figure.tex}
+```
+
+Fragment dùng `\providecommand{\BrewLiteDiagramDir}{docs/diagrams}` cùng quy ước
+với fragment Domain Class Diagram của PR #5; không ghi đè macro nếu report đã
+khai báo. Không cần sửa đường dẫn trong từng fragment. PDF chứa chữ chọn được,
+không raster hóa.
 Compile bằng toolchain hỗ trợ tiếng Việt đang dùng của báo cáo. Snippet chưa
 được tích hợp/compile trong một main report của task này.
+
+## Build, registry và ranh giới môi trường
+
+- **Local:** Docker Compose trên máy developer, DB A2 và `.env` riêng; không
+  dùng credential hoặc volume production.
+- **CI:** GitHub Actions build/test với DB cô lập. CD dự kiến dùng Vercel CLI
+  `build` rồi `deploy --prebuilt`; backend chỉ được trigger sau checks.
+- **Production target:** Vercel nhận frontend artifact; Render lấy Git commit,
+  build `backend/Dockerfile` thành runtime image rồi chạy NestJS; PostgreSQL là
+  dịch vụ managed riêng trên private network của Render.
+- **Registry:** không chọn registry độc lập để publish image BrewLite. Artifact
+  frontend do Vercel quản lý; backend image nằm trong registry private do Render
+  quản lý. Chú giải build ghi rõ thành phần này; không thêm dịch vụ GHCR/Docker
+  Hub chưa chọn vào sơ đồ. Base image Dockerfile vẫn là dependency build.
+
+Chi tiết mapping yêu cầu A2, bằng chứng image/release/rollback còn cần ở Task 5
+và giới hạn của lựa chọn này nằm ở §1.1 và §7.1 của
+[deployment.md](../architecture/deployment.md).
 
 ## Quy tắc cập nhật và kiểm tra
 

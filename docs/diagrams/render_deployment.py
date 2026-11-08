@@ -46,7 +46,9 @@ def export(source: Path) -> tuple[bytes, bytes]:
         '<title id="title">BrewLite target deployment: Vercel and Render</title>',
         '<desc id="desc">Target design, not verified live. Next.js on Vercel proxies HTTPS '
         'to NestJS on Render. PostgreSQL uses private TCP. VNPay Return uses the browser; '
-        'IPN calls the backend directly. Dashed CI/CD is planned.</desc>',
+        'IPN calls the backend directly. Local and CI are isolated from the production target. '
+        'Planned builds use Vercel prebuilt upload and Render Docker build with its managed '
+        'private image registry, without a separate BrewLite registry.</desc>',
         f'<rect width="{width:g}" height="{height:g}" fill="#ffffff"/>',
     ]
     # A3 landscape, with a uniform scale so PDF and SVG have the same geometry.
