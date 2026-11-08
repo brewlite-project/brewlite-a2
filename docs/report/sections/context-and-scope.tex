@@ -83,28 +83,53 @@ Web Client hiển thị và gửi yêu cầu; Backend là nơi quyết định g
 Bên ngoài BrewLite: Guest/Customer và VNPay Sandbox. VNPay Sandbox là provider mặc định. Mock CARD/WALLET chỉ phục vụ automated test/demo khi backend cho phép trong môi trường không phải production và luôn bị tắt ở production. ZERO\_AMOUNT xử lý nội bộ đơn 0 VND, độc lập với Mock. Không tự fallback sang Mock khi VNPay PENDING hoặc chưa rõ kết quả. [S1 §3, §9.9, §16]
 \par
 
-\subsection{In Scope -- phạm vi nghiệp vụ kế thừa}
+\subsection{In Scope -- MVP và phần mở rộng kế thừa A1-final}
+
+MVP và phần mở rộng dưới đây đều nằm trong baseline A1-final được kế thừa sang A2. Cách phân nhóm dựa trên 10 task A1 và các bổ sung Phase 2 đã ghi trong nguồn, không phải thay đổi ưu tiên hoặc loại bỏ yêu cầu. Đặc biệt, state machine, idempotency, concurrency/inventory và coupon/loyalty thuộc Task 10 A1, không bị chuyển thành tính năng tùy chọn. [S1 §4.1, §6; S3 §4.1]
+\par
+
+\subsubsection{Phạm vi MVP -- 10 task A1}
+
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.20\linewidth}>{\raggedright\arraybackslash}p{0.43\linewidth}>{\raggedright\arraybackslash}p{0.25\linewidth}}
 \hline
-\textbf{Nhóm} & \textbf{Nội dung được mô tả trong phạm vi} & \textbf{Nguồn} \\ \hline
+\textbf{Nhóm} & \textbf{Nội dung trong phạm vi MVP} & \textbf{Nguồn} \\ \hline
 \endfirsthead
-\textbf{Nhóm} & \textbf{Nội dung được mô tả trong phạm vi} & \textbf{Nguồn} \\ \hline
+\textbf{Nhóm} & \textbf{Nội dung trong phạm vi MVP} & \textbf{Nguồn} \\ \hline
 \endhead
-Identity & Đăng ký/đăng nhập JWT, băm mật khẩu Argon2id và bảo vệ API/quyền sở hữu dữ liệu. & S1 §4.1, §7.1 \\ \hline
-Catalog và Cart & Menu, chi tiết, size/topping; thêm/sửa/xóa giỏ và tổng tạm; server tính lại khi tạo đơn. & S1 §4.1, §6 F02--F03 \\ \hline
-Order và Inventory & Tạo đơn, kiểm tra hợp lệ, snapshot, trạng thái/lịch sử, chống oversell và hết hạn/hoàn tài nguyên theo lifecycle. & S1 §6 F04--F05 \\ \hline
-Payment & VNPay Sandbox; xác minh IPN/QueryDR; PENDING/SUCCESS/FAILED; idempotency, retry có kiểm soát, grace và reconciliation; bảo lưu Mock test/demo và ZERO\_AMOUNT. & S1 §4.1, §9.9, §16 \\ \hline
-Promotion và Loyalty & Kiểm tra coupon, giới hạn lượt dùng, tính giảm giá và cộng điểm sau thanh toán hợp lệ, không cộng trùng. & S1 §6 F07 \\ \hline
-Kiểm chứng và bàn giao kế thừa & Kiểm thử, Docker Compose, README và demo; phân biệt bằng chứng lịch sử A1 với kiểm chứng A2. & S1 §4.1; S2 §0 \\ \hline
+Identity & Đăng ký/đăng nhập JWT, băm mật khẩu Argon2id và bảo vệ API/quyền sở hữu dữ liệu. & S1 §4.1, §7.1; S3 §4.1 Task 7 \\ \hline
+Catalog và Cart & Menu, chi tiết, size/topping; thêm/sửa/xóa giỏ và tổng tạm; server tính lại khi tạo đơn. & S1 §4.1, §6 F02--F03; S3 §4.1 Task 2--5 \\ \hline
+Order và Inventory & Tạo đơn, kiểm tra hợp lệ, snapshot, xác nhận/trạng thái/lịch sử; state machine, chống oversell, concurrency/inventory và hết hạn/hoàn tài nguyên theo lifecycle baseline. & S1 §6 F04--F05; S3 §4.1 Task 6, 9--10 \\ \hline
+Mock Payment và idempotency & Thanh toán giả lập CARD/WALLET cho test/demo trong môi trường được backend cho phép; xử lý kết quả và idempotency. Mock luôn bị tắt ở production; policy tại mục 5 áp dụng đầy đủ. & S1 §4.1, §6 F06; S3 §4.1 Task 8, 10 \\ \hline
+Promotion và Loyalty & Kiểm tra coupon, giới hạn lượt dùng, tính giảm giá và cộng điểm sau thanh toán hợp lệ, không cộng trùng. & S1 §6 F07; S3 §4.1 Task 10 \\ \hline
+Kiểm chứng và bàn giao kế thừa & Kiểm thử, Docker Compose, README, cấu hình mẫu và demo; phân biệt bằng chứng lịch sử A1 với kiểm chứng A2. & S1 §4.1; S2 §0; S3 §4.1 Task 1, 9 \\ \hline
 \end{longtable}
 \endgroup
 
-Bảng xác định phạm vi yêu cầu, không xác nhận mức hoàn thành. Phạm vi QueryDR được bảo lưu nhưng Sandbox E2E còn Deferred; các giới hạn ở mục 9 áp dụng cho mọi phát biểu về tính năng.
+\subsubsection{Phạm vi mở rộng -- Phase 2 đã có trong baseline A1-final}
+
+\begingroup\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.20\linewidth}>{\raggedright\arraybackslash}p{0.43\linewidth}>{\raggedright\arraybackslash}p{0.25\linewidth}}
+\hline
+\textbf{Nhóm} & \textbf{Nội dung mở rộng kế thừa} & \textbf{Nguồn} \\ \hline
+\endfirsthead
+\textbf{Nhóm} & \textbf{Nội dung mở rộng kế thừa} & \textbf{Nguồn} \\ \hline
+\endhead
+VNPay Sandbox & Khởi tạo/redirect VNPay Sandbox mặc định; xác minh IPN/QueryDR. Không bao gồm thanh toán tiền thật hoặc kích hoạt cổng production. & S1 §3, §4.1, §9.9; S3 §1.1, §4 \\ \hline
+Payment/Order nâng cao & Payment PENDING/SUCCESS/FAILED, shared finalization, retry có kiểm soát, điều chỉnh chính sách TTL/grace và xử lý hết hạn/hoàn tài nguyên khi có VNPay PENDING, reconciliation theo BR-01--BR-06. & S1 §6 F04--F06, §9.9, §16; S3 §4 \\ \hline
+ZERO\_AMOUNT & Xử lý nội bộ đơn 0 VND qua finalization chung; độc lập Mock, không gọi VNPay/Mock cho đơn 0 VND. & S1 §9.9 BR-06, §16; S3 §4 \\ \hline
+\end{longtable}
+\endgroup
+
+Các bảng xác định phạm vi yêu cầu, không xác nhận mức hoàn thành. Phần mở rộng là nội dung đã được kế thừa từ A1-final, không phải đề xuất thêm nghiệp vụ A2. QueryDR vẫn In Scope; chỉ việc nghiệm thu Sandbox E2E được hoãn từ A1 sang A2, nêu tại mục 7.3. Các giới hạn ở mục 9 áp dụng cho cả MVP và phần mở rộng.
 \par
 
 \subsection{Out of Scope và Deferred}
+
+\subsubsection{Out of Scope -- ngoài phạm vi sản phẩm baseline}
+
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.68\linewidth}}
@@ -118,29 +143,51 @@ Multi-vendor, microservices, mobile native & Giữ mô hình một cửa hàng v
 Seller/Admin phức tạp và UI Barista & Module Seller/Admin phức tạp và UI Barista nằm ngoài phạm vi sản phẩm baseline; vòng đời trạng thái đơn vẫn được mô tả theo yêu cầu kế thừa. \\ \hline
 Vận chuyển và định vị thời gian thực & Không bổ sung Last-Mile, tracking hoặc nghiệp vụ giao nhận. \\ \hline
 ERP/POS và quản lý nguyên liệu đầy đủ & Tồn kho chỉ phục vụ phạm vi chống oversell và lifecycle tài nguyên của baseline. \\ \hline
-Forgot/Reset Password; hủy đơn chủ động & Forgot/Reset Password và FR-ORD-005 tiếp tục Deferred; không mô tả endpoint/UI tương ứng như đã có. \\ \hline
 \end{longtable}
 \endgroup
+
+\subsubsection{Deferred -- chức năng chưa đưa vào phạm vi hiện hành}
+
+\begingroup\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.68\linewidth}}
+\hline
+\textbf{Nội dung} & \textbf{Giới hạn} \\ \hline
+\endfirsthead
+\textbf{Nội dung} & \textbf{Giới hạn} \\ \hline
+\endhead
+Forgot/Reset Password & Tiếp tục Deferred theo baseline; không bổ sung hoặc mô tả endpoint/UI tương ứng như đã có. [S1 §4.2] \\ \hline
+Hủy đơn chủ động -- FR-ORD-005 & Tiếp tục Deferred; không mặc định có Cancel API/UI. Hết hạn đơn và hoàn tài nguyên tự động theo lifecycle vẫn nằm trong phạm vi kế thừa. [S1 §6 F04] \\ \hline
+Advanced monitoring & Tiếp tục Deferred theo phạm vi A1; không bổ sung hoặc mô tả như năng lực đã có trong Task 1.1. [S1 §4.2] \\ \hline
+\end{longtable}
+\endgroup
+
+\subsubsection{Deferred về kiểm chứng -- không loại khỏi In Scope}
+
+QueryDR Sandbox E2E được hoãn nghiệm thu từ A1 sang A2 theo ADR đã được Gap Analysis dẫn lại. QueryDR và reconciliation vẫn thuộc phần mở rộng In Scope tại mục 6.2; trạng thái Deferred chỉ nói về kiểm chứng Sandbox E2E, không phải quyết định loại chức năng khỏi A2 hoặc ghi nhận đã PASS. [S2 §0, §6--7]
+\par
 
 A1 từng defer deployment chính thức và CI/CD nâng cao; không được suy diễn rằng các mục này nằm ngoài toàn bộ Assignment 2. Task 1.1 chỉ ghi nhận sự phân biệt giữa phạm vi sản phẩm kế thừa và yêu cầu bàn giao A2. Advanced monitoring không được tự bổ sung như tính năng đã có. [S1 §4.2, §6 F04; S2 §3--5; S4]
 \par
 
 \subsection{Giả định và ràng buộc}
 
-Giả định phân tích: A1-final là baseline nghiệp vụ dùng để kế thừa; chưa có quyết định được duyệt cho thay đổi nghiệp vụ ngoài baseline trong Task 1.1. Mọi đề xuất thay đổi cần được ghi riêng và review trước khi cập nhật phạm vi.
-\par
-
-Giữ Next.js, NestJS, TypeScript, PostgreSQL, Prisma và Docker; không thực hiện refactor hay đổi cấu trúc frontend/backend trong task tài liệu này.
-\par
-
-Guest có thể xem menu; tạo đơn, thanh toán và xem lịch sử cần JWT hợp lệ và kiểm tra quyền sở hữu. Backend là nguồn quyết định giá và trạng thái.
-\par
-
-Môi trường A2 cần tách khỏi A1 về Compose project và DB/volume; không kế thừa việc container A1 đang chạy thành bằng chứng A2. Hosting và chính sách payment demo A2 còn cần quyết định theo planning.
-\par
-
-Tài liệu phải phân biệt yêu cầu, hiện trạng được ghi nhận và bằng chứng nghiệm thu. Không đánh dấu PASS, Done hoặc Approved nếu chưa có review và chứng cứ tương ứng. [S1 §3--5; S2 §0, §7; S4]
-\par
+\begingroup\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.20\linewidth}>{\raggedright\arraybackslash}p{0.43\linewidth}>{\raggedright\arraybackslash}p{0.25\linewidth}}
+\hline
+\textbf{Mã / Loại} & \textbf{Nội dung} & \textbf{Nguồn} \\ \hline
+\endfirsthead
+\textbf{Mã / Loại} & \textbf{Nội dung} & \textbf{Nguồn} \\ \hline
+\endhead
+A-01 -- Giả định phân tích & A1-final là baseline nghiệp vụ dùng để kế thừa; chưa có quyết định được duyệt cho thay đổi nghiệp vụ ngoài baseline trong Task 1.1. Mọi đề xuất thay đổi cần được ghi riêng và review trước khi cập nhật phạm vi. & S1; S2 §0; S4 \\ \hline
+C-01 -- Ràng buộc công nghệ & Giữ Next.js, NestJS, TypeScript, PostgreSQL, Prisma và Docker; không thực hiện refactor hay đổi cấu trúc frontend/backend trong task tài liệu này. & S1 §3; S4 \\ \hline
+C-02 -- Ràng buộc truy cập và nghiệp vụ & Guest có thể xem menu; tạo đơn, thanh toán và xem lịch sử cần JWT hợp lệ và kiểm tra quyền sở hữu. Backend là nguồn quyết định giá và trạng thái. & S1 §3--5 \\ \hline
+C-03 -- Ràng buộc môi trường & Môi trường A2 cần tách khỏi A1 về Compose project và DB/volume; không kế thừa việc container A1 đang chạy thành bằng chứng A2. & S2 §0; S4 \\ \hline
+A-02 -- Giả định chưa chốt & Hosting và chính sách payment demo A2 còn cần quyết định theo planning; không giả định đã có phương án được phê duyệt. & S2 §7; S4 \\ \hline
+C-04 -- Ràng buộc bằng chứng & Tài liệu phải phân biệt yêu cầu, hiện trạng được ghi nhận và bằng chứng nghiệm thu. Không đánh dấu PASS, Done hoặc Approved nếu chưa có review và chứng cứ tương ứng. & S1 §3--5; S2 §0, §7; S4 \\ \hline
+\end{longtable}
+\endgroup
 
 \subsection{Rủi ro và giới hạn kiểm chứng}
 \begingroup\small

@@ -60,20 +60,34 @@ Web Client hiển thị và gửi yêu cầu; Backend là nơi quyết định g
 
 Bên ngoài BrewLite: Guest/Customer và VNPay Sandbox. VNPay Sandbox là provider mặc định. Mock CARD/WALLET chỉ phục vụ automated test/demo khi backend cho phép trong môi trường không phải production và luôn bị tắt ở production. ZERO_AMOUNT xử lý nội bộ đơn 0 VND, độc lập với Mock. Không tự fallback sang Mock khi VNPay PENDING hoặc chưa rõ kết quả. [S1 §3, §9.9, §16]
 
-## 6. In Scope — phạm vi nghiệp vụ kế thừa
+## 6. In Scope — MVP và phần mở rộng kế thừa A1-final
 
-| Nhóm | Nội dung được mô tả trong phạm vi | Nguồn |
+MVP và phần mở rộng dưới đây đều nằm trong baseline A1-final được kế thừa sang A2. Cách phân nhóm dựa trên 10 task A1 và các bổ sung Phase 2 đã ghi trong nguồn, không phải thay đổi ưu tiên hoặc loại bỏ yêu cầu. Đặc biệt, state machine, idempotency, concurrency/inventory và coupon/loyalty thuộc Task 10 A1, không bị chuyển thành tính năng tùy chọn. [S1 §4.1, §6; S3 §4.1]
+
+### 6.1. Phạm vi MVP — 10 task A1
+
+| Nhóm | Nội dung trong phạm vi MVP | Nguồn |
 | --- | --- | --- |
-| Identity | Đăng ký/đăng nhập JWT, băm mật khẩu Argon2id và bảo vệ API/quyền sở hữu dữ liệu. | S1 §4.1, §7.1 |
-| Catalog và Cart | Menu, chi tiết, size/topping; thêm/sửa/xóa giỏ và tổng tạm; server tính lại khi tạo đơn. | S1 §4.1, §6 F02–F03 |
-| Order và Inventory | Tạo đơn, kiểm tra hợp lệ, snapshot, trạng thái/lịch sử, chống oversell và hết hạn/hoàn tài nguyên theo lifecycle. | S1 §6 F04–F05 |
-| Payment | VNPay Sandbox; xác minh IPN/QueryDR; PENDING/SUCCESS/FAILED; idempotency, retry có kiểm soát, grace và reconciliation; bảo lưu Mock test/demo và ZERO_AMOUNT. | S1 §4.1, §9.9, §16 |
-| Promotion và Loyalty | Kiểm tra coupon, giới hạn lượt dùng, tính giảm giá và cộng điểm sau thanh toán hợp lệ, không cộng trùng. | S1 §6 F07 |
-| Kiểm chứng và bàn giao kế thừa | Kiểm thử, Docker Compose, README và demo; phân biệt bằng chứng lịch sử A1 với kiểm chứng A2. | S1 §4.1; S2 §0 |
+| Identity | Đăng ký/đăng nhập JWT, băm mật khẩu Argon2id và bảo vệ API/quyền sở hữu dữ liệu. | S1 §4.1, §7.1; S3 §4.1 Task 7 |
+| Catalog và Cart | Menu, chi tiết, size/topping; thêm/sửa/xóa giỏ và tổng tạm; server tính lại khi tạo đơn. | S1 §4.1, §6 F02–F03; S3 §4.1 Task 2–5 |
+| Order và Inventory | Tạo đơn, kiểm tra hợp lệ, snapshot, xác nhận/trạng thái/lịch sử; state machine, chống oversell, concurrency/inventory và hết hạn/hoàn tài nguyên theo lifecycle baseline. | S1 §6 F04–F05; S3 §4.1 Task 6, 9–10 |
+| Mock Payment và idempotency | Thanh toán giả lập CARD/WALLET cho test/demo trong môi trường được backend cho phép; xử lý kết quả và idempotency. Mock luôn bị tắt ở production; policy tại mục 5 áp dụng đầy đủ. | S1 §4.1, §6 F06; S3 §4.1 Task 8, 10 |
+| Promotion và Loyalty | Kiểm tra coupon, giới hạn lượt dùng, tính giảm giá và cộng điểm sau thanh toán hợp lệ, không cộng trùng. | S1 §6 F07; S3 §4.1 Task 10 |
+| Kiểm chứng và bàn giao kế thừa | Kiểm thử, Docker Compose, README, cấu hình mẫu và demo; phân biệt bằng chứng lịch sử A1 với kiểm chứng A2. | S1 §4.1; S2 §0; S3 §4.1 Task 1, 9 |
 
-Bảng xác định phạm vi yêu cầu, không xác nhận mức hoàn thành. Phạm vi QueryDR được bảo lưu nhưng Sandbox E2E còn Deferred; các giới hạn ở mục 9 áp dụng cho mọi phát biểu về tính năng.
+### 6.2. Phạm vi mở rộng — Phase 2 đã có trong baseline A1-final
+
+| Nhóm | Nội dung mở rộng kế thừa | Nguồn |
+| --- | --- | --- |
+| VNPay Sandbox | Khởi tạo/redirect VNPay Sandbox mặc định; xác minh IPN/QueryDR. Không bao gồm thanh toán tiền thật hoặc kích hoạt cổng production. | S1 §3, §4.1, §9.9; S3 §1.1, §4 |
+| Payment/Order nâng cao | Payment PENDING/SUCCESS/FAILED, shared finalization, retry có kiểm soát, điều chỉnh chính sách TTL/grace và xử lý hết hạn/hoàn tài nguyên khi có VNPay PENDING, reconciliation theo BR-01–BR-06. | S1 §6 F04–F06, §9.9, §16; S3 §4 |
+| ZERO_AMOUNT | Xử lý nội bộ đơn 0 VND qua finalization chung; độc lập Mock, không gọi VNPay/Mock cho đơn 0 VND. | S1 §9.9 BR-06, §16; S3 §4 |
+
+Các bảng xác định phạm vi yêu cầu, không xác nhận mức hoàn thành. Phần mở rộng là nội dung đã được kế thừa từ A1-final, không phải đề xuất thêm nghiệp vụ A2. QueryDR vẫn In Scope; chỉ việc nghiệm thu Sandbox E2E được hoãn từ A1 sang A2, nêu tại mục 7.3. Các giới hạn ở mục 9 áp dụng cho cả MVP và phần mở rộng.
 
 ## 7. Out of Scope và Deferred
+
+### 7.1. Out of Scope — ngoài phạm vi sản phẩm baseline
 
 | Nội dung | Ranh giới áp dụng |
 | --- | --- |
@@ -82,21 +96,31 @@ Bảng xác định phạm vi yêu cầu, không xác nhận mức hoàn thành.
 | Seller/Admin phức tạp và UI Barista | Module Seller/Admin phức tạp và UI Barista nằm ngoài phạm vi sản phẩm baseline; vòng đời trạng thái đơn vẫn được mô tả theo yêu cầu kế thừa. |
 | Vận chuyển và định vị thời gian thực | Không bổ sung Last-Mile, tracking hoặc nghiệp vụ giao nhận. |
 | ERP/POS và quản lý nguyên liệu đầy đủ | Tồn kho chỉ phục vụ phạm vi chống oversell và lifecycle tài nguyên của baseline. |
-| Forgot/Reset Password; hủy đơn chủ động | Forgot/Reset Password và FR-ORD-005 tiếp tục Deferred; không mô tả endpoint/UI tương ứng như đã có. |
+
+### 7.2. Deferred — chức năng chưa đưa vào phạm vi hiện hành
+
+| Nội dung | Giới hạn |
+| --- | --- |
+| Forgot/Reset Password | Tiếp tục Deferred theo baseline; không bổ sung hoặc mô tả endpoint/UI tương ứng như đã có. [S1 §4.2] |
+| Hủy đơn chủ động — FR-ORD-005 | Tiếp tục Deferred; không mặc định có Cancel API/UI. Hết hạn đơn và hoàn tài nguyên tự động theo lifecycle vẫn nằm trong phạm vi kế thừa. [S1 §6 F04] |
+| Advanced monitoring | Tiếp tục Deferred theo phạm vi A1; không bổ sung hoặc mô tả như năng lực đã có trong Task 1.1. [S1 §4.2] |
+
+### 7.3. Deferred về kiểm chứng — không loại khỏi In Scope
+
+QueryDR Sandbox E2E được hoãn nghiệm thu từ A1 sang A2 theo ADR đã được Gap Analysis dẫn lại. QueryDR và reconciliation vẫn thuộc phần mở rộng In Scope tại mục 6.2; trạng thái Deferred chỉ nói về kiểm chứng Sandbox E2E, không phải quyết định loại chức năng khỏi A2 hoặc ghi nhận đã PASS. [S2 §0, §6–7]
 
 A1 từng defer deployment chính thức và CI/CD nâng cao; không được suy diễn rằng các mục này nằm ngoài toàn bộ Assignment 2. Task 1.1 chỉ ghi nhận sự phân biệt giữa phạm vi sản phẩm kế thừa và yêu cầu bàn giao A2. Advanced monitoring không được tự bổ sung như tính năng đã có. [S1 §4.2, §6 F04; S2 §3–5; S4]
 
 ## 8. Giả định và ràng buộc
 
-Giả định phân tích: A1-final là baseline nghiệp vụ dùng để kế thừa; chưa có quyết định được duyệt cho thay đổi nghiệp vụ ngoài baseline trong Task 1.1. Mọi đề xuất thay đổi cần được ghi riêng và review trước khi cập nhật phạm vi.
-
-Giữ Next.js, NestJS, TypeScript, PostgreSQL, Prisma và Docker; không thực hiện refactor hay đổi cấu trúc frontend/backend trong task tài liệu này.
-
-Guest có thể xem menu; tạo đơn, thanh toán và xem lịch sử cần JWT hợp lệ và kiểm tra quyền sở hữu. Backend là nguồn quyết định giá và trạng thái.
-
-Môi trường A2 cần tách khỏi A1 về Compose project và DB/volume; không kế thừa việc container A1 đang chạy thành bằng chứng A2. Hosting và chính sách payment demo A2 còn cần quyết định theo planning.
-
-Tài liệu phải phân biệt yêu cầu, hiện trạng được ghi nhận và bằng chứng nghiệm thu. Không đánh dấu PASS, Done hoặc Approved nếu chưa có review và chứng cứ tương ứng. [S1 §3–5; S2 §0, §7; S4]
+| Mã / Loại | Nội dung | Nguồn |
+| --- | --- | --- |
+| A-01 — Giả định phân tích | A1-final là baseline nghiệp vụ dùng để kế thừa; chưa có quyết định được duyệt cho thay đổi nghiệp vụ ngoài baseline trong Task 1.1. Mọi đề xuất thay đổi cần được ghi riêng và review trước khi cập nhật phạm vi. | S1; S2 §0; S4 |
+| C-01 — Ràng buộc công nghệ | Giữ Next.js, NestJS, TypeScript, PostgreSQL, Prisma và Docker; không thực hiện refactor hay đổi cấu trúc frontend/backend trong task tài liệu này. | S1 §3; S4 |
+| C-02 — Ràng buộc truy cập và nghiệp vụ | Guest có thể xem menu; tạo đơn, thanh toán và xem lịch sử cần JWT hợp lệ và kiểm tra quyền sở hữu. Backend là nguồn quyết định giá và trạng thái. | S1 §3–5 |
+| C-03 — Ràng buộc môi trường | Môi trường A2 cần tách khỏi A1 về Compose project và DB/volume; không kế thừa việc container A1 đang chạy thành bằng chứng A2. | S2 §0; S4 |
+| A-02 — Giả định chưa chốt | Hosting và chính sách payment demo A2 còn cần quyết định theo planning; không giả định đã có phương án được phê duyệt. | S2 §7; S4 |
+| C-04 — Ràng buộc bằng chứng | Tài liệu phải phân biệt yêu cầu, hiện trạng được ghi nhận và bằng chứng nghiệm thu. Không đánh dấu PASS, Done hoặc Approved nếu chưa có review và chứng cứ tương ứng. | S1 §3–5; S2 §0, §7; S4 |
 
 ## 9. Rủi ro và giới hạn kiểm chứng
 
