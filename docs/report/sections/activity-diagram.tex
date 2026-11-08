@@ -1,10 +1,10 @@
 % SCRUM-103 / A2-T2.1 — Fragment cho báo cáo Assignment 2.
-% Canonical content: docs/diagrams/A2_T2.1_Activity_Diagram_Checkout.md
+% Canonical content: docs/diagrams/activity_diagram/A2_T2.1_Activity_Diagram_Checkout.md
 % Source diagrams:
-%   - docs/diagrams/activity-checkout.puml (Tổng thể End-to-End)
-%   - docs/diagrams/activity-checkout-phase1-order.puml (Pha 1: Tạo Order & Khởi tạo thanh toán)
-%   - docs/diagrams/activity-checkout-phase2-payment.puml (Pha 2A: Tương tác VNPay, Return URL độc lập & Kết quả Customer)
-%   - docs/diagrams/activity-checkout-phase3-reconciliation.puml (Pha 2B: Xử lý IPN, Chu kỳ Scheduler Đối soát & TTL/Grace)
+%   - docs/diagrams/activity_diagram/overview/activity-checkout.puml (Tổng thể End-to-End)
+%   - docs/diagrams/activity_diagram/phase1/activity-checkout-phase1-order.puml (Pha 1: Tạo Order & Khởi tạo thanh toán)
+%   - docs/diagrams/activity_diagram/phase2/activity-checkout-phase2-payment.puml (Pha 2A: Tương tác VNPay, Return URL độc lập & Kết quả Customer)
+%   - docs/diagrams/activity_diagram/phase3/activity-checkout-phase3-reconciliation.puml (Pha 2B: Xử lý IPN, Chu kỳ Scheduler Đối soát & TTL/Grace)
 % Rendered exports:
 %   - docs/diagrams/activity-checkout*.svg / .pdf
 %   - docs/report/assets/activity-checkout*.pdf
@@ -17,7 +17,7 @@
 \noindent\textbf{Trạng thái:} DRAFT -- đã cập nhật phản hồi Review vòng 3 của PR \#4 (\texttt{R-01}..\texttt{R-06}, \texttt{REG-01} \& tối ưu bố cục dọc cho trang báo cáo A4)\par
 \noindent\textbf{Ngày soạn:} 08/11/2026\par
 \noindent\textbf{Baseline đối chiếu:} \texttt{A1-final} (\texttt{1951dc124c83359556f04adb6ba3f0ee9f22fce4})\par
-\noindent\textbf{Tệp nguồn \& kết xuất:} \texttt{docs/diagrams/activity-checkout.puml}, \texttt{docs/diagrams/activity-checkout-phase1-order.puml}, \texttt{docs/diagrams/activity-checkout-phase2-payment.puml}, \texttt{docs/diagrams/activity-checkout-phase3-reconciliation.puml} (cùng các bản xuất \texttt{.svg} và \texttt{.pdf} đồng bộ)\par
+\noindent\textbf{Tệp nguồn \& kết xuất:} \texttt{docs/diagrams/activity\_diagram/} (phân bổ theo các thư mục con \texttt{phase1/}, \texttt{phase2/}, \texttt{phase3/}, \texttt{overview/})\par
 
 \subsection{Mục tiêu và nguyên tắc kế thừa từ Assignment 1}
 
@@ -114,8 +114,8 @@ So với phiên bản A1 vốn chỉ chia hai phân vùng tổng quát (\emph{Ng
   \IfFileExists{../assets/activity-checkout-phase1-order.pdf}{%
     \includegraphics[width=\linewidth,height=0.84\textheight,keepaspectratio]{../assets/activity-checkout-phase1-order.pdf}%
   }{%
-    \IfFileExists{docs/diagrams/activity-checkout-phase1-order.pdf}{%
-      \includegraphics[width=\linewidth,height=0.84\textheight,keepaspectratio]{docs/diagrams/activity-checkout-phase1-order.pdf}%
+    \IfFileExists{docs/diagrams/activity_diagram/phase1/activity-checkout-phase1-order.pdf}{%
+      \includegraphics[width=\linewidth,height=0.84\textheight,keepaspectratio]{docs/diagrams/activity_diagram/phase1/activity-checkout-phase1-order.pdf}%
     }{%
       \fbox{\parbox{0.85\linewidth}{\centering
       Sơ đồ Pha 1 nằm tại \texttt{docs/diagrams/activity-checkout-phase1-order.pdf} và \texttt{docs/report/assets/activity-checkout-phase1-order.pdf}.}}%
@@ -134,8 +134,8 @@ So với phiên bản A1 vốn chỉ chia hai phân vùng tổng quát (\emph{Ng
   \IfFileExists{../assets/activity-checkout-phase2-payment.pdf}{%
     \includegraphics[width=0.92\linewidth,height=0.82\textheight,keepaspectratio]{../assets/activity-checkout-phase2-payment.pdf}%
   }{%
-    \IfFileExists{docs/diagrams/activity-checkout-phase2-payment.pdf}{%
-      \includegraphics[width=0.92\linewidth,height=0.82\textheight,keepaspectratio]{docs/diagrams/activity-checkout-phase2-payment.pdf}%
+    \IfFileExists{docs/diagrams/activity_diagram/phase2/activity-checkout-phase2-payment.pdf}{%
+      \includegraphics[width=0.92\linewidth,height=0.82\textheight,keepaspectratio]{docs/diagrams/activity_diagram/phase2/activity-checkout-phase2-payment.pdf}%
     }{%
       \fbox{\parbox{0.85\linewidth}{\centering
       Sơ đồ Pha 2A nằm tại \texttt{docs/diagrams/activity-checkout-phase2-payment.pdf} và \texttt{docs/report/assets/activity-checkout-phase2-payment.pdf}.}}%
@@ -154,8 +154,8 @@ So với phiên bản A1 vốn chỉ chia hai phân vùng tổng quát (\emph{Ng
   \IfFileExists{../assets/activity-checkout-phase3-reconciliation.pdf}{%
     \includegraphics[width=0.95\linewidth,height=0.84\textheight,keepaspectratio]{../assets/activity-checkout-phase3-reconciliation.pdf}%
   }{%
-    \IfFileExists{docs/diagrams/activity-checkout-phase3-reconciliation.pdf}{%
-      \includegraphics[width=0.95\linewidth,height=0.84\textheight,keepaspectratio]{docs/diagrams/activity-checkout-phase3-reconciliation.pdf}%
+    \IfFileExists{docs/diagrams/activity_diagram/phase3/activity-checkout-phase3-reconciliation.pdf}{%
+      \includegraphics[width=0.95\linewidth,height=0.84\textheight,keepaspectratio]{docs/diagrams/activity_diagram/phase3/activity-checkout-phase3-reconciliation.pdf}%
     }{%
       \fbox{\parbox{0.85\linewidth}{\centering
       Sơ đồ Pha 2B nằm tại \texttt{docs/diagrams/activity-checkout-phase3-reconciliation.pdf} và \texttt{docs/report/assets/activity-checkout-phase3-reconciliation.pdf}.}}%
@@ -174,8 +174,8 @@ So với phiên bản A1 vốn chỉ chia hai phân vùng tổng quát (\emph{Ng
   \IfFileExists{../assets/activity-checkout.pdf}{%
     \includegraphics[width=\linewidth,height=0.84\textheight,keepaspectratio]{../assets/activity-checkout.pdf}%
   }{%
-    \IfFileExists{docs/diagrams/activity-checkout.pdf}{%
-      \includegraphics[width=\linewidth,height=0.84\textheight,keepaspectratio]{docs/diagrams/activity-checkout.pdf}%
+    \IfFileExists{docs/diagrams/activity_diagram/overview/activity-checkout.pdf}{%
+      \includegraphics[width=\linewidth,height=0.84\textheight,keepaspectratio]{docs/diagrams/activity_diagram/overview/activity-checkout.pdf}%
     }{%
       \fbox{\parbox{0.85\linewidth}{\centering
       Sơ đồ tổng thể Activity Diagram Checkout nằm tại \texttt{docs/diagrams/activity-checkout.pdf} và \texttt{docs/report/assets/activity-checkout.pdf}.}}%
