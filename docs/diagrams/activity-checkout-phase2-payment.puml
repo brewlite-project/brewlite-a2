@@ -1,0 +1,71 @@
+@startuml activity-checkout-phase2-payment
+title [A2-T2.1] Activity Diagram — Checkout (Pha 2A: Tương tác VNPay, Return URL độc lập & Hiển thị kết quả cho Customer)\nĐối chiếu UC-A2-CHECKOUT-001 (Steps 9–14, AF-03..AF-06, EF-11, BR-C04, BR-C10)
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam Padding 5
+skinparam ActivityMargin 8
+skinparam ArrowColor #1E293B
+skinparam ArrowThickness 1.3
+skinparam ArrowFontSize 11
+skinparam ArrowFontColor #0F172A
+skinparam ActivityBorderColor #1E293B
+skinparam ActivityBorderThickness 1.3
+skinparam ActivityBackgroundColor #F8FAFC
+skinparam ActivityFontSize 12
+skinparam ActivityDiamondBackgroundColor #FEF3C7
+skinparam ActivityDiamondBorderColor #D97706
+skinparam ActivityDiamondBorderThickness 1.4
+skinparam ActivityDiamondFontSize 11
+skinparam NoteBackgroundColor #FFFBEB
+skinparam NoteBorderColor #F59E0B
+skinparam SwimlaneTitleFontSize 13
+skinparam SwimlaneTitleFontStyle bold
+skinparam SwimlaneBorderColor #475569
+skinparam SwimlaneBorderThickness 2
+
+|Customer|
+|Next.js Frontend|
+start
+:Tiếp nhận kết quả khởi tạo\nthanh toán từ Pha 1;
+
+if (Hoàn tất đồng bộ\nở Pha 1?) then (Có [ZERO_AMOUNT / Mock])
+  :Nhận trực tiếp kết quả\ntừ phản hồi API Pha 1\n(Order.status = PAID hoặc\nOrder.status = PAYMENT_FAILED);
+else (Không [VNPay PENDING])
+  :Chuyển hướng (Redirect)\ntrình duyệt sang VNPay Sandbox;
+
+  |VNPay Sandbox|
+  :Hiển thị cổng thanh toán\nVNPay Sandbox;
+
+  |Customer|
+  :Thực hiện thanh toán,\nhủy giao dịch hoặc đóng\ntrình duyệt trên VNPay;
+
+  |VNPay Sandbox|
+  :Phát sinh kết quả tại VNPay:\n1. Kích hoạt độc lập Luồng nền\n   IPN / Scheduler tại Pha 2B\n   (activity-checkout-phase3-reconciliation)\n   (chạy ngay cả khi đóng trình duyệt)\n2. Điều hướng trình duyệt về\n   Return URL (nếu còn mở);
+
+  |Next.js Frontend|
+  if (Trình duyệt quay về\nReturn URL?) then (Có)
+    :Nhận Return URL từ VNPay\n[EF-11: KHÔNG tự coi\nReturn URL là PAID];
+  else (Không: Đóng trình duyệt)
+    if (Khách mở lại trang\nĐơn hàng sau đó?) then (Có)
+      :Mở lại trang xác nhận /\nchi tiết đơn hàng;
+    else (Không)
+      :Kết thúc phiên trình duyệt\n(Backend vẫn xử lý IPN /\nScheduler độc lập ở Pha 2B:\nactivity-checkout-phase3-reconciliation);
+      stop
+    endif
+  endif
+
+  :Gọi GET /orders/me (bounded polling)\nkèm Bearer JWT đọc trạng thái\ndo Backend (Pha 2B) lưu tại DB*\n(*GET /orders/me đã triển khai;\nGET /payments/:id/status là\nAPI Contract v4.0 [VERIFY]);
+endif
+
+|Next.js Frontend|
+:Đồng bộ dữ liệu & hiển thị kết quả (phân biệt rõ\nOrder.status với Payment.reconciliationState [REG-01, BR-C10]):\n1. Order.status == PAID (Payment.status == SUCCESS):\n   xóa giỏ hàng client, hiển thị đặt hàng thành công.\n2. Order.status == PAYMENT_FAILED (now < E):\n   giữ giỏ/đơn, mở nút Retry (sinh Idempotency-Key\n   & vnp_TxnRef mới [BR-C04]).\n3. Order.status == CANCELLED (quá hạn tại E hoặc G):\n   thông báo đơn hàng hết hạn & đã hủy.\n4. Order.status == PENDING (đang xử lý / trong Grace\n   với Payment.reconciliationState == RECONCILING) hoặc\n   Payment.reconciliationState == REQUIRES_REVIEW /\n   hasFinancialException == true [BR-C10]:\n   hiển thị đang đối soát / chờ kiểm tra thủ công, khóa Retry\n   (REQUIRES_REVIEW là trạng thái đối soát Payment,\n   không phải giá trị của Order.status);
+
+|Customer|
+:Nhận kết quả cuối cùng trên giao diện:\n- Order.status == PAID: theo dõi chế biến đơn.\n- Order.status == PAYMENT_FAILED (now < E): Retry.\n- Order.status == CANCELLED: báo đơn đã hủy.\n- Payment.reconciliationState == REQUIRES_REVIEW /\n  RECONCILING (Order.status là PENDING hoặc\n  CANCELLED [BR-C10]): báo đang đối soát;
+stop
+
+@enduml

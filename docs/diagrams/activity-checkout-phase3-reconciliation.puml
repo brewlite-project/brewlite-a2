@@ -1,0 +1,95 @@
+@startuml activity-checkout-phase3-reconciliation
+title [A2-T2.1] Activity Diagram — Checkout (Pha 2B: Xử lý IPN, Chu kỳ Scheduler Đối soát QueryDR & Hết hạn TTL 15m / Grace 5m)\nĐối chiếu UC-A2-CHECKOUT-001 (AF-05..AF-09, EF-10, EF-12..EF-14, BR-C03..BR-C10)
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam Padding 4
+skinparam ActivityMargin 8
+skinparam ArrowColor #1E293B
+skinparam ArrowThickness 1.3
+skinparam ArrowFontSize 10
+skinparam ArrowFontColor #0F172A
+skinparam ActivityBorderColor #1E293B
+skinparam ActivityBorderThickness 1.3
+skinparam ActivityBackgroundColor #F8FAFC
+skinparam ActivityFontSize 11
+skinparam ActivityDiamondBackgroundColor #FEF3C7
+skinparam ActivityDiamondBorderColor #D97706
+skinparam ActivityDiamondBorderThickness 1.4
+skinparam ActivityDiamondFontSize 10
+skinparam NoteBackgroundColor #FFFBEB
+skinparam NoteBorderColor #F59E0B
+skinparam SwimlaneTitleFontSize 13
+skinparam SwimlaneTitleFontStyle bold
+skinparam SwimlaneBorderColor #475569
+skinparam SwimlaneBorderThickness 2
+
+|VNPay Sandbox / Scheduler|
+start
+:Khởi chạy độc lập từ giao dịch\nVNPay ở Pha 1 / Pha 2A\n(activity-checkout-phase2-payment)\n(Xử lý ở nền độc lập với trình duyệt,\nngay cả khi đã đóng trình duyệt);
+:Phát sinh webhook IPN\n(GET /payments/vnpay/ipn)\nhoặc xung nhịp Scheduler định kỳ;
+
+|NestJS Backend|
+repeat
+  :Tiếp nhận sự kiện xử lý hậu cần\n(Webhook IPN hoặc Chu kỳ Scheduler\nkhi thời gian tiến tới mốc E / G);
+
+  if (Nhận được webhook\nIPN từ VNPay?) then (Có: GET /payments/vnpay/ipn)
+    :Kiểm tra chữ ký HMAC-SHA512,\nTmnCode, vnp_TxnRef & số tiền;
+    if (Chữ ký & số tiền\nhợp lệ?) then (Có)
+      :Chấp nhận bằng chứng IPN hợp lệ;
+    else (Không [EF-10])
+      :Từ chối Finalization, giữ nguyên DB\n& trả RspCode lỗi cho VNPay;
+      stop
+    endif
+  else (Không: Mất IPN / Timeout [AF-06, EF-14])
+    :Scheduler kích hoạt đối soát nội bộ\n(VnpayQuerydrService / OrderExpiration)*\n(*Code/test đã có; Sandbox E2E\ndeferred theo ADR);
+  endif
+
+  :Khóa bản ghi Order & Payment\ntheo thứ tự chuẩn [EF-13, BR-C05]\ntrong Shared Finalization / Reconciliation;
+
+  if (Kết quả giao dịch vẫn đang\nUNKNOWN (chưa rõ kết quả)?) then (Có: UNKNOWN [AF-06..09])
+    if (Đã tới mốc TTL 15m\n(now >= E)?) then (Có: now >= E)
+      if (Có VNPay PENDING\ntạo trước mốc E?) then (Có [AF-07])
+        if (Đã quá mốc Grace 5m\n(now >= G)?) then (Có: now >= G [AF-09])
+          :Quá mốc Grace G (now >= G):\nĐánh dấu hết hạn sau Grace\nOrder.status -> CANCELLED\nPayment.status = PENDING\nreconciliationState =\n  REQUIRES_REVIEW [BR-C10];
+        else (Không: E <= now < G)
+          :Đang trong Grace 5m [E, G):\nKHÔNG hủy khi E <= now < G\nGiữ Order.status = PENDING\nPayment.status = PENDING\nreconciliationState = RECONCILING\n(chặn tạo attempt mới [BR-C03]);
+        endif
+      else (Không [AF-08])
+        :Quá hạn tại E (không VNPay):\nĐánh dấu hủy đơn tại mốc E\nOrder.status -> CANCELLED;
+      endif
+    else (Không: now < E)
+      :Chưa tới mốc TTL E (now < E):\nKHÔNG hủy đơn khi now < E\nGiữ Order.status = PENDING\nPayment.status = PENDING\nreconciliationState = SCHEDULED;
+    endif
+  else (Không: Đã rõ SUCCESS / FAILED)
+    :Đã thu được kết quả xác định\n(SUCCESS [00] hoặc FAILED)\ntừ IPN hoặc QueryDR;
+  endif
+
+repeat while (Vẫn đang PENDING / RECONCILING\n(now < E hoặc E <= now < G)\nvà chưa có kết cục cuối?) is (Có: Chờ chu kỳ kế tiếp / IPN\nđánh giá lại khi tiến tới E / G) not (Không: Đã có kết cục cuối)
+
+if (Kết quả giao dịch\nlà SUCCESS [00]?) then (Có: SUCCESS [00])
+  if (Đúng hạn (paidAt <= E)\n& Order chưa hủy?) then (Có [Main Flow])
+    :Chốt thành công đúng hạn:\nPayment.status -> SUCCESS\nreconciliationState -> RESOLVED\nOrder.status -> PAID\nCoupon -> CONSUMED\n+điểm thưởng 1 lần;
+  else (Không: Đến trễ [EF-12])
+    :Ngoại lệ tài chính [BR-C10]:\nhasFinancialException = true\nreconciliationState =\n  REQUIRES_REVIEW\n(KHÔNG hồi sinh Order\nđã CANCELLED);
+  endif
+else (Không: FAILED / Hết hạn E, G)
+  if (Kết quả là\nTerminal FAILED?) then (Có [AF-05])
+    if (Còn hạn TTL 15m\n(now < E)?) then (Có [AF-05, BR-C04])
+      :Chốt thất bại trong hạn TTL:\nPayment.status -> FAILED\nreconciliationState -> RESOLVED\nOrder.status -> PAYMENT_FAILED\n(giữ stock & Coupon HELD\nđể cho phép Retry);
+    else (Không: now >= E [AF-08])
+      :Chốt thất bại khi quá hạn E:\nPayment.status -> FAILED\nreconciliationState -> RESOLVED\nOrder.status -> CANCELLED\n(hoàn stock & giải phóng\nCoupon đúng 1 lần);
+    endif
+  else (Không: Hết hạn tại E / G)
+    :Chốt hủy đơn hết hạn tại E / G:\nOrder.status -> CANCELLED,\nhoàn stock & Coupon 1 lần\n(Nếu sau Grace tại G [AF-09]:\nPayment.status = PENDING +\nreconciliationState =\n  REQUIRES_REVIEW [BR-C10]);
+  endif
+endif
+
+|PostgreSQL DB|
+:Commit nguyên tử vào Database:\n- Order.status (PAID /\n  PAYMENT_FAILED / CANCELLED)\n- Payment.status (SUCCESS /\n  FAILED / PENDING)\n- Payment.reconciliationState\n  (RESOLVED / REQUIRES_REVIEW)\n  & cờ hasFinancialException\n- Tồn kho, Coupon & điểm thưởng\n(Pha 2A đọc độc lập qua\nGET /orders/me);
+stop
+
+@enduml
