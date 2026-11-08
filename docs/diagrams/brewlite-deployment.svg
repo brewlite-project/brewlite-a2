@@ -1,0 +1,247 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="1230" viewBox="0 0 1680 1230" role="img" aria-labelledby="title desc">
+<title id="title">BrewLite target deployment: Vercel and Render</title>
+<desc id="desc">Target design, not verified live. Next.js on Vercel proxies HTTPS to NestJS on Render. PostgreSQL uses private TCP. VNPay Return uses the browser; IPN calls the backend directly. Dashed CI/CD is planned.</desc>
+<rect width="1680" height="1230" fill="#ffffff"/>
+<g id="title">
+<text x="40" y="54" font-family="Helvetica,Arial,sans-serif" font-size="32" font-weight="bold" fill="#15253b">BrewLite | Deployment Diagram</text>
+</g>
+<g id="subtitle">
+<text x="40" y="93" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="normal" fill="#52637a">ASSIGNMENT 2 - TARGET DESIGN | Vercel Hobby + Render + VNPay Sandbox | Live verification pending</text>
+</g>
+<g id="public-boundary">
+<rect x="30" y="115" width="1620" height="390" fill="#f5f8fc" stroke="none" stroke-width="1.5"/>
+</g>
+<g id="public-label">
+<text x="50" y="141" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="bold" fill="#52637a">PUBLIC INTERNET / HTTPS</text>
+</g>
+<g id="browser">
+<rect x="60" y="205" width="290" height="200" fill="#ffffff" stroke="#61758e" stroke-width="2"/>
+</g>
+<g id="browser-heading">
+<text x="150.51" y="245" font-family="Helvetica,Arial,sans-serif" font-size="20" font-weight="bold" fill="#15253b">&lt;&lt;device&gt;&gt;</text>
+<text x="116.65" y="270" font-family="Helvetica,Arial,sans-serif" font-size="20" font-weight="bold" fill="#15253b">Customer browser</text>
+</g>
+<g id="browser-body">
+<text x="80" y="327" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">UI from Vercel</text>
+<text x="80" y="348.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">JWT on protected API calls</text>
+<text x="80" y="369.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">No backend signing keys</text>
+</g>
+<g id="vercel">
+<rect x="480" y="175" width="470" height="290" fill="#ffffff" stroke="#2c65a2" stroke-width="2"/>
+</g>
+<g id="vercel-heading">
+<text x="500" y="209" font-family="Helvetica,Arial,sans-serif" font-size="19" font-weight="bold" fill="#214c7d">&lt;&lt;executionEnvironment&gt;&gt; Vercel Hobby</text>
+<text x="500" y="232.75" font-family="Helvetica,Arial,sans-serif" font-size="19" font-weight="bold" fill="#214c7d">Public frontend HTTPS :443</text>
+</g>
+<g id="next-artifact">
+<rect x="500" y="265" width="430" height="85" fill="#eaf2fd" stroke="#b5cde9" stroke-width="1"/>
+<text x="510" y="292" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">&lt;&lt;artifact&gt;&gt; Next.js frontend</text>
+<text x="510" y="313.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">Static assets + server Route Handler</text>
+<text x="510" y="334.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">/api/backend/* proxy + /payment</text>
+</g>
+<g id="vercel-env">
+<rect x="500" y="360" width="430" height="90" fill="#f5f8fc" stroke="#b5cde9" stroke-width="1"/>
+<text x="505" y="381" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#52637a">Vercel environment</text>
+<text x="505" y="401" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#52637a">NEXT_PUBLIC_API_URL (public)</text>
+<text x="505" y="421" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#52637a">BACKEND_INTERNAL_URL (server only)</text>
+<text x="505" y="441" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#52637a">Both target public Render HTTPS</text>
+</g>
+<g id="vnpay">
+<rect x="1270" y="175" width="350" height="250" fill="#ffffff" stroke="#bd7730" stroke-width="2"/>
+</g>
+<g id="vnpay-heading">
+<text x="1341.09" y="216" font-family="Helvetica,Arial,sans-serif" font-size="21" font-weight="bold" fill="#9a571b">&lt;&lt;external service&gt;&gt;</text>
+<text x="1364.48" y="242.25" font-family="Helvetica,Arial,sans-serif" font-size="21" font-weight="bold" fill="#9a571b">VNPay Sandbox</text>
+</g>
+<g id="vnpay-body">
+<rect x="1290" y="275" width="310" height="125" fill="#fff6e9" stroke="#e6c69d" stroke-width="1"/>
+<text x="1300" y="302" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#745025">Hosted payment page</text>
+<text x="1300" y="323.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#745025">Server-to-server IPN</text>
+<text x="1300" y="344.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#745025">QueryDR API</text>
+<text x="1300" y="365.75" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#745025">Merchant settings: Return / IPN</text>
+</g>
+<g id="render-boundary">
+<rect x="455" y="550" width="1165" height="380" fill="#f5f8fc" stroke="#b9c6d7" stroke-width="1.5"/>
+</g>
+<g id="render-label">
+<text x="1225" y="577" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="bold" fill="#52637a">Render workspace / region: TBD</text>
+</g>
+<g id="render-ingress">
+<rect x="480" y="595" width="570" height="60" fill="#eaf2fd" stroke="#2c65a2" stroke-width="2"/>
+<text x="487" y="619" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#214c7d">Public HTTPS :443 / TLS ingress -&gt; process $PORT</text>
+<text x="487" y="640.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#214c7d">Render health: GET / -&gt; 200 (liveness only)</text>
+</g>
+<g id="render-runtime">
+<rect x="480" y="680" width="570" height="225" fill="#ffffff" stroke="#2c65a2" stroke-width="2"/>
+</g>
+<g id="render-heading">
+<text x="500" y="709" font-family="Helvetica,Arial,sans-serif" font-size="19" font-weight="bold" fill="#214c7d">&lt;&lt;executionEnvironment&gt;&gt; Render Web Service</text>
+</g>
+<g id="nest-artifact">
+<rect x="500" y="725" width="530" height="80" fill="#eaf2fd" stroke="#b5cde9" stroke-width="1"/>
+<text x="508" y="750" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">&lt;&lt;artifact&gt;&gt; NestJS + Prisma Client (dist/main.js)</text>
+<text x="508" y="771.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">IPN + shared finalization</text>
+<text x="508" y="792.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#15253b">Order expiration + reconciliation timers</text>
+</g>
+<g id="render-secrets">
+<rect x="500" y="815" width="530" height="75" fill="#fff6e9" stroke="#e6c69d" stroke-width="1"/>
+<text x="507" y="838" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#745025">Render server environment - secrets</text>
+<text x="507" y="858" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#745025">DATABASE_URL, JWT_SECRET, INTERNAL_SECRET</text>
+<text x="507" y="878" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#745025">VNPAY_HASH_SECRET (values never shown)</text>
+</g>
+<g id="private-boundary">
+<rect x="1225" y="595" width="370" height="310" fill="#eaf7ee" stroke="#3c8c56" stroke-width="2" stroke-dasharray="8 5"/>
+</g>
+<g id="private-heading">
+<text x="1240" y="627" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="bold" fill="#28633e">RENDER PRIVATE NETWORK</text>
+<text x="1240" y="648.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="bold" fill="#28633e">PostgreSQL is not a public API</text>
+</g>
+<g id="postgres">
+<rect x="1245" y="675" width="330" height="210" fill="#ffffff" stroke="#3c8c56" stroke-width="1.5"/>
+<text x="1255" y="702" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#28633e">&lt;&lt;executionEnvironment&gt;&gt;</text>
+<text x="1255" y="723.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#28633e">Render PostgreSQL Free</text>
+<text x="1255" y="744.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#28633e"></text>
+<text x="1255" y="765.75" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#28633e">&lt;&lt;artifact&gt;&gt; schema + persisted data</text>
+<text x="1255" y="787" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#28633e">Internal Database URL only</text>
+<text x="1255" y="808.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#28633e">External access OFF (verify)</text>
+<text x="1255" y="829.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#28633e">Same workspace / region as API</text>
+</g>
+<g id="actions">
+<rect x="60" y="595" width="310" height="310" fill="#f5f0fc" stroke="#8660ae" stroke-width="2" stroke-dasharray="8 5"/>
+</g>
+<g id="actions-heading">
+<text x="80" y="630" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="bold" fill="#67428f">&lt;&lt;external node&gt;&gt;</text>
+<text x="80" y="652.5" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="bold" fill="#67428f">GitHub / Actions runner</text>
+<text x="80" y="675" font-family="Helvetica,Arial,sans-serif" font-size="18" font-weight="bold" fill="#67428f">PLANNED - no workflow yet</text>
+</g>
+<g id="actions-body">
+<rect x="80" y="700" width="270" height="80" fill="#ffffff" stroke="#cab8de" stroke-width="1"/>
+<text x="88" y="724" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#67428f">Repository -&gt; CI checks</text>
+<text x="88" y="744" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#67428f">Build + test on isolated CI DB</text>
+<text x="88" y="764" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#67428f">CD only after checks pass</text>
+</g>
+<g id="actions-secrets">
+<rect x="80" y="795" width="270" height="90" fill="#ffffff" stroke="#cab8de" stroke-width="1"/>
+<text x="87" y="817" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#67428f">GitHub Actions secrets (planned)</text>
+<text x="87" y="835.75" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#67428f">VERCEL_TOKEN + project IDs</text>
+<text x="87" y="854.5" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#67428f">RENDER_DEPLOY_HOOK_URL</text>
+<text x="87" y="873.25" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#67428f">No live DB/payment secrets</text>
+</g>
+<g id="label-1">
+<text x="357.055" y="275" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#214c7d">1 / 4 HTTPS :443</text>
+<text x="356.86" y="293.75" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#214c7d">UI + REST/JSON</text>
+</g>
+<g id="label-2">
+<text x="735" y="497" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#214c7d">2 REST / JSON over public HTTPS :443</text>
+<text x="735" y="518.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#214c7d">Vercel proxy / SSR -&gt; Render ingress</text>
+</g>
+<g id="label-3">
+<text x="960" y="135" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#9a571b">3 Browser -&gt; signed VNPay payment URL (HTTPS)</text>
+</g>
+<g id="label-4">
+<text x="975" y="202" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#9a571b">4 Return -&gt; browser</text>
+<text x="975" y="223.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#9a571b">Then HTTPS GET /payment</text>
+</g>
+<g id="label-5">
+<text x="1190" y="467" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#9a571b">5 IPN: server-to-server</text>
+<text x="1190" y="488.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#9a571b">HTTPS GET</text>
+<text x="1190" y="509.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#9a571b">/payments/vnpay/ipn</text>
+</g>
+<g id="label-6">
+<text x="975" y="380" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#9a571b">6 QueryDR</text>
+<text x="975" y="398.75" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#9a571b">Outbound HTTPS POST</text>
+<text x="975" y="417.5" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#9a571b">Verified gateway result</text>
+</g>
+<g id="label-db">
+<text x="1073.75" y="806" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#28633e">PostgreSQL / TCP</text>
+<text x="1091.53" y="826" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#28633e">:5432, private</text>
+<text x="1081.76" y="846" font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="normal" fill="#28633e">Internal DB URL</text>
+</g>
+<g id="label-cd-vercel">
+<text x="340" y="515" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#67428f">CD</text>
+<text x="340" y="533.75" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#67428f">HTTPS</text>
+</g>
+<g id="label-cd-render">
+<text x="384.108" y="772" font-family="Helvetica,Arial,sans-serif" font-size="14" font-weight="normal" fill="#67428f">CD / HTTPS</text>
+</g>
+<g id="legend">
+<rect x="30" y="955" width="1620" height="235" fill="#f5f8fc" stroke="#b9c6d7" stroke-width="1"/>
+</g>
+<g id="legend-heading">
+<text x="55" y="994" font-family="Helvetica,Arial,sans-serif" font-size="19" font-weight="bold" fill="#15253b">READ THIS AS A TARGET DESIGN</text>
+</g>
+<g id="legend-body">
+<text x="55" y="1033" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Solid arrows: target runtime communication (verify after deploy).</text>
+<text x="55" y="1054.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Purple dashed arrows: planned CI/CD deployment dependencies.</text>
+<text x="55" y="1075.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Green boundary: private DB path; no browser / Vercel DB link.</text>
+<text x="55" y="1096.75" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Secrets: Render server env; CI deployment keys in GitHub Secrets.</text>
+<text x="55" y="1118" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Return is navigation only. IPN / QueryDR verify before finalization.</text>
+<text x="55" y="1139.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Crossing lines without a junction do not indicate a connection.</text>
+</g>
+<g id="gates-heading">
+<text x="930" y="994" font-family="Helvetica,Arial,sans-serif" font-size="19" font-weight="bold" fill="#15253b">OPEN ACCEPTANCE GATES</text>
+</g>
+<g id="gates-body">
+<text x="930" y="1033" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Live URLs / region / tier / environment: TBD.</text>
+<text x="930" y="1054.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Payment status route missing; full Return UI flow blocked.</text>
+<text x="930" y="1075.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Free Web tier (if chosen): sleep affects IPN + schedulers.</text>
+<text x="930" y="1096.75" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">DB Free lifecycle + private migration runner: verify.</text>
+<text x="930" y="1118" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">QueryDR Sandbox E2E: pending (see ADR).</text>
+<text x="930" y="1139.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">PR review / merge into dev: user authorization required.</text>
+</g>
+<g id="footer">
+<text x="40" y="1215" font-family="Helvetica,Arial,sans-serif" font-size="15" font-weight="normal" fill="#52637a">A2-T3.2 / SCRUM-108 | Source snapshot b542ee4 | 2026-11-08 | No live secrets or credentials</text>
+</g>
+<g id="flow-1">
+<polyline points="350,310 480,310" fill="none" stroke="#ffffff" stroke-width="6"/>
+<polyline points="350,310 480,310" fill="none" stroke="#2c65a2" stroke-width="2"/>
+<polygon points="480,310 470,306 470,314" fill="#2c65a2"/>
+<polygon points="350,310 360,314 360,306" fill="#2c65a2"/>
+</g>
+<g id="flow-2">
+<polyline points="700,465 700,595" fill="none" stroke="#ffffff" stroke-width="6"/>
+<polyline points="700,465 700,595" fill="none" stroke="#2c65a2" stroke-width="2"/>
+<polygon points="700,595 704,585 696,585" fill="#2c65a2"/>
+</g>
+<g id="flow-3">
+<polyline points="205,205 205,155 1445,155 1445,175" fill="none" stroke="#ffffff" stroke-width="6"/>
+<polyline points="205,205 205,155 1445,155 1445,175" fill="none" stroke="#bd7730" stroke-width="2"/>
+<polygon points="1445,175 1449,165 1441,165" fill="#bd7730"/>
+</g>
+<g id="flow-4">
+<polyline points="1270,245 1210,245 1210,165 235,165 235,205" fill="none" stroke="#ffffff" stroke-width="6"/>
+<polyline points="1270,245 1210,245 1210,165 235,165 235,205" fill="none" stroke="#bd7730" stroke-width="2"/>
+<polygon points="235,205 239,195 231,195" fill="#bd7730"/>
+</g>
+<g id="flow-5">
+<polyline points="1445,425 1445,535 980,535 980,595" fill="none" stroke="#ffffff" stroke-width="6"/>
+<polyline points="1445,425 1445,535 980,535 980,595" fill="none" stroke="#bd7730" stroke-width="2"/>
+<polygon points="980,595 984,585 976,585" fill="#bd7730"/>
+</g>
+<g id="flow-6">
+<polyline points="1050,725 1160,725 1160,345 1270,345" fill="none" stroke="#ffffff" stroke-width="6"/>
+<polyline points="1050,725 1160,725 1160,345 1270,345" fill="none" stroke="#bd7730" stroke-width="2"/>
+<polygon points="1270,345 1260,341 1260,349" fill="#bd7730"/>
+</g>
+<g id="flow-ingress">
+<polyline points="765,655 765,680" fill="none" stroke="#ffffff" stroke-width="6"/>
+<polyline points="765,655 765,680" fill="none" stroke="#2c65a2" stroke-width="2"/>
+<polygon points="765,680 769,670 761,670" fill="#2c65a2"/>
+</g>
+<g id="flow-db">
+<polyline points="1050,760 1245,760" fill="none" stroke="#ffffff" stroke-width="6"/>
+<polyline points="1050,760 1245,760" fill="none" stroke="#3c8c56" stroke-width="2"/>
+<polygon points="1245,760 1235,756 1235,764" fill="#3c8c56"/>
+<polygon points="1050,760 1060,764 1060,756" fill="#3c8c56"/>
+</g>
+<g id="deploy-vercel">
+<polyline points="370,620 415,620 415,430 480,430" fill="none" stroke="#ffffff" stroke-width="6"/>
+<polyline points="370,620 415,620 415,430 480,430" fill="none" stroke="#8660ae" stroke-width="2" stroke-dasharray="8 5"/>
+<polygon points="480,430 470,426 470,434" fill="#8660ae"/>
+</g>
+<g id="deploy-render">
+<polyline points="370,797 480,797" fill="none" stroke="#ffffff" stroke-width="6"/>
+<polyline points="370,797 480,797" fill="none" stroke="#8660ae" stroke-width="2" stroke-dasharray="8 5"/>
+<polygon points="480,797 470,793 470,801" fill="#8660ae"/>
+</g>
+</svg>

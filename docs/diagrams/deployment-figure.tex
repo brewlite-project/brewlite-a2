@@ -1,0 +1,16 @@
+% In the report preamble: \usepackage{graphicx} and \usepackage{pdflscape}
+% Paths below assume compilation from the repository root.
+% If compiling from docs/report, use ../diagrams/brewlite-deployment.pdf.
+% Insert with: \input{docs/diagrams/deployment-figure.tex}
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth,height=0.87\textheight,keepaspectratio]{docs/diagrams/brewlite-deployment.pdf}
+  \caption{Deployment Diagram dự kiến của BrewLite Assignment 2:
+  Next.js trên Vercel, NestJS và PostgreSQL trên Render, tích hợp VNPay Sandbox.
+  PostgreSQL dùng kết nối private; Return qua trình duyệt và IPN tới backend
+  là hai đường riêng. CI/CD nét đứt chưa được cấu hình. URL và cấu hình thực tế
+  phải được đối chiếu sau deploy trước nghiệm thu cuối.}
+  \label{fig:brewlite-deployment}
+\end{figure}
+\end{landscape}
