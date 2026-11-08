@@ -1,13 +1,13 @@
 @startuml activity-checkout-phase2-payment
-title [A2-T2.1] Activity Diagram — Checkout (Pha 2A: Tương tác VNPay, Return URL độc lập với IPN & Hiển thị kết quả cho Customer)\nĐối chiếu UC-A2-CHECKOUT-001 (Steps 9–14, AF-03..AF-06, EF-11, BR-C04)
+title [A2-T2.1] Activity Diagram — Checkout (Pha 2A: Tương tác VNPay, Return URL độc lập & Hiển thị kết quả cho Customer)\nĐối chiếu UC-A2-CHECKOUT-001 (Steps 9–14, AF-03..AF-06, EF-11, BR-C04, BR-C10)
 
 skinparam backgroundColor #FFFFFF
 skinparam defaultFontName "Arial"
 skinparam defaultFontSize 12
 skinparam shadowing false
 skinparam roundCorner 8
-skinparam Padding 6
-skinparam ActivityMargin 14
+skinparam Padding 5
+skinparam ActivityMargin 8
 skinparam ArrowColor #1E293B
 skinparam ArrowThickness 1.3
 skinparam ArrowFontSize 11
@@ -22,7 +22,7 @@ skinparam ActivityDiamondBorderThickness 1.4
 skinparam ActivityDiamondFontSize 11
 skinparam NoteBackgroundColor #FFFBEB
 skinparam NoteBorderColor #F59E0B
-skinparam SwimlaneTitleFontSize 14
+skinparam SwimlaneTitleFontSize 13
 skinparam SwimlaneTitleFontStyle bold
 skinparam SwimlaneBorderColor #475569
 skinparam SwimlaneBorderThickness 2
@@ -30,50 +30,42 @@ skinparam SwimlaneBorderThickness 2
 |Customer|
 |Next.js Frontend|
 start
-:Tiếp nhận kết quả khởi tạo thanh toán từ Pha 1;
+:Tiếp nhận kết quả khởi tạo\nthanh toán từ Pha 1;
 
-if (Hoàn tất đồng bộ ở Pha 1?) then (Có [ZERO_AMOUNT / Mock])
-  :Nhận trực tiếp kết quả PAID hoặc PAYMENT_FAILED\ntừ phản hồi API (không qua cổng VNPay);
+if (Hoàn tất đồng bộ\nở Pha 1?) then (Có [ZERO_AMOUNT / Mock])
+  :Nhận trực tiếp kết quả\ntừ phản hồi API Pha 1\n(Order.status = PAID hoặc\nOrder.status = PAYMENT_FAILED);
 else (Không [VNPay PENDING])
-  :Chuyển hướng (Redirect) trình duyệt sang VNPay Sandbox;
+  :Chuyển hướng (Redirect)\ntrình duyệt sang VNPay Sandbox;
 
   |VNPay Sandbox|
-  :Hiển thị cổng thanh toán VNPay Sandbox;
+  :Hiển thị cổng thanh toán\nVNPay Sandbox;
 
   |Customer|
-  :Thực hiện thanh toán, hủy giao dịch\nhoặc đóng trình duyệt trên VNPay Sandbox;
+  :Thực hiện thanh toán,\nhủy giao dịch hoặc đóng\ntrình duyệt trên VNPay;
 
   |VNPay Sandbox|
-  fork
-    :Luồng 2 (Server-to-Server IPN / Scheduler — độc lập với trình duyệt):\nGửi GET /payments/vnpay/ipn (hoặc mất IPN / timeout [AF-06, EF-14]);
-    |NestJS Backend|
-    :Xử lý IPN, Shared Finalization & Chu kỳ Scheduler\nđối soát QueryDR / TTL 15m (E) / Grace 5m (G)\n(Xem chi tiết tại sơ đồ Pha 2B: activity-checkout-phase3-reconciliation);
-    |PostgreSQL DB|
-    :Lưu bền vững trạng thái Order & Payment\n(PAID / PAYMENT_FAILED / CANCELLED / REQUIRES_REVIEW);
-    stop
-  fork again
-    |VNPay Sandbox|
-    :Luồng 1 (Browser Redirect — độc lập với IPN):\nĐiều hướng trình duyệt qua Return URL (nếu còn mở);
-    |Next.js Frontend|
-    if (Trình duyệt quay về Return URL?) then (Có)
-      :Nhận Return URL [EF-11: KHÔNG tự coi Return URL là PAID];
-    else (Không: Đóng trình duyệt)
-      if (Khách mở lại trang Đơn hàng sau đó?) then (Có)
-        :Mở lại trang xác nhận / chi tiết đơn hàng;
-      else (Không)
-        :Kết thúc phiên trình duyệt\n(Backend vẫn xử lý đơn độc lập ở Luồng 2);
-        stop
-      endif
+  :Phát sinh kết quả tại VNPay:\n1. Kích hoạt độc lập Luồng nền\n   IPN / Scheduler tại Pha 2B\n   (activity-checkout-phase3-reconciliation)\n   (chạy ngay cả khi đóng trình duyệt)\n2. Điều hướng trình duyệt về\n   Return URL (nếu còn mở);
+
+  |Next.js Frontend|
+  if (Trình duyệt quay về\nReturn URL?) then (Có)
+    :Nhận Return URL từ VNPay\n[EF-11: KHÔNG tự coi\nReturn URL là PAID];
+  else (Không: Đóng trình duyệt)
+    if (Khách mở lại trang\nĐơn hàng sau đó?) then (Có)
+      :Mở lại trang xác nhận /\nchi tiết đơn hàng;
+    else (Không)
+      :Kết thúc phiên trình duyệt\n(Backend vẫn xử lý IPN /\nScheduler độc lập ở Pha 2B:\nactivity-checkout-phase3-reconciliation);
+      stop
     endif
-    :Gọi GET /orders/me (bounded polling) đọc trạng thái từ DB*\n(*GET /orders/me đã triển khai; GET /payments/:id/status là API v4 [VERIFY]);
-  end merge
+  endif
+
+  :Gọi GET /orders/me (bounded polling)\nkèm Bearer JWT đọc trạng thái\ndo Backend (Pha 2B) lưu tại DB*\n(*GET /orders/me đã triển khai;\nGET /payments/:id/status là\nAPI Contract v4.0 [VERIFY]);
 endif
 
 |Next.js Frontend|
-:Đồng bộ trạng thái từ Backend & hiển thị kết quả cuối cùng:\n1. Order == PAID (VNPay / ZERO_AMOUNT / Mock): xóa giỏ client, báo thành công.\n2. Order == PAYMENT_FAILED (now < E): giữ giỏ/đơn, mở nút Retry\n   (yêu cầu sinh Idempotency-Key & vnp_TxnRef mới [BR-C04]).\n3. Order == CANCELLED: thông báo đơn hàng hết hạn & đã hủy.\n4. PENDING / REQUIRES_REVIEW / FINANCIAL_EXCEPTION:\n   hiển thị đang đối soát / cần kiểm tra thủ công, khóa nút Retry;
+:Đồng bộ dữ liệu & hiển thị kết quả (phân biệt rõ\nOrder.status với Payment.reconciliationState [REG-01, BR-C10]):\n1. Order.status == PAID (Payment.status == SUCCESS):\n   xóa giỏ hàng client, hiển thị đặt hàng thành công.\n2. Order.status == PAYMENT_FAILED (now < E):\n   giữ giỏ/đơn, mở nút Retry (sinh Idempotency-Key\n   & vnp_TxnRef mới [BR-C04]).\n3. Order.status == CANCELLED (quá hạn tại E hoặc G):\n   thông báo đơn hàng hết hạn & đã hủy.\n4. Order.status == PENDING (đang xử lý / trong Grace\n   với Payment.reconciliationState == RECONCILING) hoặc\n   Payment.reconciliationState == REQUIRES_REVIEW /\n   hasFinancialException == true [BR-C10]:\n   hiển thị đang đối soát / chờ kiểm tra thủ công, khóa Retry\n   (REQUIRES_REVIEW là trạng thái đối soát Payment,\n   không phải giá trị của Order.status);
 
 |Customer|
-:Nhận kết quả cuối cùng trên giao diện Checkout:\n- Thành công (PAID): theo dõi trạng thái chế biến đơn.\n- Thất bại trong hạn (PAYMENT_FAILED): có thể chọn Retry trước mốc E.\n- Đã hủy (CANCELLED) hoặc Đang đối soát (REQUIRES_REVIEW);
+:Nhận kết quả cuối cùng trên giao diện:\n- Order.status == PAID: theo dõi chế biến đơn.\n- Order.status == PAYMENT_FAILED (now < E): Retry.\n- Order.status == CANCELLED: báo đơn đã hủy.\n- Payment.reconciliationState == REQUIRES_REVIEW /\n  RECONCILING (Order.status là PENDING hoặc\n  CANCELLED [BR-C10]): báo đang đối soát;
 stop
 
 @enduml
