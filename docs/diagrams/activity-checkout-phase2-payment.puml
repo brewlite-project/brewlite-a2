@@ -1,0 +1,103 @@
+@startuml activity-checkout-phase2-payment
+title [A2-T2.1] Activity Diagram — Checkout (Pha 2: Tương tác VNPay, Return URL độc lập với IPN/QueryDR, TTL/Grace & Kết quả Customer)\nĐối chiếu UC-A2-CHECKOUT-001 (Steps 9–14, AF-03..AF-09, EF-10..EF-14, BR-C03..BR-C10)
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam ArrowColor #334155
+skinparam ActivityBorderColor #1E293B
+skinparam ActivityBackgroundColor #F8FAFC
+skinparam ActivityDiamondBackgroundColor #FEF3C7
+skinparam ActivityDiamondBorderColor #D97706
+skinparam NoteBackgroundColor #FFFBEB
+skinparam NoteBorderColor #F59E0B
+skinparam SwimlaneTitleFontSize 13
+skinparam SwimlaneTitleFontStyle bold
+skinparam SwimlaneBorderColor #64748B
+skinparam SwimlaneBorderThickness 2
+
+|Customer|
+|Next.js Frontend|
+start
+:Tiếp nhận kết quả khởi tạo thanh toán từ Pha 1;
+
+if (Giao dịch đã hoàn tất đồng bộ ở Pha 1\n(ZERO_AMOUNT [AF-03] hoặc Mock [AF-04])?) then (Có: ZERO_AMOUNT / Mock đã có kết quả DB)
+  :Nhận trực tiếp kết quả PAID hoặc PAYMENT_FAILED\ntừ phản hồi API (không qua cổng VNPay);
+else (Không: Giao dịch VNPay Sandbox đang PENDING [Main Flow])
+  :Chuyển hướng (Redirect) trình duyệt sang VNPay Sandbox (paymentUrl);
+
+  |VNPay Sandbox|
+  :Hiển thị cổng thanh toán VNPay Sandbox;
+
+  |Customer|
+  :Thực hiện thanh toán, hủy giao dịch\nhoặc đóng trình duyệt trên VNPay Sandbox;
+
+  |VNPay Sandbox|
+  fork
+    :Chuyển hướng trình duyệt (Browser Redirect)\nqua Return URL về Frontend (nếu phiên trình duyệt không đứt);
+    |Next.js Frontend|
+    :Nhận Return URL [EF-11: KHÔNG tự coi Return URL là PAID],\ngọi GET /orders/me (bounded polling) để đọc trạng thái xác thực*\n(*GET /orders/me đã triển khai; GET /payments/:id/status là API v4 [VERIFY]);
+  fork again
+    |VNPay Sandbox|
+    if (VNPay gửi được Server-to-Server IPN?) then (Có: Gửi GET /payments/vnpay/ipn)
+      |NestJS Backend|
+      :Tiếp nhận IPN (GET /payments/vnpay/ipn)\nvà kiểm tra HMAC-SHA512, TmnCode, vnp_TxnRef, số tiền snapshot;
+      if (Chữ ký HMAC, TmnCode, TxnRef\n& số tiền snapshot hợp lệ?) then (Không [EF-10])
+        :Từ chối Finalization, giữ nguyên DB\nvà phản hồi RspCode lỗi theo hợp đồng VNPay IPN;
+        detach
+      else (Có: Hợp lệ)
+      endif
+    else (Không: Mất IPN / Timeout [AF-06, EF-14])
+      |NestJS Backend|
+      :Kích hoạt tiến trình đối soát nội bộ (QueryDR / OrderExpiration)*\n(*Service/Scheduler có trong code/test; Sandbox E2E deferred theo ADR);
+    endif
+
+    |NestJS Backend|
+    :Khóa Payment & Order theo thứ tự chuẩn [EF-13 / BR-C05]\ntrong Shared Finalization / Reconciliation;
+
+    if (Giao dịch báo SUCCESS [00]?) then (Có: SUCCESS [00])
+      if (Thanh toán đúng hạn (paidAt <= E)\n& Order chưa bị CANCELLED?) then (Có: Đúng hạn [Main Flow])
+        :Xác định kết cục thành công đúng hạn:\nPayment -> SUCCESS, Order -> PAID;
+      else (Không: Thanh toán trễ sau E / sau CANCELLED [EF-12])
+        :Xác định ngoại lệ tài chính:\nhasFinancialException = true, reconciliationState = REQUIRES_REVIEW;
+      endif
+    else (Không: FAILED hoặc UNKNOWN)
+      if (Kết quả là Terminal FAILED xác định? [AF-05]) then (Có: Terminal FAILED)
+        if (Đơn hàng còn trong hạn TTL 15 phút (now < E)?) then (Có: now < E [AF-05])
+          :Xác định thất bại trong hạn:\nPayment -> FAILED, Order -> PAYMENT_FAILED (cho phép Retry [BR-C04]);
+        else (Không: now >= E [AF-08])
+          :Xác định thất bại khi đã quá hạn E:\nPayment -> FAILED, Order -> CANCELLED;
+        endif
+      else (Không: Chưa rõ / UNKNOWN [AF-06..AF-09, EF-14])
+        if (Đã tới mốc hết hạn TTL 15 phút (now >= E)?) then (Không: now < E)
+          :Giữ nguyên Order = PENDING, Payment = PENDING\n(chờ IPN hoặc chu kỳ đối soát tiếp theo);
+        else (Có: now >= E)
+          if (Có giao dịch VNPay đang PENDING phát sinh trước E?) then (Không [AF-08])
+            :Xác định hết hạn tại mốc E:\nOrder -> CANCELLED (hoàn trả tài nguyên);
+          else (Có: Vào cửa sổ Grace 5 phút G = E + 5m [AF-07])
+            :Giữ đơn trong Grace [E, G), chặn tạo Payment/Order mới,\ntiếp tục đối soát QueryDR [BR-C03];
+            if (Đã quá cửa sổ Grace 5 phút (now >= G)\nmà kết quả vẫn UNKNOWN?) then (Không: E <= now < G)
+              :Giữ trạng thái chờ đối soát trong Grace\n(Order = PENDING, reconciliationState = RECONCILING);
+            else (Có: now >= G [AF-09 / BR-C10])
+              :Xác định hết hạn sau Grace tại mốc G:\nOrder -> CANCELLED; Payment giữ PENDING + REQUIRES_REVIEW;
+            endif
+          endif
+        endif
+      endif
+    endif
+
+    |PostgreSQL DB|
+    :Commit nguyên tử kết cục tương ứng vào Database:\n1. Thành công đúng hạn: Payment = SUCCESS, Order = PAID,\n   Coupon HELD -> CONSUMED, cộng điểm đúng 1 lần.\n2. Ngoại lệ trễ [EF-12]: lưu hasFinancialException / REQUIRES_REVIEW,\n   KHÔNG hồi sinh Order, KHÔNG cấp lại stock/coupon/điểm.\n3. Thất bại trong TTL [AF-05]: Payment = FAILED, Order = PAYMENT_FAILED\n   (bảo toàn tồn kho & Coupon HELD để Retry).\n4. Quá hạn tại E / G [AF-08, AF-09]: Order = CANCELLED, hoàn trả stock &\n   giải phóng Coupon 1 lần (sau Grace: Payment giữ PENDING + REQUIRES_REVIEW);
+  end fork
+endif
+
+|Next.js Frontend|
+:Đồng bộ kết quả Order & Payment từ Backend\nvà hiển thị giao diện theo trạng thái cuối cùng:\n1. Order == PAID (VNPay / ZERO_AMOUNT / Mock): xóa giỏ hàng client, báo thành công.\n2. Order == PAYMENT_FAILED (now < E): giữ giỏ/đơn, hiển thị nút Retry\n   (yêu cầu sinh Idempotency-Key & vnp_TxnRef mới [BR-C04]).\n3. Order == CANCELLED: hiển thị thông báo đơn hết hạn & đã hủy.\n4. PENDING / REQUIRES_REVIEW / FINANCIAL_EXCEPTION:\n   hiển thị đang đối soát / cần kiểm tra thủ công, khóa nút Retry;
+
+|Customer|
+:Nhận kết quả cuối cùng trên giao diện Checkout:\n- Thành công (PAID): theo dõi trạng thái chế biến đơn.\n- Thất bại trong hạn (PAYMENT_FAILED): có thể chọn Retry trước mốc E.\n- Đã hủy (CANCELLED) hoặc Đang đối soát (REQUIRES_REVIEW);
+stop
+
+@enduml
