@@ -1,0 +1,164 @@
+@startuml sequence-checkout-phase1-order
+title [A2-T2.2] Sequence Diagram — Pha 1: Xác thực JWT & Giao dịch Tạo đơn hàng Nguyên tử (POST /orders)\nĐối chiếu UC-A2-CHECKOUT-001 (Steps 1–5, AF-01, AF-03, EF-01..EF-05) & Kế thừa A1 SD-01, SD-04
+
+skinparam dpi 150
+skinparam maxMessageSize 380
+skinparam responseMessageBelowArrow true
+skinparam sequenceMessageAlign left
+skinparam Padding 3
+skinparam ParticipantPadding 28
+skinparam BoxPadding 12
+skinparam Shadowing false
+skinparam RoundCorner 6
+skinparam defaultFontName "Segoe UI", "Roboto", "Arial", sans-serif
+skinparam defaultFontSize 11
+
+skinparam sequence {
+  ArrowColor #334155
+  ArrowFontColor #0F172A
+  ArrowFontSize 11
+  LifeLineBorderColor #64748B
+  LifeLineBackgroundColor #F8FAFC
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F1F5F9
+  ParticipantFontColor #0F172A
+  ParticipantFontSize 12
+  ParticipantFontStyle bold
+  ActorBorderColor #1E293B
+  ActorBackgroundColor #E2E8F0
+  ActorFontColor #0F172A
+  ActorFontSize 12
+  ActorFontStyle bold
+  DatabaseBorderColor #1E293B
+  DatabaseBackgroundColor #E0F2FE
+  DatabaseFontColor #0F172A
+  DatabaseFontSize 12
+  DatabaseFontStyle bold
+  GroupBorderColor #2563EB
+  GroupBackgroundColor #EFF6FF
+  GroupHeaderFontColor #1E3A8A
+  GroupFontColor #1E293B
+  GroupFontSize 11
+  GroupFontStyle bold
+  DividerBorderColor #475569
+  DividerBackgroundColor #F1F5F9
+  DividerFontColor #0F172A
+  DividerFontSize 11
+  DividerFontStyle bold
+}
+
+skinparam note {
+  BackgroundColor #FEFCE8
+  BorderColor #D97706
+  FontColor #1E293B
+  FontSize 10
+}
+
+autonumber "<b>[P1-00]"
+
+actor "Customer" as Customer
+participant "Next.js UI\n(CartDrawer / PaymentPageView)" as UI
+participant "NestJS API\n(OrdersController / OrdersService)" as API
+database "Database\n(PostgreSQL / Prisma)" as DB
+participant "Payment Service\n(OrderExpiration / Grace Check)" as PaymentSvc
+
+== 1. Kiểm tra giỏ hàng & Phiên đăng nhập JWT trước khi tạo đơn ==
+
+Customer -> UI : Bấm "Thanh toán" từ giỏ hàng (items[], couponCode tùy chọn)
+activate UI
+UI -> UI : Kiểm tra giỏ khác rỗng & kiểm tra JWT bằng getValidToken()
+
+alt Chưa đăng nhập hoặc JWT phía Client đã hết hạn [AF-01 / Kế thừa SD-04]
+  UI --> Customer : Chuyển hướng /login (bảo toàn giỏ hàng local)
+  ref over Customer, UI, API, DB : **Kế thừa A1 SD-04 — Đăng nhập (POST /auth/login):** Xác minh mật khẩu, cấp Bearer JWT hợp lệ rồi quay lại Checkout
+else Đã có phiên Bearer JWT
+  note over UI, API : **Lưu ý Coupon Preview:** ""POST /promotions/coupons/preview"" có trong code/test A1 (SCRUM-96) nhưng thuộc nhóm cần xác nhận phạm vi A2 **[VERIFY]**. ""POST /orders"" luôn kiểm tra & giữ mã nguyên tử phía Server.
+
+  UI -> API : POST /orders (Header: Authorization: Bearer <JWT>, Body: CreateOrderDto { items[], couponCode? })
+  activate API
+  API -> API : JwtAuthGuard xác minh chữ ký/hạn JWT & ValidationPipe kiểm tra CreateOrderDto
+
+  alt JWT không hợp lệ / hết hạn (401) [EF-01] hoặc CreateOrderDto sai định dạng / giỏ rỗng (400) [EF-02]
+    API --> UI : 401 UNAUTHORIZED hoặc 400 BAD_REQUEST (VALIDATION_ERROR)
+    UI --> Customer : Yêu cầu đăng nhập lại (401) hoặc báo lỗi dữ liệu giỏ hàng (400) — giữ nguyên giỏ hàng
+
+  else JWT & CreateOrderDto hợp lệ — Thực thi Giao dịch Nguyên tử (runInventoryTransaction)
+
+    == 2. Khóa tư vấn (Advisory Lock) & Dọn dẹp lười đơn cũ quá hạn (Lazy Expiration) ==
+
+    API -> DB : BEGIN TRANSACTION + Kiểm tra User tồn tại + SELECT pg_advisory_xact_lock(hashtextextended('create-order:' || userId, 0))
+    activate DB
+    DB --> API : Đã giữ khóa tư vấn theo userId (chống tạo 2 đơn đồng thời)
+
+    API -> DB : Tìm đơn đang mở của Customer: WHERE userId = ? AND status IN ('PENDING', 'PAYMENT_FAILED')
+    DB --> API : Kết quả đơn đang mở (nếu có)
+
+    opt Tồn tại đơn cũ đang mở (PENDING hoặc PAYMENT_FAILED) [AF-03 / EF-03]
+      API -> PaymentSvc : expireOrderInTransaction(tx, activeOrder.id, now)
+      activate PaymentSvc
+      PaymentSvc -> DB : Đọc expiresAt (E) và kiểm tra giao dịch Payment (provider = 'VNPAY' AND status = 'PENDING')
+      DB --> PaymentSvc : Trạng thái hạn E & giao dịch VNPay PENDING
+      PaymentSvc --> API : Kết quả đánh giá hết hạn E / cửa sổ Grace G = E + 5 phút
+      deactivate PaymentSvc
+
+      alt Đơn cũ đã quá hạn E VÀ (không có VNPay PENDING hoặc đã quá Grace G = E + 5m) [AF-03]
+        API -> DB : Cập nhật đơn cũ -> CANCELLED, hoàn tồn kho & giải phóng coupon HELD -> RELEASED (idempotent)\n+ COMMIT pha dọn dẹp & mở lại BEGIN TRANSACTION + khóa advisory lock cho đơn mới
+        DB --> API : Đã dọn dẹp đơn cũ quá hạn, tiếp tục tạo đơn mới
+      else Đơn cũ còn hạn (now < E) HOẶC đang trong Grace 5 phút (E <= now < G) với VNPay PENDING [EF-03]
+        API -> DB : ROLLBACK TRANSACTION
+        API --> UI : 409 CONFLICT (PENDING_ORDER_EXISTS, kèm activeOrderId)
+        UI --> Customer : Thông báo còn đơn chưa hoàn tất & điều hướng về đơn hiện có
+      end
+    end
+
+    == 3. Tính giá chuẩn Server, Trừ giữ chỗ Tồn kho, Giữ chỗ Coupon & Tạo Order PENDING ==
+
+    opt Không còn đơn mở cản trở (tiếp tục pha tạo đơn mới)
+      API -> DB : priceCart(tx, items): Đọc Product, ProductSize, Topping (isActive, isAvailable, stock) & tính lại subtotalVnd chuẩn Server
+      DB --> API : Thông tin sản phẩm & kết quả tính giá
+
+      alt Sản phẩm / Size / Topping không tồn tại hoặc ngừng bán [EF-02]
+        API -> DB : ROLLBACK TRANSACTION
+        API --> UI : 400 BAD_REQUEST (INVALID_CART)
+        UI --> Customer : Thông báo món không còn khả dụng (giữ nguyên giỏ hàng)
+
+      else Danh mục món hợp lệ
+        API -> DB : reserveInventory(tx, quantities): Khóa dòng & trừ tồn kho nguyên tử (stock >= requested)
+        DB --> API : Kết quả trừ giữ chỗ tồn kho
+
+        alt Không đủ số lượng tồn kho [EF-04]
+          API -> DB : ROLLBACK TRANSACTION
+          API --> UI : 409 CONFLICT (INSUFFICIENT_STOCK)
+          UI --> Customer : Thông báo thiếu tồn kho (giữ nguyên giỏ hàng)
+
+        else Đủ tồn kho
+          opt Có gửi kèm mã giảm giá (couponCode)
+            API -> DB : reserveCoupon(tx, userId, couponCode, subtotalVnd): Kiểm tra hiệu lực, minOrderAmount, maxUses & lượt đang giữ
+            DB --> API : Kết quả kiểm tra coupon
+
+            alt Coupon không hợp lệ hoặc hết lượt / đang HELD ở đơn khác [EF-05]
+              API -> DB : ROLLBACK TRANSACTION (tự động hoàn lại tồn kho vừa trừ trong transaction)
+              API --> UI : 400 INVALID_COUPON hoặc 409 COUPON_UNAVAILABLE
+              UI --> Customer : Thông báo không thể áp dụng mã giảm giá (giữ nguyên giỏ hàng)
+            else Coupon hợp lệ
+              API -> DB : Tính discountVnd, totalVnd = max(0, subtotalVnd - discountVnd) & giữ chỗ CouponRedemption (status = 'HELD')
+            end
+          end
+
+          API -> DB : INSERT Order (status = 'PENDING', expiresAt = E = createdAt + 15m, subtotalVnd, discountVnd, totalVnd)\n+ INSERT OrderItem & OrderItemTopping snapshots + COMMIT TRANSACTION
+          DB --> API : Xác nhận COMMIT tạo Order PENDING thành công
+          deactivate DB
+
+          API --> UI : 201 Created (CreateOrderResponseDto: { id, status: 'PENDING', subtotalVnd, discountVnd, totalVnd, expiresAt })
+          deactivate API
+
+          UI -> UI : Bảo toàn giỏ hàng khi Order đang PENDING (chỉ xóa giỏ sau khi xác nhận Order == PAID)
+          UI --> Customer : Hiển thị thông tin đơn PENDING & chuyển sang bước khởi tạo thanh toán (Pha 2)
+        end
+      end
+    end
+  end
+end
+
+deactivate UI
+@enduml

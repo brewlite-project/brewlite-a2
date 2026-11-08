@@ -1,0 +1,197 @@
+@startuml sequence-checkout
+title [A2-T2.2] Sequence Diagram Tổng thể — Luồng Checkout & Payment (End-to-End)\nĐối chiếu UC-A2-CHECKOUT-001, API Contract v4.0, Baseline A1-final & Kế thừa A1 SD-01, SD-02, SD-04, SD-06B
+
+skinparam dpi 150
+skinparam maxMessageSize 360
+skinparam responseMessageBelowArrow true
+skinparam sequenceMessageAlign left
+skinparam Padding 3
+skinparam ParticipantPadding 24
+skinparam BoxPadding 12
+skinparam Shadowing false
+skinparam RoundCorner 6
+skinparam defaultFontName "Segoe UI", "Roboto", "Arial", sans-serif
+skinparam defaultFontSize 11
+
+skinparam sequence {
+  ArrowColor #334155
+  ArrowFontColor #0F172A
+  ArrowFontSize 11
+  LifeLineBorderColor #64748B
+  LifeLineBackgroundColor #F8FAFC
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F1F5F9
+  ParticipantFontColor #0F172A
+  ParticipantFontSize 12
+  ParticipantFontStyle bold
+  ActorBorderColor #1E293B
+  ActorBackgroundColor #E2E8F0
+  ActorFontColor #0F172A
+  ActorFontSize 12
+  ActorFontStyle bold
+  DatabaseBorderColor #1E293B
+  DatabaseBackgroundColor #E0F2FE
+  DatabaseFontColor #0F172A
+  DatabaseFontSize 12
+  DatabaseFontStyle bold
+  GroupBorderColor #2563EB
+  GroupBackgroundColor #EFF6FF
+  GroupHeaderFontColor #1E3A8A
+  GroupFontColor #1E293B
+  GroupFontSize 11
+  GroupFontStyle bold
+  DividerBorderColor #475569
+  DividerBackgroundColor #F1F5F9
+  DividerFontColor #0F172A
+  DividerFontSize 11
+  DividerFontStyle bold
+}
+
+skinparam note {
+  BackgroundColor #FEFCE8
+  BorderColor #D97706
+  FontColor #1E293B
+  FontSize 10
+}
+
+autonumber "<b>[00]"
+
+actor "Customer" as Customer
+participant "Next.js UI\n(CartDrawer / PaymentPageView)" as UI
+participant "NestJS API\n(Orders / Payments / IPN Controllers)" as API
+database "Database\n(PostgreSQL / Prisma)" as DB
+participant "Payment Service\n(ZeroAmount / Mock / VnpayInit /\nFinalization / Scheduler)" as PaymentSvc
+participant "VNPay Sandbox\n(External Payment Gateway)" as VNPay #DCFCE7
+
+== Pha 1: Xác thực JWT & Giao dịch Tạo đơn hàng Nguyên tử (Chi tiết: sequence-checkout-phase1-order) ==
+
+Customer -> UI : Bấm "Thanh toán" từ giỏ hàng (items[], couponCode?)
+activate UI
+UI -> UI : Kiểm tra giỏ khác rỗng & kiểm tra JWT (getValidToken())
+
+alt Chưa có JWT hoặc JWT hết hạn [AF-01 / SD-04]
+  UI --> Customer : Chuyển hướng /login (giữ nguyên giỏ hàng)
+else Đã có Bearer JWT
+  UI -> API : POST /orders (Bearer JWT, CreateOrderDto { items[], couponCode? })
+  activate API
+  API -> API : JwtAuthGuard xác thực JWT & ValidationPipe kiểm tra DTO
+
+  alt JWT lỗi (401) hoặc DTO lỗi (400) [EF-01, EF-02]
+    API --> UI : 401 UNAUTHORIZED / 400 BAD_REQUEST
+    UI --> Customer : Báo lỗi xác thực hoặc dữ liệu (giữ nguyên giỏ hàng)
+
+  else JWT & DTO hợp lệ — Thực thi runInventoryTransaction
+    API -> DB : BEGIN TRANSACTION + pg_advisory_xact_lock('create-order:' || userId) + Tìm đơn cũ đang mở (PENDING / PAYMENT_FAILED)
+    activate DB
+    opt Có đơn cũ đang mở [AF-03 / EF-03]
+      API -> PaymentSvc : expireOrderInTransaction(tx, activeOrder.id, now) — Kiểm tra hạn E & giao dịch VNPay PENDING (Grace G = E + 5m)
+      activate PaymentSvc
+      PaymentSvc -> DB : Hủy đơn cũ nếu đã quá hạn E / quá Grace G; hoặc trả lỗi 409 PENDING_ORDER_EXISTS nếu còn hiệu lực
+      PaymentSvc --> API : Kết quả xử lý đơn cũ
+      deactivate PaymentSvc
+    end
+
+    API -> DB : • priceCart(): Tính lại giá chuẩn Server (400 INVALID_CART nếu món ngừng bán)\n• reserveInventory(): Khóa & trừ tồn kho nguyên tử (409 INSUFFICIENT_STOCK nếu thiếu)\n• reserveCoupon(): Kiểm tra & giữ chỗ coupon HELD (400/409 nếu không hợp lệ)\n• INSERT Order (status = 'PENDING', expiresAt = E = createdAt + 15m) + OrderItem snapshots + COMMIT TRANSACTION
+    DB --> API : Đã tạo Order PENDING (E = createdAt + 15m)
+    deactivate DB
+    API --> UI : 201 Created (CreateOrderResponseDto { id, status: 'PENDING', totalVnd, expiresAt })
+    deactivate API
+    UI -> UI : Bảo toàn giỏ hàng khi Order đang PENDING
+
+    == Pha 2: Khởi tạo Thanh toán, Cơ chế Idempotency & Phân nhánh (Chi tiết: sequence-checkout-phase2-payment-init) ==
+
+    Customer -> UI : Xác nhận thanh toán (hoặc Retry với Idempotency-Key mới khi PAYMENT_FAILED trước mốc E)
+    UI -> API : Gửi request kèm Bearer JWT & Header Idempotency-Key (8..64 ký tự):\n• totalVnd == 0: POST /payments/zero-amount  |  • totalVnd > 0 (Mock): POST /payments  |  • totalVnd > 0 (VNPay): POST /payments/vnpay/initiate
+    activate API
+    API -> PaymentSvc : Xác thực Guard/Pipe (JwtAuthGuard, IdempotencyKeyPipe, MockPaymentGuard) & chuyển vào Payment Service
+    activate PaymentSvc
+    PaymentSvc -> DB : BEGIN TRANSACTION + Kiểm tra quyền sở hữu Order (404 nếu khác user) + Tra cứu (userId, idempotencyKey) & SHA-256 requestHash
+    activate DB
+
+    alt Idempotency Replay (cùng key + cùng requestHash) [AF-06]
+      PaymentSvc --> API : 200 OK (Header: Idempotency-Replayed: true) + trả snapshot đã lưu (không thực thi lại giao dịch)
+      API --> UI : 200 OK (Idempotency-Replayed: true)
+      UI --> Customer : Hiển thị kết quả tương ứng
+
+    else Lỗi Idempotency Conflict (409) / Đang xử lý (pg_try_advisory_xact_lock = false -> 409) / Quá hạn E (409) [EF-06..EF-09]
+      PaymentSvc -> DB : ROLLBACK TRANSACTION
+      PaymentSvc --> API : 409 CONFLICT (IDEMPOTENCY_KEY_CONFLICT / PAYMENT_IN_PROGRESS / ORDER_EXPIRED)
+      API --> UI : 409 CONFLICT
+      UI --> Customer : Thông báo lỗi xung đột hoặc đơn hết hạn
+
+    else Key mới & Order hợp lệ (SELECT Order FOR UPDATE, now < E) — Phân nhánh theo phương thức
+      alt Nhánh 1: Đơn 0 VND (totalVnd == 0) — POST /payments/zero-amount [AF-02, BR-C06]
+        PaymentSvc -> DB : Shared Finalization: Coupon HELD -> CONSUMED, Order -> PAID (0 điểm), INSERT Payment (ZERO_AMOUNT, SUCCESS) + COMMIT
+        PaymentSvc --> API : 201 Created (Order PAID)
+        API --> UI : 201 Created
+        UI --> Customer : Xóa giỏ hàng local & hiển thị xác nhận đơn hàng PAID (0 VND)
+
+      else Nhánh 2: Mock CARD / WALLET (totalVnd > 0) — POST /payments [AF-04, AF-05, SD-02]
+        PaymentSvc -> DB : Đánh giá thẻ/ví giả lập & gọi Shared Finalization:\n• Nếu SUCCESS: Coupon HELD -> CONSUMED, cộng điểm, Order -> PAID, Payment -> SUCCESS\n• Nếu FAILED: Giữ nguyên tồn kho & coupon HELD, Order -> PAYMENT_FAILED, Payment -> FAILED + COMMIT
+        PaymentSvc --> API : 200 OK (status: SUCCESS / FAILED)
+        API --> UI : 200 OK
+        UI --> Customer : Nếu PAID: Xóa giỏ & báo thành công. Nếu PAYMENT_FAILED: Giữ giỏ & cho phép Retry với Idempotency-Key mới trước mốc E
+
+      else Nhánh 3: Luồng chính VNPay Sandbox (totalVnd > 0) — POST /payments/vnpay/initiate [Main Flow]
+        PaymentSvc -> DB : Sinh paymentId, vnpTxnRef mới (32-hex), ký HMAC-SHA512 tạo paymentUrl +\nINSERT Payment (VNPAY, status = 'PENDING', reconciliationState = 'SCHEDULED', nextQueryAt = E, reconcileUntil = E + 65m) + COMMIT
+        deactivate DB
+        PaymentSvc --> API : 201 Created { paymentId, vnpTxnRef, paymentUrl, expiresAt }
+        deactivate PaymentSvc
+        API --> UI : 201 Created (paymentUrl)
+        deactivate API
+
+        == Pha 3: Tương tác VNPay Sandbox, Return URL độc lập với IPN & Đối soát / Hết hạn (Chi tiết: sequence-checkout-phase3) ==
+
+        UI -> VNPay : Redirect trình duyệt sang paymentUrl trên VNPay Sandbox
+        activate VNPay
+        Customer -> VNPay : Thực hiện thanh toán, hủy giao dịch hoặc đóng trình duyệt
+
+        par Luồng độc lập 1: Server-to-Server IPN (Nguồn sự thật chốt trạng thái tại Backend)
+          VNPay -> API : GET /payments/vnpay/ipn?vnp_* (Server-to-Server, không cần JWT của Customer)
+          activate API
+          API -> PaymentSvc : VnpayIpnService.handle() — Kiểm tra HMAC-SHA512, vnpTxnRef & vnp_Amount
+          activate PaymentSvc
+          PaymentSvc -> DB : BEGIN TRANSACTION + Khóa chuẩn Order FOR UPDATE -> Payment FOR UPDATE [EF-13, BR-C05] + Kiểm tra PaymentGatewayEvent:\n• SUCCESS đúng hạn (paidAt <= E, now < G): Coupon CONSUMED, cộng điểm, Payment -> SUCCESS, Order -> PAID\n• SUCCESS đến trễ (Order đã CANCELLED / paidAt > E / now >= G) [EF-12]: Ghi FINANCIAL_EXCEPTION + REQUIRES_REVIEW (không hồi sinh đơn)\n• FAILED: Payment -> FAILED; nếu now < E thì Order -> PAYMENT_FAILED (cho phép Retry); nếu now >= E thì Order -> CANCELLED + hoàn kho/coupon\n+ COMMIT TRANSACTION
+          activate DB
+          DB --> PaymentSvc : Xác nhận COMMIT
+          deactivate DB
+          PaymentSvc --> API : { RspCode: '00' / '02' / '97' / '01' / '04', Message }
+          deactivate PaymentSvc
+          API --> VNPay : 200 OK { RspCode, Message }
+          deactivate API
+
+        else Luồng độc lập 2: Browser Return URL (Chỉ điều hướng UI, KHÔNG tự coi Return URL là PAID [EF-11])
+          VNPay --> UI : HTTP 302 Redirect về Return URL (nếu Customer không đóng trình duyệt)
+          deactivate VNPay
+          UI -> API : Bounded Polling GET /orders/me (Bearer JWT) + GET /auth/me (*GET /payments/:paymentId/status là API v4.0 [VERIFY]*)
+          activate API
+          API -> DB : Đọc trạng thái chuẩn của Order & Payment từ DB
+          activate DB
+          DB --> API : Trạng thái Order (PAID / PAYMENT_FAILED / CANCELLED / PENDING)
+          deactivate DB
+          API --> UI : 200 OK (Order & resolution)
+          deactivate API
+          UI --> Customer : Hiển thị kết quả cuối cùng:\n• PAID: Xóa giỏ hàng, hiện xác nhận & điểm thưởng  |  • PAYMENT_FAILED (now < E): Giữ giỏ hàng, mở nút Retry (key & vnpTxnRef mới)\n• CANCELLED: Báo đơn hết hạn & đã hủy  |  • REQUIRES_REVIEW: Báo đang đối soát / chờ kiểm tra thủ công, khóa Retry
+
+        else Luồng độc lập 3: Background Scheduler — Đối soát QueryDR & Tự động hủy đơn tại mốc E (15m) & G (E + 5m) [AF-07, AF-08, SD-06B]
+          PaymentSvc -> DB : Cron quét Order quá hạn (expiresAt <= now) & Payment VNPay PENDING (nextQueryAt <= now)
+          activate PaymentSvc
+          opt Đang trong Grace 5 phút (E <= now < G) với VNPay PENDING [AF-07, BR-C04]
+            PaymentSvc -> VNPay : POST QueryDR (ngoài khóa DB) [ADR-P2-QueryDR-Sandbox-E2E-Deferred]
+            activate VNPay
+            VNPay --> PaymentSvc : Kết quả QueryDR (SUCCESS / FAILED / UNKNOWN)
+            deactivate VNPay
+            PaymentSvc -> DB : Chốt qua Shared Finalization (nếu rõ kết quả) hoặc tăng backoff nextQueryAt
+          end
+          opt Quá hạn E (không có VNPay PENDING) hoặc đã chạm mốc G = E + 5m mà vẫn UNKNOWN [AF-08, SD-06B]
+            PaymentSvc -> DB : Khóa Order FOR UPDATE -> Cập nhật Order -> CANCELLED + Hoàn tồn kho & giải phóng coupon HELD -> RELEASED đúng 1 lần (idempotent)
+          end
+          deactivate PaymentSvc
+        end
+      end
+    end
+  end
+end
+
+deactivate UI
+@enduml

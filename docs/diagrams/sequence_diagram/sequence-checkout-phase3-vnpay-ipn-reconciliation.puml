@@ -1,0 +1,167 @@
+@startuml sequence-checkout-phase3-vnpay-ipn-reconciliation
+title [A2-T2.2] Sequence Diagram — Pha 3: Tương tác VNPay Sandbox, Phân biệt Browser Return URL với Server-to-Server IPN & Đối soát / Hết hạn (E, G)\nĐối chiếu UC-A2-CHECKOUT-001 (Steps 9–14, AF-05, AF-07, AF-08, EF-11..EF-13, BR-C04..BR-C05) & Kế thừa A1 SD-06 (Phần B)
+
+skinparam dpi 150
+skinparam maxMessageSize 360
+skinparam responseMessageBelowArrow true
+skinparam sequenceMessageAlign left
+skinparam Padding 3
+skinparam ParticipantPadding 24
+skinparam BoxPadding 12
+skinparam Shadowing false
+skinparam RoundCorner 6
+skinparam defaultFontName "Segoe UI", "Roboto", "Arial", sans-serif
+skinparam defaultFontSize 11
+
+skinparam sequence {
+  ArrowColor #334155
+  ArrowFontColor #0F172A
+  ArrowFontSize 11
+  LifeLineBorderColor #64748B
+  LifeLineBackgroundColor #F8FAFC
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F1F5F9
+  ParticipantFontColor #0F172A
+  ParticipantFontSize 12
+  ParticipantFontStyle bold
+  ActorBorderColor #1E293B
+  ActorBackgroundColor #E2E8F0
+  ActorFontColor #0F172A
+  ActorFontSize 12
+  ActorFontStyle bold
+  DatabaseBorderColor #1E293B
+  DatabaseBackgroundColor #E0F2FE
+  DatabaseFontColor #0F172A
+  DatabaseFontSize 12
+  DatabaseFontStyle bold
+  GroupBorderColor #2563EB
+  GroupBackgroundColor #EFF6FF
+  GroupHeaderFontColor #1E3A8A
+  GroupFontColor #1E293B
+  GroupFontSize 11
+  GroupFontStyle bold
+  DividerBorderColor #475569
+  DividerBackgroundColor #F1F5F9
+  DividerFontColor #0F172A
+  DividerFontSize 11
+  DividerFontStyle bold
+}
+
+skinparam note {
+  BackgroundColor #FEFCE8
+  BorderColor #D97706
+  FontColor #1E293B
+  FontSize 10
+}
+
+autonumber "<b>[P3-00]"
+
+actor "Customer" as Customer
+participant "Next.js UI\n(Payment / Confirmation Page)" as UI
+participant "NestJS API\n(VnpayIpn / Orders Controllers)" as API
+database "Database\n(PostgreSQL / Prisma)" as DB
+participant "Payment Service\n(VnpayIpn / Finalization /\nScheduler & OrderExpiration)" as PaymentSvc
+participant "VNPay Sandbox\n(External Payment Gateway)" as VNPay #DCFCE7
+
+== 1. Chuyển hướng sang Cổng thanh toán VNPay Sandbox ==
+
+UI -> VNPay : Chuyển hướng trình duyệt theo paymentUrl đã ký HMAC-SHA512 (vnp_TxnRef, vnp_Amount = totalVnd * 100, vnp_ExpireDate = E)
+activate VNPay
+Customer -> VNPay : Thực hiện thanh toán, hủy giao dịch hoặc đóng trình duyệt trên cổng VNPay Sandbox
+
+== 2. Xử lý Bất đồng bộ & Độc lập: Server-to-Server IPN vs Browser Return URL vs Background Scheduler ==
+
+par Luồng 1: Server-to-Server IPN (Nguồn sự thật chốt trạng thái tại Backend — KHÔNG phụ thuộc trình duyệt Customer)
+
+  VNPay -> API : GET /payments/vnpay/ipn?vnp_TxnRef=...&vnp_Amount=...&vnp_ResponseCode=...&vnp_SecureHash=...\n(Gọi trực tiếp Server-to-Server, KHÔNG dùng Bearer JWT của Customer)
+  activate API
+  API -> PaymentSvc : VnpayIpnService.handle(rawQuery) — parseAndVerifyIpn() kiểm tra chữ ký HMAC-SHA512 & vnp_TmnCode
+  activate PaymentSvc
+
+  alt Chữ ký HMAC-SHA512 sai (RspCode '97') HOẶC không tìm thấy vnpTxnRef (RspCode '01') HOẶC lệch số tiền vnp_Amount != amountVnd * 100 (RspCode '04') [EF-11]
+    PaymentSvc -> DB : Kiểm tra vnpTxnRef & amountVnd (nếu chữ ký đúng) -> Từ chối cập nhật trạng thái Order & Payment
+    PaymentSvc --> API : { RspCode: '97' / '01' / '04', Message }
+    API --> VNPay : 200 OK { RspCode: '97' / '01' / '04', Message }
+
+  else Chữ ký hợp lệ, khớp vnpTxnRef & số tiền — Gọi Shared Finalization (PaymentFinalizationService.finalizeInTransaction)
+    PaymentSvc -> DB : BEGIN TRANSACTION + Khóa dòng theo thứ tự chuẩn chống Deadlock [EF-13, BR-C05]:\n1. SELECT * FROM "Order" WHERE id = ? FOR UPDATE  ->  2. SELECT * FROM "Payment" WHERE id = ? FOR UPDATE\n+ Kiểm tra chống xử lý trùng lặp qua bảng PaymentGatewayEvent
+    activate DB
+    DB --> PaymentSvc : Đã giữ khóa Order -> Payment & trạng thái hiện tại
+
+    alt Sự kiện IPN trùng lặp (Payment đã ở trạng thái kết thúc SUCCESS / FAILED)
+      PaymentSvc -> DB : Ghi nhận PaymentGatewayEvent (DUPLICATE) & COMMIT
+      PaymentSvc --> API : { RspCode: '02', Message: 'Order already confirmed' }
+      API --> VNPay : 200 OK { RspCode: '02', Message: 'Order already confirmed' }
+
+    else Kết quả VNPay == SUCCESS ('00'/'00') VÀ Hợp lệ (Order đang PENDING/PAYMENT_FAILED, paidAt <= E, now < G) [Main Flow]
+      PaymentSvc -> DB : • Chuyển CouponRedemption HELD -> CONSUMED (nếu có) + Cộng điểm User.loyaltyPoints += floor(totalVnd / 10000) (đúng 1 lần)\n• INSERT PaymentGatewayEvent (FINALIZED) + UPDATE Payment -> SUCCESS (RESOLVED) + UPDATE Order -> PAID + COMMIT
+      DB --> PaymentSvc : Xác nhận COMMIT
+      PaymentSvc --> API : { RspCode: '00', Message: 'Confirm Success' }
+      API --> VNPay : 200 OK { RspCode: '00', Message: 'Confirm Success' }
+
+    else Kết quả VNPay == SUCCESS ('00'/'00') NHƯNG Đến trễ (Order đã CANCELLED hoặc paidAt > E hoặc now >= G) [EF-12]
+      PaymentSvc -> DB : • INSERT PaymentGatewayEvent (FINANCIAL_EXCEPTION) + UPDATE Payment (hasFinancialException = true, reconciliationState = 'REQUIRES_REVIEW')\n• KHÔNG hồi sinh Order đã CANCELLED, KHÔNG cộng điểm + COMMIT TRANSACTION
+      DB --> PaymentSvc : Xác nhận ghi nhận ngoại lệ tài chính
+      PaymentSvc --> API : { RspCode: '00', Message: 'Confirm Success' }
+      API --> VNPay : 200 OK { RspCode: '00', Message: 'Confirm Success' }
+
+    else Kết quả VNPay == FAILED (mã khác '00') [AF-05 / AF-08]
+      PaymentSvc -> DB : • UPDATE Payment -> FAILED (reconciliationState = 'RESOLVED')\n• Nếu còn hạn (now < E) [AF-05]: UPDATE Order -> PAYMENT_FAILED (giữ nguyên tồn kho & coupon HELD cho phép Retry)\n• Nếu đã quá hạn (now >= E) [AF-08]: UPDATE Order -> CANCELLED + Hoàn tồn kho & giải phóng coupon HELD -> RELEASED đúng 1 lần\n+ COMMIT TRANSACTION
+      DB --> PaymentSvc : Xác nhận COMMIT
+      deactivate DB
+      PaymentSvc --> API : { RspCode: '00', Message: 'Confirm Success' }
+      deactivate PaymentSvc
+      API --> VNPay : 200 OK { RspCode: '00', Message: 'Confirm Success' }
+      deactivate API
+    end
+  end
+
+else Luồng 2: Browser Return URL (Chỉ là điều hướng trình duyệt — Độc lập với IPN, tuyệt đối KHÔNG tự coi Return URL là PAID [EF-11])
+
+  alt Customer đóng trình duyệt tại cổng VNPay
+    Customer -> VNPay : Đóng tab trình duyệt (Không có Return URL; Backend vẫn tự xử lý đầy đủ qua Luồng 1 IPN hoặc Luồng 3 Scheduler)
+  else Trình duyệt Redirect về Return URL hoặc Customer mở lại trang đơn hàng
+    VNPay --> UI : HTTP 302 Redirect về Return URL (/payment hoặc /order-confirmation kèm query vnp_*)
+    deactivate VNPay
+    activate UI
+    UI -> UI : Quy tắc EF-11: KHÔNG tự đánh dấu Order PAID dựa trên query vnp_ResponseCode của Return URL
+
+    loop Bounded Polling mỗi 3 giây (tối đa 10 lần) khi Order còn PENDING / đang đối soát
+      UI -> API : GET /orders/me (Header: Authorization: Bearer <JWT>) + GET /auth/me\n(*Lưu ý [VERIFY]: API v4.0 định nghĩa GET /payments/:paymentId/status và frontend có hàm gọi, nhưng PaymentsController ở A1-final chưa có route này*)
+      activate API
+      API -> DB : Đọc trạng thái chuẩn của Order, Payment mới nhất & User.loyaltyPoints từ DB
+      activate DB
+      DB --> API : Trả Order (PAID / PAYMENT_FAILED / CANCELLED / PENDING)
+      deactivate DB
+      API --> UI : 200 OK (Danh sách/trạng thái Order & điểm thưởng)
+      deactivate API
+    end
+
+    UI --> Customer : Đồng bộ trạng thái từ DB & hiển thị kết quả cuối cùng:\n1. Order == PAID: Xóa giỏ hàng phía Client, hiển thị xác nhận đơn & điểm thưởng\n2. Order == PAYMENT_FAILED (now < E): Giữ nguyên giỏ hàng, mở nút Retry (yêu cầu Idempotency-Key & vnpTxnRef mới)\n3. Order == CANCELLED: Thông báo đơn hàng đã hết hạn & bị hủy\n4. PENDING + REQUIRES_REVIEW / FINANCIAL_EXCEPTION: Khóa nút Retry, thông báo đang đối soát / chờ kiểm tra thủ công
+    deactivate UI
+  end
+
+else Luồng 3: Background Scheduler — Đối soát QueryDR & Tự động hủy đơn theo mốc E = 15m và Grace G = E + 5m [AF-07, AF-08, SD-06B]
+
+  loop Chu kỳ Cron định kỳ (OrderExpirationService mỗi 60s / PaymentReconciliationScheduler mỗi 30s)
+    PaymentSvc -> DB : Quét Order quá hạn (expiresAt <= now) & Payment VNPay PENDING đến hạn đối soát (nextQueryAt <= now)
+    activate PaymentSvc
+    activate DB
+    DB --> PaymentSvc : Danh sách Order & Payment ứng viên
+    deactivate DB
+
+    alt Đang trong cửa sổ Grace 5 phút (E <= now < G = E + 5m) VÀ Order có VNPay PENDING [AF-07, BR-C04]
+      PaymentSvc -> VNPay : Tạm hoãn hủy Order trong 5 phút Grace & gọi POST QueryDR (ngoài phạm vi khóa DB)\n(*[ADR-P2-QueryDR-Sandbox-E2E-Deferred]: Code/test đã có ở A1-final; nghiệm thu Sandbox E2E thực tế hoãn sang A2*)
+      activate VNPay
+      VNPay --> PaymentSvc : Phản hồi QueryDR (SUCCESS / FAILED / UNKNOWN)
+      deactivate VNPay
+      PaymentSvc -> DB : Nếu SUCCESS/FAILED: Gọi chung PaymentFinalizationService.finalizeInTransaction(source = 'QUERYDR') (khóa Order -> Payment).\nNếu UNKNOWN: Tăng lịch thử lại (backoff nextQueryAt)
+
+    else Đã quá hạn E mà KHÔNG có VNPay PENDING HOẶC đã chạm mốc G = E + 5m mà VNPay PENDING vẫn UNKNOWN [AF-08, SD-06B]
+      PaymentSvc -> DB : BEGIN TRANSACTION + SELECT * FROM "Order" WHERE id = ? FOR UPDATE\n• Cập nhật có điều kiện Order (PENDING / PAYMENT_FAILED) -> CANCELLED\n• Hoàn lại tồn kho (Product/Topping) & giải phóng coupon HELD -> RELEASED đúng 1 lần (idempotent) + COMMIT\n*(Nếu còn VNPay PENDING sau mốc G, tiếp tục hậu kiểm đến H = E + 65m -> REQUIRES_REVIEW)*
+    end
+    deactivate PaymentSvc
+  end
+
+end
+@enduml
