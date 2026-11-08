@@ -1,1 +1,4 @@
 *.pdf binary
+# BrewLite A2 documentation
+docs/report/sections/checkout-use-case.tex text eol=lf
+docs/requirements/A2_T1.3_Checkout_Use_Case_Specification.md text eol=lf
