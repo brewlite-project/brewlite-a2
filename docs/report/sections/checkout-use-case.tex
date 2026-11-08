@@ -60,8 +60,8 @@ late financial SUCCESS sau CANCELLED lưu evidence, không hồi sinh Order.
 
 \subsection{Traceability và giới hạn xác minh}
 Chi tiết mọi nhánh, mã lỗi và traceability nằm trong tệp
-\texttt{docs/requirements/A2\_T1.3\_Checkout\_Use\_Case\_Specification.md}.
-Các mapping FR/NFR A2 Task 1.2 và bằng chứng implementation trong source \texttt{brewlite-a2/dev} còn chờ đối chiếu; các route trong API Contract v4.0 là căn cứ thiết kế, không mặc định đã triển khai.
+\texttt{docs/requirements/}\allowbreak\texttt{A2\_T1.3\_Checkout\_}\allowbreak\texttt{Use\_Case\_Specification.md}.
+Danh mục FR/NFR Checkout đã được đối chiếu với SRS SCRUM-102; các endpoint được đối chiếu tĩnh với source hiện có. Đối chiếu tĩnh không đồng nghĩa kiểm thử runtime đã PASS; chi tiết tại R-02 và R-03.
 
 
 % R-01 — Include editable original from docs/requirements/diagrams/checkout-use-case.drawio.
@@ -83,43 +83,46 @@ Các mapping FR/NFR A2 Task 1.2 và bằng chứng implementation trong source \
 \end{figure}
 
 \subsection{Đối chiếu FR/NFR A2 Task 1.2 (R-02)}
-\textbf{Trạng thái: PENDING SOURCE VERIFICATION.} Bảng sau là mapping
-\emph{tạm thời} theo Requirements v3.1, US--AC Phase 2 và API Contract v4.0;
-không thay thế mã FR/NFR chính thức của A2 Task 1.2.
-\begin{longtable}{|p{0.23\linewidth}|p{0.28\linewidth}|p{0.34\linewidth}|}
+\textbf{SOURCE MAPPED --- REVIEW PENDING.} Đã đối chiếu danh mục
+\texttt{docs/requirements/srs.md} (SCRUM-102/A2-T1.2, origin/dev ngày
+08/11/2026). SRS vẫn ở trạng thái DRAFT; mapping không có nghĩa AC PASS.
+\begin{longtable}{|p{0.21\linewidth}|p{0.31\linewidth}|p{0.31\linewidth}|}
 \hline
-\textbf{Nhóm quy tắc} & \textbf{Nguồn baseline} & \textbf{Điểm trong Checkout} \\ \hline
-Auth/ownership & UC-ORD-001; API v4 & P1--P3; kiểm JWT/owner, EF-01/02 \\ \hline
-Giỏ, giá, kho, coupon, một Order active & FR-ORD-001/002/006; FR-INV/PRO & Steps 3--6; EF-03/04/05 \\ \hline
-TTL 15 phút và Grace 5 phút & FR-ORD-007; FR-PAY-010 & AF-07/08/09; EF-08/12 \\ \hline
-VNPay, IPN, QueryDR, finalization & FR-PAY-007--011; API v4 API-01/02/07 & Steps 7--11; AF-05/06; EF-10--14 \\ \hline
-Zero amount, retry, idempotency & FR-PAY-011/012; API v4 API-04 & AF-03/05/10; EF-06/09/13 \\ \hline
-Security, atomicity, availability, latency & NFR baseline (chưa map A2) & P1--P3; Steps 4/9/10; EF-15 \\ \hline
+\textbf{Nhóm Checkout} & \textbf{FR A2} & \textbf{NFR A2} \\ \hline
+JWT / ownership & FR-03, FR-05--07 & NFR-01, 02, 05, 09 \\ \hline
+Cart, giá, snapshot & FR-11, 17--20 & NFR-11, 12, 17, 27, 29 \\ \hline
+Order active, tồn, coupon & FR-21, 24--28, 42, 46 & NFR-10, 13, 15, 18 \\ \hline
+VNPay, retry, idempotency & FR-30--33, 36, 40 & NFR-15, 45, 46 \\ \hline
+IPN / QueryDR / TTL & FR-25, 31, 37--39 & NFR-02, 16, 18, 43, 47, 48 \\ \hline
+ZERO\_AMOUNT / Mock & FR-41 / FR-35 & NFR-10, 15, 48 / 49 \\ \hline
+Status / Order History & FR-22, 34 & NFR-25--27 \\ \hline
+Testing / logging / perf & FR-19, 30, 31 & NFR-20, 21, 33--36, 42 \\ \hline
 \end{longtable}
-\textbf{Điều kiện đóng R-02:} lấy bản T1.2 từ cùng commit \texttt{origin/dev},
-điền mã FR/NFR A2, priority MUST/SHOULD, đường dẫn dòng nguồn, ghi nhận
-bất nhất và xác nhận bởi reviewer. Chưa có chứng cứ nên \textbf{không đánh dấu PASS}.
+FR-23 (hủy chủ động) và FR-43 (coupon preview) vẫn SHOULD/Deferred;
+FR-29 inventory movement là SHOULD. Nhãn MUST* của NFR trong SRS
+là ưu tiên suy luận chờ reviewer xác nhận. AC-A2 liên quan và mapping
+đến từng bước nằm trong bảng R-02 của tệp Markdown Task 1.3.
 
-\subsection{Đối chiếu API Contract và implementation (R-03)}
-\textbf{Trạng thái: CODE NOT VERIFIED.} Các route dưới đây là \emph{đặc tả thiết kế},
-chưa phải chứng cứ backend đã triển khai. Việc review phải ghi rõ commit/hash,
-controller, DTO, service, guard, test và kết quả kiểm tra cho từng nhánh.
-\begin{longtable}{|p{0.40\linewidth}|p{0.43\linewidth}|}
+\subsection{Kiểm tra API và implementation (R-03)}
+\textbf{STATIC SOURCE CHECK --- NOT RUNTIME ACCEPTANCE.} Đã đối chiếu
+API Contract v4.0 với controller/service ở \texttt{origin/dev};
+không chạy lại tests hoặc VNPay Sandbox E2E.
+\begin{longtable}{|p{0.34\linewidth}|p{0.24\linewidth}|p{0.25\linewidth}|}
 \hline
-\textbf{API / thành phần} & \textbf{Điểm cần kiểm tra trong source/test} \\ \hline
-\texttt{POST /orders} & JWT, snapshot giá, inventory/coupon atomic, 409 active Order \\ \hline
-\texttt{POST /payments/vnpay/initiate} & ownership, TTL, Idempotency-Key, TxnRef, chặn PENDING attempt \\ \hline
-\texttt{GET /payments/vnpay/ipn} & HMAC, merchant, amount, paid time, shared finalization, duplicate IPN \\ \hline
-\texttt{GET /payments/:paymentId/status} & owner, response DB-only, phân biệt status và resolution \\ \hline
-\texttt{POST /payments/zero-amount} & totalVnd=0, không gateway, không cộng loyalty \\ \hline
-\texttt{POST /payments} (Mock) & chỉ non-production, feature flag, không fallback khi VNPay uncertain \\ \hline
-Order History, internal QueryDR/expiration & PaymentSummary, Grace/horizon, timeout/unknown và late SUCCESS \\ \hline
+\textbf{Contract route} & \textbf{Kết quả} & \textbf{Source} \\ \hline
+\texttt{POST /orders} & ROUTE PRESENT & \texttt{orders.controller.ts} \\ \hline
+\texttt{POST /payments/vnpay/initiate} & ROUTE PRESENT & \texttt{payments.controller.ts} \\ \hline
+\texttt{GET /payments/vnpay/ipn} & ROUTE PRESENT & \texttt{vnpay-ipn.controller.ts} \\ \hline
+\texttt{GET /payments/:paymentId/status} & GAP: NO BACKEND ROUTE & \texttt{payments.controller.ts} \\ \hline
+\texttt{POST /payments/zero-amount} & ROUTE PRESENT & \texttt{zero-amount-}\newline\texttt{payment.controller.ts} \\ \hline
+\texttt{POST /payments} (Mock) & ROUTE PRESENT & \texttt{payments.controller.ts} \\ \hline
+\texttt{GET /orders/me} & ROUTE PRESENT & \texttt{orders.controller.ts} \\ \hline
+Internal QueryDR & SERVICE PRESENT & \texttt{vnpay-querydr.service.ts} \\ \hline
 \end{longtable}
-\textbf{Điều kiện đóng R-03:} phân loại mỗi dòng \texttt{IMPLEMENTED},
-\texttt{PARTIAL}, \texttt{DESIGN-ONLY} hoặc \texttt{NOT FOUND}, dẫn file/dòng
-và test/commit thực tế. Chỉ cập nhật trạng thái sau kiểm chứng;
-không suy diễn runtime PASS từ nhãn \texttt{LOCKED} trong API Contract.
-Chi tiết ma trận đối chiếu nằm tại tài liệu Markdown của Task 1.3.
+Đường dẫn đầy đủ đến source/test và scope kiểm chứng được ghi ở bảng
+R-03 trong tệp Markdown. Route Payment Status còn thiếu trong backend,
+frontend có consumer; phải giao cho task triển khai riêng. Source presence
+không chứng minh behavior, integration tests hoặc Sandbox E2E đã PASS.
 
 \subsection{Phân biệt trạng thái đối soát (R-04)}
 \texttt{REQUIRES\_REVIEW} là thông tin \emph{reconciliation} hoặc
