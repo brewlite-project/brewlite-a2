@@ -7,16 +7,14 @@
 \section{Sơ đồ Tuần tự (Sequence Diagram) — Luồng Checkout \& Payment}
 \label{sec:sequence-diagram-checkout}
 \noindent\textbf{Task:} SCRUM-104 / A2-T2.2\par
-\noindent\textbf{Trạng thái:} READY FOR REVIEW -- đã cập nhật theo phản hồi PR \#8 (Review vòng 1 \& vòng 2: \texttt{SD-R01}..\texttt{SD-R06})\par
-\noindent\textbf{Ngày cập nhật:} 08/11/2026\par
+\noindent\textbf{Trạng thái:} READY FOR REVIEW -- đã cập nhật toàn diện theo phản hồi PR \#8 (Review vòng 1, 2 \& 3: \texttt{SD-R01}..\texttt{SD-R06})\par
+\noindent\textbf{Ngày cập nhật:} 09/11/2026\par
 \noindent\textbf{Baseline đối chiếu:} A1-final (\texttt{1951dc124c83359556f04adb6ba3f0ee9f22fce4}) \& \texttt{dev} (\texttt{f5b67a5})\par
 \noindent\textbf{Nguồn đặc tả \& PlantUML:} \texttt{docs/diagrams/sequence\_diagram/}\par
 
 \subsection{Mục tiêu, Phạm vi và Kế thừa từ Assignment 1}
 
 Mục này chuẩn hóa Sơ đồ Tuần tự (Sequence Diagram) cho Use Case trọng tâm \textbf{Checkout \& Payment (\texttt{UC-A2-CHECKOUT-001})}, kế thừa trực tiếp bộ Sequence Diagram của Assignment 1 (\texttt{SD-01}..\texttt{SD-06} trong \texttt{docs/diagram/Sequence/}) và đối chiếu nghiêm ngặt với mã nguồn thực tế tại baseline \texttt{A1-final} cùng \texttt{BrewLite API Contract v4.0}.
-
-Để đảm bảo khả năng đọc rõ nét trên trang báo cáo khổ A4 (\texttt{SD-R02}) và tính chính xác của vòng đời giao dịch (\texttt{SD-R03}, \texttt{SD-R05}, \texttt{SD-R06}), bộ sơ đồ được chuẩn hóa với \texttt{skinparam style strictuml} (loại bỏ khối hộp lifeline lặp lại ở đáy hình), tối ưu tỷ lệ khung hình của ba sơ đồ pha về mức \texttt{1.38..1.52} (\texttt{Pha 1}: \(1836 \times 2803\,\text{px}\); \texttt{Pha 2}: \(2110 \times 2979\,\text{px}\); \texttt{Pha 3}: \(2139 \times 2944\,\text{px}\)) và bố trí mỗi sơ đồ trên \textbf{một trang hình riêng biệt (\texttt{\textbackslash clearpage} + \texttt{[p]})} chiếm \texttt{90\%--92\%} chiều cao trang báo cáo A4.
 
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
@@ -35,9 +33,26 @@ Mục này chuẩn hóa Sơ đồ Tuần tự (Sequence Diagram) cho Use Case tr
 \end{longtable}
 \endgroup
 
+\subsection{Giải pháp Tối ưu Độ đọc Thực tế trên Trang Báo cáo A4 (\texttt{SD-R02})}
+
+Nhằm khắc phục triệt để lỗi \textbf{\texttt{SD-R02}} (khi co các sơ đồ tuần tự quá dài vào khung hình A4, chữ bị thu nhỏ xuống mức 2--3 pt không thể đọc được bằng mắt thường khi nghiệm thu), bộ tạo phẩm Sequence Diagram Assignment 2 áp dụng chiến lược thiết kế phân rã hai cấp độ:
+\begin{enumerate}
+  \item \textbf{Phân rã thành 6 sơ đồ con tập trung (Hình~\ref{fig:seq-phase1a}--\ref{fig:seq-phase3b}):} Mỗi pha nghiệp vụ lớn được chia thành 2 sơ đồ con tương ứng với ranh giới trách nhiệm và transaction độc lập:
+  \begin{itemize}
+    \item \textbf{Pha 1A:} Xác thực JWT, Khóa tư vấn \& Dọn dẹp đơn cũ (15 thông điệp, chiều cao $2244\,\text{px}$).
+    \item \textbf{Pha 1B:} Giao dịch Tạo đơn hàng Nguyên tử tính giá chuẩn và trừ tồn kho (14 thông điệp, chiều cao $1814\,\text{px}$).
+    \item \textbf{Pha 2A:} Giao thức Idempotency \& Khóa tư vấn chống gửi trùng thanh toán (16 thông điệp, chiều cao $2591\,\text{px}$).
+    \item \textbf{Pha 2B:} Phân nhánh Thực thi Thanh toán ZERO\_AMOUNT, Mock \& VNPay Initiate (14 thông điệp, chiều cao $1898\,\text{px}$).
+    \item \textbf{Pha 3A:} Webhook Server-to-Server IPN \& Chốt giao dịch Shared Finalization (18 thông điệp, chiều cao $2539\,\text{px}$).
+    \item \textbf{Pha 3B:} Browser Return URL độc lập \& Background Scheduler Đối soát / Hết hạn (14 thông điệp, chiều cao $2275\,\text{px}$).
+  \end{itemize}
+  Nhờ giảm số lượng thông điệp và chiều cao mỗi hình xuống dưới $1800$--$2500\,\text{px}$ kết hợp cỡ chữ nguồn $13$--$14\,\text{pt}$, hệ số thu phóng trên trang A4 đạt $0.65$--$0.75$, tương ứng cỡ chữ hiển thị thực tế đạt \textbf{$8.5$--$9.5\,\text{pt}$} (tương đương văn bản in tiêu chuẩn của báo cáo kỹ thuật).
+  \item \textbf{Lưu trữ Sơ đồ Tổng thể End-to-End tại Phụ lục (Hình~\ref{fig:seq-checkout-overall}):} Sơ đồ tổng thể toàn cục 82 thông điệp được trình bày ở mục phụ lục cuối chương ở khổ trang riêng phục vụ tra cứu kiến trúc đầu-cuối.
+\end{enumerate}
+
 \subsection{Các Lifeline và Thứ tự Tương tác Chuẩn}
 
-Cả 4 sơ đồ tuần tự đều duy trì thứ tự lifeline nhất quán từ trái sang phải theo đúng kiến trúc thực tế:
+Cả bộ sơ đồ tuần tự đều duy trì thứ tự lifeline nhất quán từ trái sang phải theo đúng kiến trúc thực tế:
 \begin{enumerate}
   \item \textbf{\texttt{Customer} (Actor):} Người dùng thao tác đặt hàng, xác nhận thanh toán, tương tác trên cổng VNPay Sandbox (hoặc đóng trình duyệt) và nhận kết quả cuối cùng.
   \item \textbf{\texttt{Next.js UI} (\texttt{CartDrawer}, \texttt{PaymentPageView}):} Kiểm tra token (\texttt{verifySession()} / \texttt{getValidToken()}), bảo toàn giỏ hàng khi \texttt{Order} đang \texttt{PENDING}/\texttt{PAYMENT\_FAILED}, sinh \texttt{Idempotency-Key} (8..64 ký tự), nhận Browser Return URL (\texttt{EF-11}: không tự coi Return URL là \texttt{PAID}) và thực hiện bounded polling \texttt{GET /orders/me} kết hợp \texttt{GET /auth/me}.
@@ -47,86 +62,143 @@ Cả 4 sơ đồ tuần tự đều duy trì thứ tự lifeline nhất quán t�
   \item \textbf{\texttt{VNPay Sandbox} (Hệ thống cổng thanh toán bên ngoài):} Tiếp nhận redirect từ trình duyệt, gửi callback Server-to-Server IPN (\texttt{GET /payments/vnpay/ipn}) và phản hồi truy vấn \texttt{QueryDR}.
 \end{enumerate}
 
-\subsection{Sơ đồ Pha 1: Xác thực JWT, Khối \texttt{alt} Loại trừ \texttt{409} (\texttt{SD-R01}) và Vòng đời Khóa Tư vấn qua 2 Transaction (\texttt{SD-R05})}
+\subsection{Pha 1A: Xác thực JWT, Khóa tư vấn \& Dọn dẹp đơn cũ (\texttt{POST /orders})}
 
-Hình~\ref{fig:seq-checkout-phase1} (đặt trên trang riêng ngay sau mục này để đảm bảo kích thước chữ lớn, rõ nét) biểu diễn chi tiết Pha 1 (\texttt{POST /orders}) theo đúng mã nguồn \texttt{OrdersService.create} (\texttt{orders.service.ts} L147--285):
+Hình~\ref{fig:seq-phase1a} biểu diễn nửa đầu Pha 1: kiểm tra JWT Client/Server, khóa tư vấn cấp transaction \texttt{pg\_advisory\_xact\_lock('create-order:' || userId)}, khối \texttt{alt} loại trừ lẫn nhau giữa nhánh lỗi \texttt{409 PENDING\_ORDER\_EXISTS} (\texttt{SD-R01}) và nhánh dọn dẹp đơn cũ qua vòng lặp 2 pha (\texttt{SD-R05}): \texttt{COMMIT TX (phase = 0)} giải phóng khóa tư vấn cũ $\rightarrow$ \texttt{BEGIN TX (phase = 1)} lấy lại khóa tư vấn mới.
+
+\begin{figure}[htbp]
+  \centering
+  \IfFileExists{\BrewLiteSeqDiagramDir/sequence-checkout-phase1a-order-init.pdf}{%
+    \includegraphics[width=0.95\linewidth,height=0.72\textheight,keepaspectratio]{\BrewLiteSeqDiagramDir/sequence-checkout-phase1a-order-init.pdf}%
+  }{%
+    \IfFileExists{../assets/sequence-checkout-phase1a-order-init.pdf}{%
+      \includegraphics[width=0.95\linewidth,height=0.72\textheight,keepaspectratio]{../assets/sequence-checkout-phase1a-order-init.pdf}%
+    }{%
+      \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 1A nằm tại \texttt{docs/report/assets/sequence-checkout-phase1a-order-init.pdf}.}}%
+    }%
+  }
+  \caption{Sequence Diagram Pha 1A — Xác thực JWT, khối \texttt{alt} loại trừ \texttt{409} (\texttt{SD-R01}) và vòng đời khóa tư vấn qua 2 pha dọn dẹp (\texttt{SD-R05}).}
+  \label{fig:seq-phase1a}
+\end{figure}
+
+\subsection{Pha 1B: Giao dịch Tạo đơn hàng Nguyên tử (Tính giá, Khóa kho, Giữ Coupon \& Tạo Order)}
+
+Hình~\ref{fig:seq-phase1b} biểu diễn nửa sau Pha 1 trong Transaction sạch (\texttt{phase = 1}): tính giá phía server (\texttt{priceCart}), trừ giữ chỗ tồn kho (\texttt{reserveInventory}), giữ chỗ coupon (\texttt{reserveCoupon HELD}) và tạo bản ghi \texttt{Order (status = 'PENDING', expiresAt = E = now + 15m)} cùng các bản chụp \texttt{OrderItem} / \texttt{OrderItemTopping}. Mọi nhánh lỗi đều \texttt{ROLLBACK TX} và đóng lifeline tường minh.
+
+\begin{figure}[htbp]
+  \centering
+  \IfFileExists{\BrewLiteSeqDiagramDir/sequence-checkout-phase1b-order-create.pdf}{%
+    \includegraphics[width=0.92\linewidth,height=0.68\textheight,keepaspectratio]{\BrewLiteSeqDiagramDir/sequence-checkout-phase1b-order-create.pdf}%
+  }{%
+    \IfFileExists{../assets/sequence-checkout-phase1b-order-create.pdf}{%
+      \includegraphics[width=0.92\linewidth,height=0.68\textheight,keepaspectratio]{../assets/sequence-checkout-phase1b-order-create.pdf}%
+    }{%
+      \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 1B nằm tại \texttt{docs/report/assets/sequence-checkout-phase1b-order-create.pdf}.}}%
+    }%
+  }
+  \caption{Sequence Diagram Pha 1B — Giao dịch tạo đơn hàng nguyên tử: tính giá chuẩn server, khóa kho, giữ coupon và tạo \texttt{Order PENDING}.}
+  \label{fig:seq-phase1b}
+\end{figure}
+
+\subsection{Pha 2A: Giao thức Idempotency, Kiểm tra Quyền sở hữu \& Khóa tư vấn Thanh toán}
+
+Hình~\ref{fig:seq-phase2a} mô tả giao thức kiểm soát \texttt{Idempotency-Key} thống nhất: kiểm tra quyền sở hữu (\texttt{404 NOT\_FOUND}), tra cứu \texttt{(userId, idempotencyKey)} cùng mã băm \texttt{requestHash} SHA-256 (\texttt{200 OK} Replay vs \texttt{409 IDEMPOTENCY\_KEY\_CONFLICT}), khóa tư vấn không chặn \texttt{pg\_try\_advisory\_xact\_lock} (\texttt{409 PAYMENT\_IN\_PROGRESS}), khóa dòng \texttt{Order FOR UPDATE} và kiểm tra thời hạn \texttt{now < E}.
+
+\begin{figure}[htbp]
+  \centering
+  \IfFileExists{\BrewLiteSeqDiagramDir/sequence-checkout-phase2a-idempotency.pdf}{%
+    \includegraphics[width=0.95\linewidth,height=0.75\textheight,keepaspectratio]{\BrewLiteSeqDiagramDir/sequence-checkout-phase2a-idempotency.pdf}%
+  }{%
+    \IfFileExists{../assets/sequence-checkout-phase2a-idempotency.pdf}{%
+      \includegraphics[width=0.95\linewidth,height=0.75\textheight,keepaspectratio]{../assets/sequence-checkout-phase2a-idempotency.pdf}%
+    }{%
+      \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 2A nằm tại \texttt{docs/report/assets/sequence-checkout-phase2a-idempotency.pdf}.}}%
+    }%
+  }
+  \caption{Sequence Diagram Pha 2A — Giao thức Idempotency, kiểm tra quyền sở hữu và khóa tư vấn thanh toán (\texttt{pg\_try\_advisory\_xact\_lock}).}
+  \label{fig:seq-phase2a}
+\end{figure}
+
+\subsection{Pha 2B: Phân nhánh Thực thi Thanh toán (ZERO\_AMOUNT, Mock \& VNPay Initiate)}
+
+Hình~\ref{fig:seq-phase2b} mô tả ba nhánh thực thi thanh toán khi Order và Idempotency-Key hợp lệ:
 \begin{itemize}
-  \item \textbf{Nhánh 1 -- Lỗi \texttt{409 PENDING\_ORDER\_EXISTS} loại trừ hoàn toàn bước tạo đơn (\texttt{SD-R01}):} Trong giao dịch \texttt{phase = 0}, sau khi lấy khóa tư vấn cấp transaction \texttt{pg\_advisory\_xact\_lock(hashtextextended('create-order:' || userId, 0))}, nếu phát hiện đơn cũ đang mở (\texttt{PENDING}/\texttt{PAYMENT\_FAILED}) và \texttt{expireOrderInTransaction} xác nhận đơn vẫn còn hạn (\texttt{now < E}) hoặc đang trong cửa sổ Grace 5 phút (\texttt{E <= now < G}) với giao dịch \texttt{VNPay PENDING}, hệ thống ném \texttt{ConflictException}, thực hiện \texttt{ROLLBACK TX} (tự động giải phóng khóa tư vấn), đóng lifeline \texttt{Database} và \texttt{NestJS API}, trả \texttt{409 CONFLICT} và kết thúc ngay request.
-  \item \textbf{Nhánh 2 -- Vòng lặp 2 pha dọn đơn cũ quá hạn và lấy lại khóa \texttt{pg\_advisory\_xact\_lock} (\texttt{SD-R05}):} Khi đơn cũ đã quá hạn \texttt{E} (và không vướng Grace \texttt{G}), \texttt{expireOrderInTransaction} hủy đơn cũ sang \texttt{CANCELLED}, hoàn \texttt{Product.stock} và giải phóng \texttt{CouponRedemption (HELD -> RELEASED)}, sau đó hàm \texttt{createOrCleanup} trả về \texttt{null} để \textbf{\texttt{COMMIT TX} dọn dẹp (\texttt{phase = 0})}. Vì \texttt{pg\_advisory\_xact\_lock} là khóa cấp transaction, khóa này \textbf{tự động được giải phóng khi \texttt{COMMIT TX (phase = 0)}} (tránh đảo ngược thứ tự khóa \texttt{Coupon -> Product} giữa đơn cũ và đơn mới). Ngay lập tức, vòng lặp \texttt{for (let phase = 0; phase < 2; phase++)} mở \textbf{\texttt{BEGIN TX} mới (\texttt{phase = 1})}, kiểm tra lại \texttt{User}, \textbf{gọi lại \texttt{SELECT pg\_advisory\_xact\_lock('create-order:' || userId)} để lấy lại khóa tư vấn trong transaction mới} và kiểm tra lại \texttt{active Order} (\texttt{active == null}) trước khi chạy \texttt{priceCart}, \texttt{reserveInventory}, \texttt{reserveCoupon} và tạo \texttt{Order PENDING}.
+  \item \textbf{Nhánh A (\texttt{totalVnd == 0}):} \texttt{finalizeInTransaction(provider = 'ZERO\_AMOUNT')} chuyển coupon \texttt{HELD \(\rightarrow\) CONSUMED}, cập nhật \texttt{Order \(\rightarrow\) PAID} (\texttt{pointsEarned = 0}, \texttt{paidAt = clock.now}), lưu \texttt{Payment (ZERO\_AMOUNT, SUCCESS)} và trả \texttt{201 Created}.
+  \item \textbf{Nhánh B (\texttt{Mock CARD/WALLET}):} Được bảo vệ bởi \texttt{MockPaymentGuard}. Nếu \texttt{SUCCESS}: coupon \texttt{CONSUMED}, cộng điểm, \texttt{Order \(\rightarrow\) PAID} (\texttt{paidAt = clock.now}). Nếu \texttt{FAILED}: giữ nguyên kho \& coupon \texttt{HELD}, \texttt{Order \(\rightarrow\) PAYMENT\_FAILED} cho phép Retry trước mốc $E$.
+  \item \textbf{Nhánh C (\texttt{VNPay Sandbox Initiate}):} Sinh \texttt{paymentId}, \texttt{vnpTxnRef} mới (32-hex), ký \texttt{HMAC-SHA512} tạo \texttt{paymentUrl}, lưu \texttt{Payment PENDING} (\texttt{reconciliationState = SCHEDULED}) và điều hướng trình duyệt sang cổng VNPay.
 \end{itemize}
 
-\clearpage
-\begin{figure}[p]
+\begin{figure}[htbp]
   \centering
-  \IfFileExists{\BrewLiteSeqDiagramDir/sequence-checkout-phase1-order.pdf}{%
-    \includegraphics[width=\linewidth,height=0.90\textheight,keepaspectratio]{\BrewLiteSeqDiagramDir/sequence-checkout-phase1-order.pdf}%
+  \IfFileExists{\BrewLiteSeqDiagramDir/sequence-checkout-phase2b-payment-execution.pdf}{%
+    \includegraphics[width=0.92\linewidth,height=0.68\textheight,keepaspectratio]{\BrewLiteSeqDiagramDir/sequence-checkout-phase2b-payment-execution.pdf}%
   }{%
-    \IfFileExists{../assets/sequence-checkout-phase1-order.pdf}{%
-      \includegraphics[width=\linewidth,height=0.90\textheight,keepaspectratio]{../assets/sequence-checkout-phase1-order.pdf}%
+    \IfFileExists{../assets/sequence-checkout-phase2b-payment-execution.pdf}{%
+      \includegraphics[width=0.92\linewidth,height=0.68\textheight,keepaspectratio]{../assets/sequence-checkout-phase2b-payment-execution.pdf}%
     }{%
-      \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 1 nằm tại \texttt{docs/report/assets/sequence-checkout-phase1-order.pdf}.}}%
+      \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 2B nằm tại \texttt{docs/report/assets/sequence-checkout-phase2b-payment-execution.pdf}.}}%
     }%
   }
-  \caption{Sequence Diagram Pha 1 — Xác thực JWT, khối \texttt{alt} loại trừ \texttt{409 PENDING\_ORDER\_EXISTS} (\texttt{SD-R01}), vòng lặp 2 transaction lấy lại \texttt{pg\_advisory\_xact\_lock} (\texttt{SD-R05}) và tạo đơn hàng nguyên tử (\texttt{POST /orders}).}
-  \label{fig:seq-checkout-phase1}
+  \caption{Sequence Diagram Pha 2B — Phân nhánh thực thi: đơn \texttt{0 VND}, giả lập \texttt{Mock} và khởi tạo thanh toán \texttt{VNPay Sandbox}.}
+  \label{fig:seq-phase2b}
 \end{figure}
-\clearpage
 
-\subsection{Sơ đồ Pha 2: Khởi tạo Thanh toán, Cơ chế Idempotency và Phân nhánh (\texttt{ZERO\_AMOUNT} / \texttt{Mock} / \texttt{VNPay})}
+\subsection{Pha 3A: Xử lý Webhook Server-to-Server IPN \& Chốt giao dịch (Shared Finalization)}
 
-Hình~\ref{fig:seq-checkout-phase2} mô tả cơ chế kiểm tra quyền sở hữu (\texttt{404 NOT\_FOUND} kèm \texttt{ROLLBACK TX}), tra cứu \texttt{(userId, idempotencyKey)} cùng mã băm \texttt{requestHash} SHA-256 (trả \texttt{200 OK} kèm \texttt{Idempotency-Replayed: true} nếu trùng khớp, hoặc \texttt{ROLLBACK TX} $\rightarrow$ \texttt{409 IDEMPOTENCY\_KEY\_CONFLICT} nếu lệch payload/provider), khóa tư vấn không chặn \texttt{pg\_try\_advisory\_xact\_lock} (\texttt{409 PAYMENT\_IN\_PROGRESS}), khóa dòng \texttt{Order FOR UPDATE} và phân nhánh xử lý cho đơn \texttt{0 VND}, \texttt{Mock} và \texttt{VNPay Sandbox}.
+Hình~\ref{fig:seq-phase3a} biểu diễn luồng IPN độc lập ở phía Server (nguồn sự thật chốt kết quả tại Backend):
+\begin{enumerate}
+  \item Kiểm tra chữ ký số \texttt{HMAC-SHA512} và \texttt{vnp\_TmnCode}; nếu lỗi trả \texttt{RspCode 97/99} mà \textbf{không mở DB transaction}.
+  \item Mở transaction kiểm tra \texttt{vnpTxnRef} và số tiền (\texttt{vnp\_Amount == amountVnd * 100}); nếu lỗi trả \texttt{RspCode 01/04} và đóng transaction không sửa dữ liệu.
+  \item Khóa chuẩn \texttt{Order FOR UPDATE} $\rightarrow$ \texttt{Payment FOR UPDATE} (\texttt{EF-13, BR-C05}) và đối chiếu thời điểm thanh toán \texttt{gatewayPaidAt} (\texttt{vnp\_PayDate}) với thời điểm DB finalization \texttt{clock.now} (\texttt{SD-R06}):
+  \begin{itemize}
+    \item \emph{Thành công đúng hạn (\texttt{gatewayPaidAt <= E} \& \texttt{clock.now < G}):} Cập nhật \texttt{Payment \(\rightarrow\) SUCCESS} (\texttt{verifiedPaidAt = gatewayPaidAt}, \texttt{finalizedAt = clock.now}) và \texttt{Order \(\rightarrow\) PAID} (\texttt{paidAt = clock.now}).
+    \item \emph{Thành công đến trễ / Xung đột (\texttt{gatewayPaidAt > E} hoặc \texttt{clock.now >= G}):} Ghi nhận \texttt{FINANCIAL\_EXCEPTION}, giữ nguyên \texttt{Payment.status}, đặt \texttt{reconciliationState = REQUIRES\_REVIEW} và hủy \texttt{Order \(\rightarrow\) CANCELLED} nếu đang mở (không hồi sinh sang \texttt{PAID}).
+    \item \emph{Thất bại terminal:} Cập nhật \texttt{Payment \(\rightarrow\) FAILED}; nếu \texttt{clock.now < E} thì \texttt{Order \(\rightarrow\) PAYMENT\_FAILED} (cho phép Retry); nếu \texttt{clock.now >= E} thì hủy \texttt{Order \(\rightarrow\) CANCELLED} và hoàn tài nguyên đúng 1 lần.
+  \end{itemize}
+\end{enumerate}
 
-\clearpage
-\begin{figure}[p]
+\begin{figure}[htbp]
   \centering
-  \IfFileExists{\BrewLiteSeqDiagramDir/sequence-checkout-phase2-payment-init.pdf}{%
-    \includegraphics[width=\linewidth,height=0.90\textheight,keepaspectratio]{\BrewLiteSeqDiagramDir/sequence-checkout-phase2-payment-init.pdf}%
+  \IfFileExists{\BrewLiteSeqDiagramDir/sequence-checkout-phase3a-vnpay-ipn.pdf}{%
+    \includegraphics[width=0.95\linewidth,height=0.76\textheight,keepaspectratio]{\BrewLiteSeqDiagramDir/sequence-checkout-phase3a-vnpay-ipn.pdf}%
   }{%
-    \IfFileExists{../assets/sequence-checkout-phase2-payment-init.pdf}{%
-      \includegraphics[width=\linewidth,height=0.90\textheight,keepaspectratio]{../assets/sequence-checkout-phase2-payment-init.pdf}%
+    \IfFileExists{../assets/sequence-checkout-phase3a-vnpay-ipn.pdf}{%
+      \includegraphics[width=0.95\linewidth,height=0.76\textheight,keepaspectratio]{../assets/sequence-checkout-phase3a-vnpay-ipn.pdf}%
     }{%
-      \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 2 nằm tại \texttt{docs/report/assets/sequence-checkout-phase2-payment-init.pdf}.}}%
+      \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 3A nằm tại \texttt{docs/report/assets/sequence-checkout-phase3a-vnpay-ipn.pdf}.}}%
     }%
   }
-  \caption{Sequence Diagram Pha 2 — Khởi tạo thanh toán, cơ chế Idempotency và các nhánh \texttt{ZERO\_AMOUNT}, \texttt{Mock}, \texttt{VNPay Initiate}.}
-  \label{fig:seq-checkout-phase2}
+  \caption{Sequence Diagram Pha 3A — Xử lý Server-to-Server IPN: kiểm tra chữ ký, phân biệt \texttt{gatewayPaidAt <= E} vs \texttt{clock.now < G} (\texttt{SD-R06}) và chốt kết quả \texttt{Shared Finalization}.}
+  \label{fig:seq-phase3a}
 \end{figure}
-\clearpage
 
-\subsection{Sơ đồ Pha 3: Tương tác VNPay Sandbox, Phân biệt Browser Return URL với Server-to-Server IPN, Thời điểm Thanh toán \texttt{gatewayPaidAt} vs \texttt{clock.now} (\texttt{SD-R06}) và Đối soát / Hết hạn}
+\subsection{Pha 3B: Browser Return URL, Bounded Polling \& Background Scheduler Đối soát / Hết hạn}
 
-Hình~\ref{fig:seq-checkout-phase3} sử dụng khối \texttt{par} để biểu diễn ba luồng bất đồng bộ hoàn toàn độc lập sau khi chuyển hướng sang VNPay Sandbox, trong đó làm rõ mối quan hệ giữa thời điểm thanh toán tại VNPay và thời điểm backend finalization theo quy tắc Grace (\texttt{SD-R06}, đối chiếu \texttt{payment-finalization.service.ts} L561--638):
+Hình~\ref{fig:seq-phase3b} biểu diễn hai luồng độc lập còn lại của Pha 3:
 \begin{itemize}
-  \item \textbf{Phân biệt \texttt{gatewayPaidAt} (\texttt{vnp\_PayDate}) và \texttt{clock.now} (\texttt{clock\_timestamp()}) trong \texttt{PaymentFinalizationService.finalizeVnpay} (\texttt{SD-R06}):}
-  \begin{enumerate}
-    \item Khi xác thực chữ ký HMAC-SHA512 từ IPN (\texttt{VnpayIpnService}) hoặc QueryDR (\texttt{VnpayQueryDrService}), hệ thống đọc thời điểm giao dịch tại cổng VNPay (\texttt{vnp\_PayDate}) vào trường \textbf{\texttt{gatewayPaidAt}}.
-    \item Khi khóa \texttt{Order FOR UPDATE} $\rightarrow$ \texttt{Payment FOR UPDATE}, hệ thống đọc đồng hồ cơ sở dữ liệu \textbf{\texttt{clock.now = clock\_timestamp()}} (thời điểm backend thực thi finalization) và kiểm tra hai điều kiện bắt buộc để chấp nhận kết quả \texttt{SUCCESS ('00'/'00')}:
-    \begin{itemize}
-      \item \emph{Điều kiện 1 -- Thời điểm khách trả tiền tại VNPay (\texttt{isPaidOnOrBeforeExpiry}, L577):} \texttt{gatewayPaidAt <= E} (\(\text{vnp\_PayDate} \le \text{orders.expires\_at}\)). Nếu \texttt{gatewayPaidAt > E}, hệ thống ghi nhận ngoại lệ \texttt{FINANCIAL\_EXCEPTION} với lý do \texttt{LATE\_SUCCESS}.
-      \item \emph{Điều kiện 2 -- Thời điểm backend chốt kết quả trong cửa sổ Grace (\texttt{clock.beforeGraceEnd}, L587):} \texttt{clock.now < G = E + 5m} (và \texttt{Order} chưa bị \texttt{CANCELLED}). Nếu \texttt{clock.now >= G}, hệ thống ghi nhận ngoại lệ \texttt{FINANCIAL\_EXCEPTION} với lý do \texttt{GRACE\_ENDED}.
-    \end{itemize}
-    \item \emph{Cập nhật dấu thời gian khi hợp lệ (L613--638):} Bản ghi \texttt{Payment} lưu \textbf{\texttt{verifiedPaidAt = gatewayPaidAt}} (bằng chứng trả tiền đúng hạn \(\le E\)) và \textbf{\texttt{finalizedAt = clock.now}}; bản ghi \texttt{Order} chuyển sang \texttt{status = 'PAID'} và lưu \textbf{\texttt{Order.paidAt = clock.now}} (thời điểm DB chính thức hoàn tất chuyển trạng thái đơn hàng, có thể nằm trong khoảng \([E, G)\) khi IPN/QueryDR về trong cửa sổ Grace 5 phút).
-  \end{enumerate}
-  \item \textbf{Luồng 2 -- Browser Return URL (\texttt{EF-11}):} Chỉ đóng vai trò điều hướng giao diện. Khi trình duyệt quay về, \texttt{Next.js UI} không tin tham số Return URL mà thực hiện bounded polling \texttt{GET /orders/me} kết hợp \texttt{GET /auth/me}.
-  \item \textbf{Luồng 3 -- Background Scheduler (\texttt{OrderExpirationService} \& \texttt{PaymentReconciliationScheduler}):} Thực thi đúng mô hình 3 transaction của \texttt{VnpayQueryDrService}: \textbf{TX 1 (\texttt{claim})} khóa \texttt{Order -> Payment}, hủy \texttt{Order} nếu \texttt{clock.now >= G = E + 5m}, cấp \texttt{claimToken} rồi \texttt{COMMIT} để giải phóng khóa DB; gọi HTTP \texttt{POST QueryDR} ở ngoài DB TX; sau đó mở \textbf{TX 2 (\texttt{finalizeInTransaction})} và \textbf{TX 3 (\texttt{releaseClaim})} để chốt kết quả và xóa lease. Khi chạm chân trời \texttt{H = E + 65m}, \texttt{markExhausted()} chuyển \texttt{reconciliationState = 'REQUIRES\_REVIEW'}.
+  \item \textbf{Luồng Browser Return URL (\texttt{EF-11}):} Chỉ điều hướng UI; không tự coi Return URL là \texttt{PAID}. Frontend thực hiện bounded polling \texttt{GET /orders/me} kết hợp \texttt{GET /auth/me} để đồng bộ trạng thái chuẩn từ cơ sở dữ liệu.
+  \item \textbf{Luồng Background Scheduler (Mô hình 3 Transaction của \texttt{VnpayQueryDrService}):}
+  \begin{itemize}
+    \item \textbf{TX 1 (\texttt{claim}):} Khóa \texttt{Order} $\rightarrow$ \texttt{Payment}; nếu \texttt{clock.now >= G} thì hủy đơn sang \texttt{CANCELLED} và giải phóng kho/coupon; cấp \texttt{claimToken} rồi \texttt{COMMIT} để giải phóng khóa DB.
+    \item \textbf{HTTP Call:} Gọi \texttt{POST /merchant\_webapi/api/transaction} (\texttt{querydr}) ngoài DB transaction (\texttt{ADR-P2-QueryDR-Sandbox-E2E-Deferred}).
+    \item \textbf{TX 2 (\texttt{finalizeInTransaction})} + \textbf{TX 3 (\texttt{releaseClaim})}: Khóa lại và chốt kết quả đối soát, sau đó giải phóng lease. Khi chạm chân trời $H = E + 65\text{m}$, \texttt{markExhausted()} đặt \texttt{reconciliationState = 'REQUIRES\_REVIEW'}.
+  \end{itemize}
 \end{itemize}
 
-\clearpage
-\begin{figure}[p]
+\begin{figure}[htbp]
   \centering
-  \IfFileExists{\BrewLiteSeqDiagramDir/sequence-checkout-phase3-vnpay-ipn-reconciliation.pdf}{%
-    \includegraphics[width=\linewidth,height=0.90\textheight,keepaspectratio]{\BrewLiteSeqDiagramDir/sequence-checkout-phase3-vnpay-ipn-reconciliation.pdf}%
+  \IfFileExists{\BrewLiteSeqDiagramDir/sequence-checkout-phase3b-return-scheduler.pdf}{%
+    \includegraphics[width=0.95\linewidth,height=0.74\textheight,keepaspectratio]{\BrewLiteSeqDiagramDir/sequence-checkout-phase3b-return-scheduler.pdf}%
   }{%
-    \IfFileExists{../assets/sequence-checkout-phase3-vnpay-ipn-reconciliation.pdf}{%
-      \includegraphics[width=\linewidth,height=0.90\textheight,keepaspectratio]{../assets/sequence-checkout-phase3-vnpay-ipn-reconciliation.pdf}%
+    \IfFileExists{../assets/sequence-checkout-phase3b-return-scheduler.pdf}{%
+      \includegraphics[width=0.95\linewidth,height=0.74\textheight,keepaspectratio]{../assets/sequence-checkout-phase3b-return-scheduler.pdf}%
     }{%
-      \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 3 nằm tại \texttt{docs/report/assets/sequence-checkout-phase3-vnpay-ipn-reconciliation.pdf}.}}%
+      \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 3B nằm tại \texttt{docs/report/assets/sequence-checkout-phase3b-return-scheduler.pdf}.}}%
     }%
   }
-  \caption{Sequence Diagram Pha 3 — Tương tác VNPay Sandbox, phân biệt Browser Return URL với Server-to-Server IPN, đối chiếu \texttt{gatewayPaidAt <= E} vs \texttt{clock.now < G} (\texttt{SD-R06}) và đối soát / hết hạn (\texttt{E = 15m}, \texttt{G = E + 5m}, \texttt{H = E + 65m}).}
-  \label{fig:seq-checkout-phase3}
+  \caption{Sequence Diagram Pha 3B — Browser Return URL, bounded polling \texttt{GET /orders/me} và chu kỳ đối soát QueryDR / hết hạn của Background Scheduler.}
+  \label{fig:seq-phase3b}
 \end{figure}
-\clearpage
 
 \subsection{Đối chiếu Chi tiết Implementation (\texttt{A1-final}) với \texttt{API Contract v4.0} và các Mục \texttt{[VERIFY]} / \texttt{Deferred} (\texttt{SD-R04}..\texttt{SD-R06})}
 
@@ -141,20 +213,20 @@ Bảng dưới đây tổng hợp kết quả rà soát đối chiếu (\texttt{
 \hline
 \textbf{Hạng mục kỹ thuật} & \textbf{Thực tế trong Codebase \texttt{A1-final}} & \textbf{Ghi chú đối chiếu \& Biểu diễn trên Sơ đồ} \\ \hline
 \endhead
-Vòng lặp 2 pha \& khóa \texttt{pg\_advisory\_xact\_lock} khi tạo đơn (\texttt{SD-R05}) & \texttt{orders.service.ts} (L163--175, L279--285): chạy \texttt{for (let phase = 0; phase < 2; phase++) runInventoryTransaction(createOrCleanup)}. Khi dọn đơn cũ quá hạn ở \texttt{phase = 0}, \texttt{COMMIT TX} tự động giải phóng \texttt{pg\_advisory\_xact\_lock}; vòng lặp sang \texttt{phase = 1} mở \texttt{BEGIN TX} mới và gọi lại \texttt{SELECT pg\_advisory\_xact\_lock('create-order:' || userId)}. & Bước \texttt{[P1-18]}..\texttt{[P1-25]} trên Pha 1 và \texttt{[16]}..\texttt{[19]} trên sơ đồ tổng thể thể hiện rõ \texttt{COMMIT TX (phase = 0)} giải phóng khóa cũ $\rightarrow$ \texttt{BEGIN TX (phase = 1)} lấy lại khóa tư vấn mới. \\ \hline
-Thời điểm thanh toán \texttt{gatewayPaidAt} vs thời điểm chốt \texttt{clock.now} (\texttt{SD-R06}) & \texttt{payment-finalization.service.ts} (L561--638): kiểm tra \texttt{gatewayPaidAt <= E} (\texttt{vnp\_PayDate} từ VNPay $\le$ \texttt{expires\_at}) \textbf{và} \texttt{clock.now < G = E + 5m}. Khi hợp lệ, lưu \texttt{Payment.verifiedPaidAt = gatewayPaidAt}, \texttt{Payment.finalizedAt = clock.now}, và gán \texttt{Order.paidAt = clock.now}. & Bước \texttt{[P3-19]}, \texttt{[P3-23]}, \texttt{[P3-45]} trên Pha 3 và \texttt{[63]}, \texttt{[79]} trên sơ đồ tổng thể phân biệt rõ \texttt{gatewayPaidAt <= E}, \texttt{clock.now < G}, \texttt{Payment.verifiedPaidAt = gatewayPaidAt} và \texttt{Order.paidAt = clock.now}. \\ \hline
-Body lỗi \texttt{409 PENDING\_ORDER\_EXISTS} (\texttt{SD-R04}) & \texttt{orders.service.ts} (L29--35) ném \texttt{\{ code: 'PENDING\_ORDER\_EXISTS', message \}} \textbf{không kèm \texttt{activeOrderId}}; UI đồng bộ đơn đang mở qua \texttt{GET /orders/me}. & Bước \texttt{[P1-16]}..\texttt{[P1-17]} ghi rõ body không kèm \texttt{activeOrderId} và UI đồng bộ qua \texttt{GET /orders/me}. \\ \hline
-Trường \texttt{expiresAt} khi tạo đơn (\texttt{SD-R04}) & DB lưu \texttt{expiresAt = now + 15m}, nhưng \texttt{CreateOrderResponseDto} của \texttt{201 Created} chỉ trả \texttt{createdAt}; \texttt{expiresAt} được trả qua \texttt{GET /orders/me} và \texttt{POST /payments/vnpay/initiate}. & Bước \texttt{[P1-42]} ghi lưu \texttt{expiresAt = E} vào DB; bước \texttt{[P1-44]} chú thích rõ các trường trả về của \texttt{CreateOrderResponseDto}. \\ \hline
+Vòng lặp 2 pha \& khóa \texttt{pg\_advisory\_xact\_lock} khi tạo đơn (\texttt{SD-R05}) & \texttt{orders.service.ts} (L163--175, L279--285): chạy \texttt{for (let phase = 0; phase < 2; phase++) runInventoryTransaction(createOrCleanup)}. Khi dọn đơn cũ quá hạn ở \texttt{phase = 0}, \texttt{COMMIT TX} tự động giải phóng \texttt{pg\_advisory\_xact\_lock}; vòng lặp sang \texttt{phase = 1} mở \texttt{BEGIN TX} mới và gọi lại \texttt{SELECT pg\_advisory\_xact\_lock('create-order:' || userId)}. & Bước \texttt{[P1A-18]}..\texttt{[P1A-25]} trên Pha 1A và \texttt{[16]}..\texttt{[19]} trên sơ đồ tổng thể thể hiện rõ \texttt{COMMIT TX (phase = 0)} giải phóng khóa cũ $\rightarrow$ \texttt{BEGIN TX (phase = 1)} lấy lại khóa tư vấn mới. \\ \hline
+Thời điểm thanh toán \texttt{gatewayPaidAt} vs thời điểm chốt \texttt{clock.now} (\texttt{SD-R06}) & \texttt{payment-finalization.service.ts} (L561--638): kiểm tra \texttt{gatewayPaidAt <= E} (\texttt{vnp\_PayDate} từ VNPay $\le$ \texttt{expires\_at}) \textbf{và} \texttt{clock.now < G = E + 5m}. Khi hợp lệ, lưu \texttt{Payment.verifiedPaidAt = gatewayPaidAt}, \texttt{Payment.finalizedAt = clock.now}, và gán \texttt{Order.paidAt = clock.now}. & Bước \texttt{[P3A-18]}, \texttt{[P3A-22]}, \texttt{[P3B-15]} trên Pha 3A/3B phân biệt rõ \texttt{gatewayPaidAt <= E}, \texttt{clock.now < G}, \texttt{Payment.verifiedPaidAt = gatewayPaidAt} và \texttt{Order.paidAt = clock.now}. \\ \hline
+Body lỗi \texttt{409 PENDING\_ORDER\_EXISTS} (\texttt{SD-R04}) & \texttt{orders.service.ts} (L29--35) ném \texttt{\{ code: 'PENDING\_ORDER\_EXISTS', message \}} \textbf{không kèm \texttt{activeOrderId}}; UI đồng bộ đơn đang mở qua \texttt{GET /orders/me}. & Bước \texttt{[P1A-16]}..\texttt{[P1A-17]} ghi rõ body không kèm \texttt{activeOrderId} và UI đồng bộ qua \texttt{GET /orders/me}. \\ \hline
+Trường \texttt{expiresAt} khi tạo đơn (\texttt{SD-R04}) & DB lưu \texttt{expiresAt = now + 15m}, nhưng \texttt{CreateOrderResponseDto} của \texttt{201 Created} chỉ trả \texttt{createdAt}; \texttt{expiresAt} được trả qua \texttt{GET /orders/me} và \texttt{POST /payments/vnpay/initiate}. & Bước \texttt{[P1B-17]} ghi lưu \texttt{expiresAt = E} vào DB; bước \texttt{[P1B-19]} chú thích rõ các trường trả về của \texttt{CreateOrderResponseDto}. \\ \hline
 Tồn kho \texttt{Product.stock} vs \texttt{Topping} \& giữ chỗ Coupon (\texttt{SD-R04}) & Chỉ \texttt{Product} có cột \texttt{stock} (\texttt{Topping} kiểm tra \texttt{isAvailable}); \texttt{reserveCoupon} tăng \texttt{Coupon.activeUsageCount} và tạo \texttt{CouponRedemption (HELD)}. Bảng \texttt{InventoryMovement} (\texttt{FR-INV-004}) là \texttt{SHOULD} (chưa có trong \texttt{schema.prisma}). & Sơ đồ chỉ trừ \texttt{Product.stock}, kiểm tra \texttt{Topping.isAvailable} và cập nhật \texttt{activeUsageCount} + \texttt{CouponRedemption}; không vẽ bảng \texttt{InventoryMovement}. \\ \hline
-Mã lỗi khi thanh toán đơn đã quá hạn \texttt{now >= E} (\texttt{SD-R04}) & \texttt{VnpayInitiationService} và \texttt{ZeroAmountPaymentService} trả \texttt{409 ORDER\_EXPIRED}; \texttt{PaymentsService} (Mock) trả \texttt{409 INVALID\_TRANSITION}. & Bước \texttt{[P2-29]} và \texttt{[42]} ghi rõ cả hai mã lỗi theo đúng từng dịch vụ. \\ \hline
-\textbf{\texttt{[VERIFY]}} Route \texttt{GET /payments/:paymentId/status} (\texttt{SD-R04}) & Có trong \texttt{API Contract v4.0} §5 và \texttt{frontend/services/payment.service.ts}, nhưng \texttt{PaymentsController} ở \texttt{A1-final} chưa triển khai route này; UI thực tế gọi \texttt{GET /orders/me} + \texttt{GET /auth/me}. & Bước \texttt{[P3-34]} và \texttt{[68]} vẽ luồng chạy thực tế \texttt{GET /orders/me} và gắn nhãn \texttt{[SD-R04 / VERIFY]} cho route \texttt{GET /payments/:paymentId/status}. \\ \hline
-\textbf{\texttt{[VERIFY / Deferred]}} \texttt{POST /coupons/preview}, \texttt{QueryDR Sandbox E2E} \& \texttt{FR-ORD-005} & \texttt{POST /coupons/preview} thuộc nhóm \texttt{SHOULD / Deferred}; \texttt{VnpayQueryDrService} đã có code/test nhưng hoãn nghiệm thu E2E Sandbox (\texttt{ADR-P2-QueryDR-Sandbox-E2E-Deferred}); hủy đơn chủ động \texttt{FR-ORD-005} là \texttt{Deferred}. & Ghi chú tường minh trong \texttt{note} đầu Pha 1, gắn nhãn \texttt{[ADR-P2-QueryDR-Sandbox-E2E-Deferred]} tại bước \texttt{[P3-43]}, và lược bỏ \texttt{FR-ORD-005} khỏi luồng chính. \\ \hline
+Mã lỗi khi thanh toán đơn đã quá hạn \texttt{now >= E} (\texttt{SD-R04}) & \texttt{VnpayInitiationService} và \texttt{ZeroAmountPaymentService} trả \texttt{409 ORDER\_EXPIRED}; \texttt{PaymentsService} (Mock) trả \texttt{409 INVALID\_TRANSITION}. & Bước \texttt{[P2A-29]} ghi rõ cả hai mã lỗi theo đúng từng dịch vụ. \\ \hline
+\textbf{\texttt{[VERIFY]}} Route \texttt{GET /payments/:paymentId/status} (\texttt{SD-R04}) & Có trong \texttt{API Contract v4.0} §5 và \texttt{frontend/services/payment.service.ts}, nhưng \texttt{PaymentsController} ở \texttt{A1-final} chưa triển khai route này; UI thực tế gọi \texttt{GET /orders/me} + \texttt{GET /auth/me}. & Bước \texttt{[P3B-04]} vẽ luồng chạy thực tế \texttt{GET /orders/me} và gắn nhãn \texttt{[SD-R04 / VERIFY]} cho route \texttt{GET /payments/:paymentId/status}. \\ \hline
+\textbf{\texttt{[VERIFY / Deferred]}} \texttt{POST /coupons/preview}, \texttt{QueryDR Sandbox E2E} \& \texttt{FR-ORD-005} & \texttt{POST /coupons/preview} thuộc nhóm \texttt{SHOULD / Deferred}; \texttt{VnpayQueryDrService} đã có code/test nhưng hoãn nghiệm thu E2E Sandbox (\texttt{ADR-P2-QueryDR-Sandbox-E2E-Deferred}); hủy đơn chủ động \texttt{FR-ORD-005} là \texttt{Deferred}. & Ghi chú tường minh trong \texttt{note} đầu Pha 1A, gắn nhãn \texttt{[ADR-P2-QueryDR-Sandbox-E2E-Deferred]} tại bước \texttt{[P3B-13]}, và lược bỏ \texttt{FR-ORD-005} khỏi luồng chính. \\ \hline
 \end{longtable}
 \endgroup
 
 \subsection{Phụ lục Sơ đồ Tuần tự Tổng thể (End-to-End Checkout \& Payment)}
 
-Để phục vụ tra cứu kiến trúc tổng quan trên một trang duy nhất (bên cạnh 3 sơ đồ tách pha đã trình bày trên từng trang riêng ở các Hình~\ref{fig:seq-checkout-phase1}, \ref{fig:seq-checkout-phase2} và \ref{fig:seq-checkout-phase3}), Hình~\ref{fig:seq-checkout-overall} bố trí bản vector tổng thể End-to-End trên một trang riêng biệt (\texttt{[p]}).
+Để phục vụ tra cứu kiến trúc tổng quan trên một trang duy nhất (bên cạnh 6 sơ đồ con tách pha có độ phóng đại cao ở các Hình~\ref{fig:seq-phase1a}--\ref{fig:seq-phase3b}), Hình~\ref{fig:seq-checkout-overall} bố trí bản vector tổng thể End-to-End 82 thông điệp trên một trang riêng biệt (\texttt{[p]}).
 
 \clearpage
 \begin{figure}[p]
@@ -168,7 +240,7 @@ Mã lỗi khi thanh toán đơn đã quá hạn \texttt{now >= E} (\texttt{SD-R0
       \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ tổng thể nằm tại \texttt{docs/report/assets/sequence-checkout.pdf}.}}%
     }%
   }
-  \caption{Sequence Diagram Tổng thể (End-to-End) — Luồng Checkout \& Payment của BrewLite Assignment 2 (bản vector đặt trên trang riêng, đọc chi tiết theo từng pha tại Hình~\ref{fig:seq-checkout-phase1}--\ref{fig:seq-checkout-phase3}).}
+  \caption{Sequence Diagram Tổng thể (End-to-End) — Luồng Checkout \& Payment của BrewLite Assignment 2 (bản vector toàn cảnh đặt trên trang riêng, phục vụ đối chiếu tổng thể kết hợp 6 sơ đồ con độ đọc cao ở Hình~\ref{fig:seq-phase1a}--\ref{fig:seq-phase3b}).}
   \label{fig:seq-checkout-overall}
 \end{figure}
 \clearpage

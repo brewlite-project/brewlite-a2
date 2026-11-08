@@ -1,0 +1,147 @@
+@startuml sequence-checkout-phase2a-idempotency
+title [A2-T2.2] Sequence Diagram — Pha 2A: Giao thức Idempotency, Kiểm tra Quyền sở hữu & Khóa tư vấn Thanh toán\nĐối chiếu UC-A2-CHECKOUT-001 (Steps 7–8, AF-10, EF-01..EF-02, EF-06..EF-09), API Contract v4.0 & Kế thừa A1 SD-02
+
+skinparam dpi 96
+skinparam maxMessageSize 260
+skinparam responseMessageBelowArrow false
+skinparam sequenceMessageAlign left
+skinparam Padding 2
+skinparam ParticipantPadding 14
+skinparam BoxPadding 5
+skinparam Shadowing false
+skinparam RoundCorner 6
+skinparam style strictuml
+skinparam defaultFontName "Segoe UI", "Roboto", "Arial", sans-serif
+skinparam defaultFontSize 13
+
+skinparam sequence {
+  ArrowColor #334155
+  ArrowFontColor #0F172A
+  ArrowFontSize 13
+  LifeLineBorderColor #64748B
+  LifeLineBackgroundColor #F8FAFC
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F1F5F9
+  ParticipantFontColor #0F172A
+  ParticipantFontSize 14
+  ParticipantFontStyle bold
+  ActorBorderColor #1E293B
+  ActorBackgroundColor #E2E8F0
+  ActorFontColor #0F172A
+  ActorFontSize 14
+  ActorFontStyle bold
+  DatabaseBorderColor #1E293B
+  DatabaseBackgroundColor #E0F2FE
+  DatabaseFontColor #0F172A
+  DatabaseFontSize 14
+  DatabaseFontStyle bold
+  GroupBorderColor #2563EB
+  GroupBackgroundColor #EFF6FF
+  GroupHeaderFontColor #1E3A8A
+  GroupFontColor #1E293B
+  GroupFontSize 13
+  GroupFontStyle bold
+  DividerBorderColor #475569
+  DividerBackgroundColor #F1F5F9
+  DividerFontColor #0F172A
+  DividerFontSize 13
+  DividerFontStyle bold
+}
+
+skinparam note {
+  BackgroundColor #FEFCE8
+  BorderColor #D97706
+  FontColor #1E293B
+  FontSize 12
+}
+
+autonumber "<b>[P2A-00]"
+
+actor "Customer" as Customer
+participant "Next.js UI\n(CartDrawer /\nPaymentPageView)" as UI
+participant "NestJS API\n(Payments / ZeroAmount\nControllers)" as API
+database "Database\n(PostgreSQL /\nPrisma Tx)" as DB
+participant "Payment Service\n(ZeroAmount / Mock / VnpayInit /\nPaymentFinalizationService)" as PaymentSvc
+
+note over Customer, PaymentSvc
+  **Điều kiện đầu vào Pha 2:** Order ở trạng thái ""PENDING"" (hoặc ""PAYMENT_FAILED"" khi Retry trước mốc E = createdAt + 15m).
+  Mỗi lần thử thanh toán mới phải sinh ""Idempotency-Key"" (8..64 ký tự); nếu gửi lại cùng key + cùng payload thì trả Replay.
+end note
+
+== 1. Gửi yêu cầu khởi tạo thanh toán kèm Bearer JWT & Idempotency-Key ==
+
+Customer -> UI : Xác nhận thanh toán (hoặc bấm "Thử lại thanh toán" với Idempotency-Key mới khi PAYMENT_FAILED)
+activate UI
+UI -> UI : Sinh Header Idempotency-Key (8..64 ký tự) & chọn endpoint theo totalVnd và chế độ thanh toán
+
+UI -> API : Gửi request kèm Bearer JWT & Idempotency-Key:\n• totalVnd == 0: POST /payments/zero-amount { orderId } | • Mock: POST /payments { orderId, method, paymentDetails }\n• VNPay: POST /payments/vnpay/initiate { orderId }
+activate API
+API -> API : JwtAuthGuard xác thực JWT + IdempotencyKeyPipe & DTO Pipe + MockPaymentGuard (nếu gọi POST /payments)
+
+alt Lỗi xác thực JWT (401) [EF-01], lỗi DTO / Idempotency-Key (400), hoặc Mock bị tắt (403) [AF-04]
+  API --> UI : 401 UNAUTHORIZED / 400 VALIDATION_ERROR / 403 MOCK_PAYMENT_DISABLED
+  deactivate API
+  UI --> Customer : Hiển thị thông báo lỗi xác thực, dữ liệu không hợp lệ hoặc phương thức Mock bị khóa
+
+else Đạt kiểm tra Guard & Pipe — Chuyển vào Payment Service xử lý nguyên tử
+
+  == 2. Kiểm tra Quyền sở hữu, Idempotency Replay/Conflict & Khóa tư vấn (Advisory Lock) ==
+
+  API -> PaymentSvc : execute() / initiate(userId, idempotencyKey, dto) — tính SHA-256 requestHash theo từng provider
+  activate PaymentSvc
+  PaymentSvc -> DB : BEGIN TX + Kiểm tra quyền sở hữu Order (WHERE id = orderId AND userId = ?) + Tra cứu Payment theo (userId, idempotencyKey)
+  activate DB
+  DB --> PaymentSvc : Kết quả kiểm tra chủ sở hữu Order & bản ghi Payment cũ (nếu có)
+
+  alt Order không tồn tại hoặc thuộc về Customer khác [EF-02]
+    PaymentSvc -> DB : ROLLBACK TX (Đóng transaction trước khi tiết lộ thông tin key)
+    DB --> PaymentSvc : Đã ROLLBACK TX
+    deactivate DB
+    PaymentSvc --> API : Ném 404 NOT_FOUND
+    deactivate PaymentSvc
+    API --> UI : 404 NOT_FOUND
+    deactivate API
+    UI --> Customer : Thông báo không tìm thấy đơn hàng
+
+  else Key đã tồn tại VÀ trùng khớp requestHash & provider [AF-10 — Idempotent Replay]
+    PaymentSvc -> DB : COMMIT đọc snapshot đã lưu (responseSnapshot / initiationSnapshot + trạng thái hiện tại; không thực thi lại giao dịch)
+    DB --> PaymentSvc : Hoàn tất đọc snapshot
+    deactivate DB
+    PaymentSvc --> API : Trả kết quả Replay (replayed: true)
+    deactivate PaymentSvc
+    API --> UI : 200 OK (Header: Idempotency-Replayed: true)
+    deactivate API
+    UI --> Customer : Hiển thị lại kết quả thanh toán hoặc dùng thông tin phiên thanh toán đã lưu
+
+  else Key đã tồn tại NHƯNG khác requestHash hoặc khác provider/endpoint [EF-06]
+    PaymentSvc -> DB : ROLLBACK TX (Đóng transaction)
+    DB --> PaymentSvc : Đã ROLLBACK TX
+    deactivate DB
+    PaymentSvc --> API : Ném 409 CONFLICT (IDEMPOTENCY_KEY_CONFLICT)
+    deactivate PaymentSvc
+    API --> UI : 409 CONFLICT (IDEMPOTENCY_KEY_CONFLICT)
+    deactivate API
+    UI --> Customer : Thông báo xung đột khóa Idempotency-Key
+
+  else Key mới — Xin khóa tư vấn chống gửi trùng đồng thời & Khóa dòng Order (FOR UPDATE)
+    PaymentSvc -> DB : SELECT pg_try_advisory_xact_lock(hashtextextended('[userId, key]', 0)) + SET LOCAL lock_timeout = '1500ms'\n+ SELECT id FROM orders WHERE id = ? FOR UPDATE + Đọc trạng thái Order, hạn E & lịch sử Payment
+    DB --> PaymentSvc : Kết quả giữ khóa advisory, khóa Order, trạng thái hạn E & các Payment hiện có
+
+    alt Không lấy được khóa advisory / đang có VNPay PENDING (409 PAYMENT_IN_PROGRESS) [EF-07] HOẶC Order quá hạn now >= E (409 ORDER_EXPIRED / INVALID_TRANSITION) [EF-08..EF-09]
+      PaymentSvc -> DB : ROLLBACK TX (Đóng transaction, giải phóng khóa)
+      DB --> PaymentSvc : Đã ROLLBACK TX
+      deactivate DB
+      PaymentSvc --> API : Ném 409 CONFLICT (PAYMENT_IN_PROGRESS / ORDER_EXPIRED / INVALID_TRANSITION / ZERO_AMOUNT_REQUIRED / FINANCIAL_EXCEPTION_REQUIRES_REVIEW)
+      deactivate PaymentSvc
+      API --> UI : 409 CONFLICT
+      deactivate API
+      UI --> Customer : Thông báo giao dịch đang xử lý, đơn đã hết hạn 15 phút hoặc trạng thái đơn không hợp lệ
+
+    else Đã giữ khóa & Order hợp lệ (status IN ('PENDING', 'PAYMENT_FAILED') & now < E)
+      note over PaymentSvc, DB : Chuyển sang **Pha 2B (sequence-checkout-phase2b-payment-execution):**\nPhân nhánh thực thi cho ZERO_AMOUNT, Mock hoặc luồng chính VNPay Sandbox.
+    end
+  end
+end
+
+deactivate UI
+@enduml

@@ -1,0 +1,124 @@
+@startuml sequence-checkout-phase3b-return-scheduler
+title [A2-T2.2] Sequence Diagram — Pha 3B: Browser Return URL, Bounded Polling & Background Scheduler Đối soát / Hết hạn\nĐối chiếu UC-A2-CHECKOUT-001 (Step 11, AF-06..AF-09, EF-11, EF-14, BR-C03..BR-C04, BR-C10), API Contract v4.0 & Kế thừa A1 SD-06B
+
+skinparam dpi 96
+skinparam maxMessageSize 260
+skinparam responseMessageBelowArrow false
+skinparam sequenceMessageAlign left
+skinparam Padding 2
+skinparam ParticipantPadding 12
+skinparam BoxPadding 5
+skinparam Shadowing false
+skinparam RoundCorner 6
+skinparam style strictuml
+skinparam defaultFontName "Segoe UI", "Roboto", "Arial", sans-serif
+skinparam defaultFontSize 13
+
+skinparam sequence {
+  ArrowColor #334155
+  ArrowFontColor #0F172A
+  ArrowFontSize 13
+  LifeLineBorderColor #64748B
+  LifeLineBackgroundColor #F8FAFC
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F1F5F9
+  ParticipantFontColor #0F172A
+  ParticipantFontSize 14
+  ParticipantFontStyle bold
+  ActorBorderColor #1E293B
+  ActorBackgroundColor #E2E8F0
+  ActorFontColor #0F172A
+  ActorFontSize 14
+  ActorFontStyle bold
+  DatabaseBorderColor #1E293B
+  DatabaseBackgroundColor #E0F2FE
+  DatabaseFontColor #0F172A
+  DatabaseFontSize 14
+  DatabaseFontStyle bold
+  GroupBorderColor #2563EB
+  GroupBackgroundColor #EFF6FF
+  GroupHeaderFontColor #1E3A8A
+  GroupFontColor #1E293B
+  GroupFontSize 13
+  GroupFontStyle bold
+  DividerBorderColor #475569
+  DividerBackgroundColor #F1F5F9
+  DividerFontColor #0F172A
+  DividerFontSize 13
+  DividerFontStyle bold
+}
+
+skinparam note {
+  BackgroundColor #FEFCE8
+  BorderColor #D97706
+  FontColor #1E293B
+  FontSize 12
+}
+
+autonumber "<b>[P3B-00]"
+
+actor "Customer" as Customer
+participant "Next.js UI\n(Payment /\nConfirmation Page)" as UI
+participant "NestJS API\n(OrdersController)" as API
+database "Database\n(PostgreSQL /\nPrisma Tx)" as DB
+participant "Payment Service\n(Scheduler &\nOrderExpiration)" as PaymentSvc
+participant "VNPay Sandbox\n(External Gateway)" as VNPay #DCFCE7
+
+== Luồng 1: Browser Return URL & Bounded Polling (Điều hướng Giao diện Khách hàng) ==
+
+alt Customer đóng trình duyệt ngay trên cổng VNPay
+  Customer -> VNPay : Đóng tab trình duyệt (Không có Return URL; Backend vẫn tự xử lý đầy đủ qua IPN hoặc Scheduler)
+else Trình duyệt Redirect về Return URL hoặc Customer mở lại trang đơn hàng
+  VNPay --> UI : HTTP 302 Redirect về Return URL (/payment hoặc /order-confirmation kèm query vnp_*)
+  activate UI
+  UI -> UI : Quy tắc EF-11: KHÔNG tự đánh dấu Order.status = PAID dựa trên query vnp_ResponseCode của Return URL
+
+  loop Bounded Polling mỗi 3 giây (tối đa 10 lần) khi Order còn đang xử lý / đối soát
+    UI -> API : GET /orders/me (Bearer <JWT>) + GET /auth/me\n*[SD-R04 / VERIFY: API v4.0 định nghĩa GET /payments/:paymentId/status nhưng PaymentsController ở A1-final chưa có route này]*
+    activate API
+    API -> DB : Đọc Order, Payment representative, PaymentGatewayEvent & mapOrderPaymentPresentation()
+    activate DB
+    DB --> API : Trả Order.status, hasFinancialException & PaymentSummary (status, provider, resolution, requiresReview, canRetry)
+    deactivate DB
+    API --> UI : 200 OK (GetMyOrdersResponseDto)
+    deactivate API
+  end
+
+  UI --> Customer : Đồng bộ trạng thái chuẩn từ DB & hiển thị kết quả cuối cùng:\n1. Order.status == PAID: Xóa giỏ hàng, hiển thị xác nhận đơn & điểm thưởng\n2. Order.status == PAYMENT_FAILED: Giữ giỏ hàng, mở nút Retry (key & vnpTxnRef mới)\n3. Order.status == CANCELLED: Thông báo đơn hết hạn & bị hủy\n4. reconciliationState == REQUIRES_REVIEW / RECONCILING: Khóa Retry, báo chờ kiểm tra
+  deactivate UI
+end
+
+== Luồng 2: Background Scheduler — Đối soát QueryDR & Tự động hủy đơn theo mốc E, G & H ==
+
+loop Chu kỳ Cron định kỳ (OrderExpirationService mỗi 60s / PaymentReconciliationScheduler mỗi 30s)
+  PaymentSvc -> DB : Quét ứng viên: Order quá hạn (expiresAt <= now) & Payment VNPay PENDING đến hạn (nextQueryAt <= now hoặc reconcileUntil <= now)
+  activate PaymentSvc
+  activate DB
+  DB --> PaymentSvc : Danh sách Order & Payment ứng viên
+  deactivate DB
+
+  alt Ứng viên QueryDR chưa chạm chân trời H = E + 65m (now < reconcileUntil) [AF-06..AF-07, BR-C03]
+    PaymentSvc -> DB : TX 1 — claim(): Khóa Order FOR UPDATE -> Payment FOR UPDATE\n• Nếu clock.now >= G = E + 5m: gọi expireOrderInTransaction(tx, orderId) hủy Order -> 'CANCELLED' & hoàn kho/coupon (giữ Payment = 'PENDING')\n• Cấp claimToken, leaseExpiresAt, tăng queryAttempts, cập nhật nextQueryAt = max(G, now + cooldown) + COMMIT TX 1
+    activate DB
+    DB --> PaymentSvc : Đã COMMIT claim lease (Không giữ khóa DB khi gọi HTTP ra ngoài)
+    deactivate DB
+
+    PaymentSvc -> VNPay : POST /merchant_webapi/api/transaction (vnp_Command = 'querydr', ngoài DB TX) *[ADR-P2-QueryDR-Sandbox-E2E-Deferred]*
+    activate VNPay
+    VNPay --> PaymentSvc : Phản hồi QueryDR đã ký HMAC-SHA512 (outcome: SUCCESS / FAILED / UNKNOWN, gatewayPaidAt = vnp_PayDate)
+    deactivate VNPay
+
+    PaymentSvc -> DB : TX 2 — Gọi finalizeInTransaction(tx, { provider: 'VNPAY', source: 'QUERYDR' }) (khóa Order -> Payment, kiểm tra gatewayPaidAt <= E & clock.now < G + COMMIT)\n+ TX 3 (finally) — releaseClaim(): Xóa claimToken & leaseExpiresAt + COMMIT
+    activate DB
+    DB --> PaymentSvc : Đã COMMIT kết quả đối soát & giải phóng lease
+    deactivate DB
+
+  else Đã quá hạn E mà KHÔNG có VNPay PENDING [AF-08] HOẶC đã chạm chân trời H = E + 65m mà vẫn PENDING [AF-09, BR-C10]
+    PaymentSvc -> DB : BEGIN TX + Khóa chuẩn Order FOR UPDATE (-> Payment FOR UPDATE nếu markExhausted):\n• expireOrderInTransaction(tx, orderId): Nếu (now >= E & không có VNPay PENDING) hoặc (now >= G = E + 5m): UPDATE Order -> 'CANCELLED',\n  hoàn Product.stock & releaseHeldCoupon (HELD -> RELEASED, giảm activeUsageCount) đúng 1 lần\n• Nếu chạm mốc H = E + 65m (markExhausted): Giữ Payment.status = 'PENDING', đặt reconciliationState = 'REQUIRES_REVIEW' + COMMIT TX
+    activate DB
+    DB --> PaymentSvc : Đã COMMIT hủy đơn quá hạn / chuyển trạng thái REQUIRES_REVIEW
+    deactivate DB
+  end
+  deactivate PaymentSvc
+end
+@enduml
