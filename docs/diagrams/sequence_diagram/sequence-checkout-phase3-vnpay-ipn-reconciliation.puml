@@ -1,15 +1,16 @@
 @startuml sequence-checkout-phase3-vnpay-ipn-reconciliation
-title [A2-T2.2] Sequence Diagram — Pha 3: Tương tác VNPay Sandbox, Phân biệt Browser Return URL với Server-to-Server IPN & Đối soát / Hết hạn (E, G)\nĐối chiếu UC-A2-CHECKOUT-001 (Steps 9–14, AF-05, AF-07..AF-09, EF-11..EF-13, BR-C04..BR-C05, BR-C10), API Contract v4.0 & Kế thừa A1 SD-06B
+title [A2-T2.2] Sequence Diagram — Pha 3: Tương tác VNPay Sandbox, Phân biệt Browser Return URL với Server-to-Server IPN & Đối soát / Hết hạn (E, G, H)\nĐối chiếu UC-A2-CHECKOUT-001 (Steps 9–11, AF-05..AF-09, EF-10..EF-14, BR-C03..BR-C05, BR-C10), API Contract v4.0 & Kế thừa A1 SD-06B
 
 skinparam dpi 96
-skinparam maxMessageSize 240
+skinparam maxMessageSize 310
 skinparam responseMessageBelowArrow true
 skinparam sequenceMessageAlign left
-skinparam Padding 2
+skinparam Padding 1
 skinparam ParticipantPadding 12
-skinparam BoxPadding 6
+skinparam BoxPadding 5
 skinparam Shadowing false
 skinparam RoundCorner 6
+skinparam style strictuml
 skinparam defaultFontName "Segoe UI", "Roboto", "Arial", sans-serif
 skinparam defaultFontSize 11
 
@@ -73,12 +74,12 @@ Customer -> VNPay : Thực hiện thanh toán, hủy giao dịch hoặc đóng t
 
 par Luồng 1: Server-to-Server IPN (Nguồn sự thật chốt trạng thái tại Backend — Độc lập hoàn toàn với trình duyệt Customer)
 
-  VNPay -> API : GET /payments/vnpay/ipn (vnp_TxnRef, vnp_Amount, vnp_ResponseCode, vnp_TransactionStatus, vnp_SecureHash)\n(Gọi trực tiếp Server-to-Server, KHÔNG dùng Bearer JWT của Customer)
+  VNPay -> API : GET /payments/vnpay/ipn (vnp_TxnRef, vnp_Amount, vnp_ResponseCode, vnp_TransactionStatus, vnp_PayDate, vnp_SecureHash) — Gọi trực tiếp Server-to-Server, KHÔNG dùng JWT của Customer
   activate API
-  API -> PaymentSvc : VnpayIpnService.handle(rawQuery) — parseAndVerifyIpn() kiểm tra chữ ký HMAC-SHA512 & vnp_TmnCode
+  API -> PaymentSvc : VnpayIpnService.handle(rawQuery) — parseAndVerifyIpn() kiểm tra chữ ký HMAC-SHA512, vnp_TmnCode & đọc gatewayPaidAt = vnp_PayDate
   activate PaymentSvc
 
-  alt Chữ ký HMAC-SHA512 sai (RspCode '97') HOẶC payload lỗi / sai vnp_TmnCode (RspCode '99') [EF-11]
+  alt Chữ ký HMAC-SHA512 sai (RspCode '97') HOẶC payload lỗi / sai vnp_TmnCode (RspCode '99') [EF-10]
     PaymentSvc --> API : { RspCode: '97' hoặc '99', Message } *(Không mở DB Transaction)*
     deactivate PaymentSvc
     API --> VNPay : 200 OK { RspCode: '97' / '99', Message }
@@ -89,7 +90,7 @@ par Luồng 1: Server-to-Server IPN (Nguồn sự thật chốt trạng thái t�
     activate DB
     DB --> PaymentSvc : Thông tin bản ghi Payment (nếu tồn tại)
 
-    alt Không tìm thấy vnpTxnRef (RspCode '01') HOẶC lệch số tiền vnp_Amount != amountVnd * 100 (RspCode '04') [EF-11]
+    alt Không tìm thấy vnpTxnRef (RspCode '01') HOẶC lệch số tiền vnp_Amount != amountVnd * 100 (RspCode '04') [EF-10]
       PaymentSvc -> DB : Đóng TX không ghi (Không sửa trạng thái Order & Payment)
       DB --> PaymentSvc : Đã đóng TX
       deactivate DB
@@ -98,11 +99,11 @@ par Luồng 1: Server-to-Server IPN (Nguồn sự thật chốt trạng thái t�
       API --> VNPay : 200 OK { RspCode: '01' / '04', Message }
       deactivate API
 
-    else Khớp vnpTxnRef & số tiền — Gọi finalizeInTransaction(tx, { provider: 'VNPAY' })
-      PaymentSvc -> DB : Khóa chuẩn chống Deadlock [EF-13, BR-C05]: 1. SELECT orders FOR UPDATE -> 2. SELECT payments FOR UPDATE\n+ Đọc đồng hồ DB (beforeExpiry: now < E, beforeGraceEnd: now < G = E + 5m) + Tra cứu PaymentGatewayEvent
+    else Khớp vnpTxnRef & số tiền — Gọi finalizeInTransaction(tx, { provider: 'VNPAY', verifiedOutcome })
+      PaymentSvc -> DB : Khóa chuẩn chống Deadlock [EF-13, BR-C05]: 1. SELECT orders FOR UPDATE -> 2. SELECT payments FOR UPDATE + Đọc đồng hồ DB clock.now (beforeExpiry: clock.now < E, beforeGraceEnd: clock.now < G = E + 5m) + Tra cứu PaymentGatewayEvent
       DB --> PaymentSvc : Đã giữ khóa Order -> Payment & trạng thái hiện tại
 
-      alt Sự kiện IPN trùng lặp (Cùng eventIdentity HOẶC cùng kết quả terminal đã lưu)
+      alt Sự kiện IPN trùng lặp (Cùng eventIdentity HOẶC cùng kết quả terminal đã lưu) [EF-13]
         PaymentSvc -> DB : Ghi nhận PaymentGatewayEvent (disposition = 'DUPLICATE' nếu event mới) + COMMIT TX
         DB --> PaymentSvc : Đã COMMIT TX
         deactivate DB
@@ -111,8 +112,8 @@ par Luồng 1: Server-to-Server IPN (Nguồn sự thật chốt trạng thái t�
         API --> VNPay : 200 OK { RspCode: '02', Message: 'Order already confirmed' }
         deactivate API
 
-      else Kết quả VNPay == SUCCESS ('00'/'00') VÀ Hợp lệ (Order đang PENDING/PAYMENT_FAILED, paidAt <= E, now < G) [Main Flow]
-        PaymentSvc -> DB : Coupon HELD -> CONSUMED + Cộng điểm floor(totalVnd / 10000) (đúng 1 lần) + INSERT PaymentGatewayEvent (FINALIZED)\n+ UPDATE Payment -> status = 'SUCCESS' (RESOLVED) + UPDATE Order -> status = 'PAID', paidAt = now + COMMIT TX
+      else Kết quả VNPay == SUCCESS ('00'/'00') VÀ Hợp lệ (Order đang PENDING/PAYMENT_FAILED, gatewayPaidAt <= E, clock.now < G) [Main Flow, SD-R06]
+        PaymentSvc -> DB : Coupon HELD -> CONSUMED + Cộng điểm floor(totalVnd / 10000) (đúng 1 lần) + INSERT PaymentGatewayEvent (FINALIZED)\n+ UPDATE Payment -> status = 'SUCCESS' (RESOLVED, verifiedPaidAt = gatewayPaidAt [vnp_PayDate], finalizedAt = clock.now) + UPDATE Order -> status = 'PAID', paidAt = clock.now [thời điểm DB finalization <= G] + COMMIT TX
         DB --> PaymentSvc : Đã COMMIT TX
         deactivate DB
         PaymentSvc --> API : { RspCode: '00', Message: 'Confirm Success' }
@@ -120,8 +121,8 @@ par Luồng 1: Server-to-Server IPN (Nguồn sự thật chốt trạng thái t�
         API --> VNPay : 200 OK { RspCode: '00', Message: 'Confirm Success' }
         deactivate API
 
-      else Kết quả VNPay == SUCCESS ('00'/'00') NHƯNG Đến trễ / Xung đột (Order đã CANCELLED / paidAt > E / now >= G / Payment đã FAILED) [EF-12, BR-C10]
-        PaymentSvc -> DB : INSERT PaymentGatewayEvent (disposition = 'FINANCIAL_EXCEPTION') + UPDATE Payment (giữ nguyên status, hasFinancialException = true,\nreconciliationState = 'REQUIRES_REVIEW') + Nếu Order đang mở & now >= E thì hủy Order -> 'CANCELLED' (KHÔNG hồi sinh sang PAID) + COMMIT TX
+      else Kết quả VNPay == SUCCESS ('00'/'00') NHƯNG Đến trễ / Xung đột (Order đã CANCELLED / gatewayPaidAt > E [LATE_SUCCESS] / clock.now >= G [GRACE_ENDED] / Payment đã FAILED) [EF-12, BR-C10, SD-R06]
+        PaymentSvc -> DB : INSERT PaymentGatewayEvent (disposition = 'FINANCIAL_EXCEPTION') + UPDATE Payment (giữ nguyên status, hasFinancialException = true, reconciliationState = 'REQUIRES_REVIEW') + Nếu Order đang mở & clock.now >= E thì hủy Order -> 'CANCELLED' (KHÔNG hồi sinh sang PAID) + COMMIT TX
         DB --> PaymentSvc : Đã COMMIT ghi nhận ngoại lệ tài chính
         deactivate DB
         PaymentSvc --> API : { RspCode: '00', Message: 'Confirm Success' }
@@ -130,7 +131,7 @@ par Luồng 1: Server-to-Server IPN (Nguồn sự thật chốt trạng thái t�
         deactivate API
 
       else Kết quả VNPay == FAILED (mã xác minh thất bại terminal) [AF-05 / AF-08]
-        PaymentSvc -> DB : INSERT PaymentGatewayEvent (FINALIZED) + UPDATE Payment -> status = 'FAILED' (RESOLVED)\n• Nếu còn hạn (now < E) [AF-05]: UPDATE Order -> 'PAYMENT_FAILED' (giữ tồn kho & coupon HELD cho phép Retry)\n• Nếu quá hạn (now >= E) [AF-08]: UPDATE Order -> 'CANCELLED' + Hoàn Product.stock & releaseHeldCoupon đúng 1 lần + COMMIT TX
+        PaymentSvc -> DB : INSERT PaymentGatewayEvent (FINALIZED) + UPDATE Payment -> status = 'FAILED' (RESOLVED, finalizedAt = clock.now)\n• Nếu còn hạn (clock.now < E) [AF-05]: UPDATE Order -> 'PAYMENT_FAILED' (giữ tồn kho & coupon HELD cho phép Retry) | • Nếu quá hạn (clock.now >= E) [AF-08]: UPDATE Order -> 'CANCELLED' + Hoàn Product.stock & releaseHeldCoupon đúng 1 lần + COMMIT TX
         DB --> PaymentSvc : Đã COMMIT TX
         deactivate DB
         PaymentSvc --> API : { RspCode: '00', Message: 'Confirm Success' }
@@ -152,7 +153,7 @@ else Luồng 2: Browser Return URL (Chỉ là điều hướng trình duyệt �
     UI -> UI : Quy tắc EF-11: KHÔNG tự đánh dấu Order.status = PAID dựa trên query vnp_ResponseCode của Return URL
 
     loop Bounded Polling mỗi 3 giây (tối đa 10 lần) khi Order còn đang xử lý / đối soát
-      UI -> API : GET /orders/me (Bearer <JWT>) + GET /auth/me\n*[SD-R04 / VERIFY: API v4.0 định nghĩa GET /payments/:paymentId/status nhưng PaymentsController ở A1-final chưa có route này]*
+      UI -> API : GET /orders/me (Bearer <JWT>) + GET /auth/me *[SD-R04 / VERIFY: API v4.0 định nghĩa GET /payments/:paymentId/status nhưng PaymentsController ở A1-final chưa có route này]*
       activate API
       API -> DB : Đọc Order, Payment representative, PaymentGatewayEvent & mapOrderPaymentPresentation()
       activate DB
@@ -162,11 +163,11 @@ else Luồng 2: Browser Return URL (Chỉ là điều hướng trình duyệt �
       deactivate API
     end
 
-    UI --> Customer : Đồng bộ trạng thái chuẩn từ DB & hiển thị kết quả cuối cùng:\n1. Order.status == PAID (Payment.status == SUCCESS): Xóa giỏ hàng phía Client, hiển thị xác nhận đơn & điểm thưởng\n2. Order.status == PAYMENT_FAILED (Payment.status == FAILED, now < E, canRetry == true): Giữ giỏ hàng, mở nút Retry (key & vnpTxnRef mới)\n3. Order.status == CANCELLED: Thông báo đơn hết hạn & bị hủy  |  4. reconciliationState == REQUIRES_REVIEW / RECONCILING: Khóa Retry, báo chờ kiểm tra
+    UI --> Customer : Đồng bộ trạng thái chuẩn từ DB & hiển thị kết quả cuối cùng:\n1. Order.status == PAID (Payment.status == SUCCESS): Xóa giỏ hàng phía Client, hiển thị xác nhận đơn & điểm thưởng | 2. Order.status == PAYMENT_FAILED (Payment.status == FAILED, now < E, canRetry == true): Giữ giỏ hàng, mở nút Retry (key & vnpTxnRef mới)\n3. Order.status == CANCELLED: Thông báo đơn hết hạn & bị hủy | 4. reconciliationState == REQUIRES_REVIEW / RECONCILING: Khóa Retry, báo chờ kiểm tra
     deactivate UI
   end
 
-else Luồng 3: Background Scheduler — Đối soát QueryDR & Tự động hủy đơn theo mốc E = 15m, Grace G = E + 5m & Horizon H = E + 65m [AF-07..AF-09, SD-06B]
+else Luồng 3: Background Scheduler — Đối soát QueryDR & Tự động hủy đơn theo mốc E = 15m, Grace G = E + 5m & Horizon H = E + 65m [AF-06..AF-09, SD-06B]
 
   loop Chu kỳ Cron định kỳ (OrderExpirationService mỗi 60s / PaymentReconciliationScheduler mỗi 30s)
     PaymentSvc -> DB : Quét ứng viên: Order quá hạn (expiresAt <= now) & Payment VNPay PENDING đến hạn (nextQueryAt <= now hoặc reconcileUntil <= now)
@@ -175,24 +176,24 @@ else Luồng 3: Background Scheduler — Đối soát QueryDR & Tự động h�
     DB --> PaymentSvc : Danh sách Order & Payment ứng viên
     deactivate DB
 
-    alt Ứng viên QueryDR chưa chạm chân trời H = E + 65m (now < reconcileUntil) [AF-07, BR-C04]
-      PaymentSvc -> DB : TX 1 — VnpayQueryDrService.claim(): Khóa Order FOR UPDATE -> Payment FOR UPDATE\n• Nếu now >= G = E + 5m: gọi expireOrderInTransaction(tx, orderId) hủy Order -> 'CANCELLED' & hoàn kho/coupon (nhưng giữ Payment = 'PENDING')\n• Cấp claimToken, leaseExpiresAt, tăng queryAttempts, cập nhật nextQueryAt = max(G, now + cooldown) + COMMIT TX 1
+    alt Ứng viên QueryDR chưa chạm chân trời H = E + 65m (now < reconcileUntil) [AF-06..AF-07, BR-C03]
+      PaymentSvc -> DB : TX 1 — VnpayQueryDrService.claim(): Khóa Order FOR UPDATE -> Payment FOR UPDATE • Nếu clock.now >= G = E + 5m: gọi expireOrderInTransaction(tx, orderId) hủy Order -> 'CANCELLED' & hoàn kho/coupon (giữ Payment = 'PENDING') • Cấp claimToken, leaseExpiresAt, tăng queryAttempts, cập nhật nextQueryAt = max(G, now + cooldown) + COMMIT TX 1
       activate DB
       DB --> PaymentSvc : Đã COMMIT claim lease (Không giữ khóa DB khi gọi HTTP ra ngoài)
       deactivate DB
 
       PaymentSvc -> VNPay : POST /merchant_webapi/api/transaction (vnp_Command = 'querydr', ngoài DB TX) *[ADR-P2-QueryDR-Sandbox-E2E-Deferred]*
       activate VNPay
-      VNPay --> PaymentSvc : Phản hồi QueryDR đã ký HMAC-SHA512 (outcome: SUCCESS / FAILED / UNKNOWN)
+      VNPay --> PaymentSvc : Phản hồi QueryDR đã ký HMAC-SHA512 (outcome: SUCCESS / FAILED / UNKNOWN, gatewayPaidAt = vnp_PayDate)
       deactivate VNPay
 
-      PaymentSvc -> DB : TX 2 — Gọi PaymentFinalizationService.finalizeInTransaction(tx, { provider: 'VNPAY', source: 'QUERYDR' }) (khóa Order -> Payment + COMMIT)\n+ TX 3 (finally) — releaseClaim(): Xóa claimToken & leaseExpiresAt + COMMIT
+      PaymentSvc -> DB : TX 2 — Gọi finalizeInTransaction(tx, { provider: 'VNPAY', source: 'QUERYDR' }) (khóa Order -> Payment, kiểm tra gatewayPaidAt <= E & clock.now < G + COMMIT) + TX 3 (finally) — releaseClaim(): Xóa claimToken & leaseExpiresAt + COMMIT
       activate DB
       DB --> PaymentSvc : Đã COMMIT kết quả đối soát & giải phóng lease
       deactivate DB
 
     else Đã quá hạn E mà KHÔNG có VNPay PENDING [AF-08] HOẶC đã chạm chân trời H = E + 65m mà vẫn PENDING [AF-09, BR-C10]
-      PaymentSvc -> DB : BEGIN TX + Khóa chuẩn Order FOR UPDATE (-> Payment FOR UPDATE nếu markExhausted):\n• expireOrderInTransaction(tx, orderId): Nếu (now >= E & không có VNPay PENDING) hoặc (now >= G = E + 5m): UPDATE Order -> 'CANCELLED',\n  hoàn Product.stock & releaseHeldCoupon (HELD -> RELEASED, giảm activeUsageCount) đúng 1 lần\n• Nếu chạm mốc H = E + 65m (markExhausted): Giữ Payment.status = 'PENDING', đặt reconciliationState = 'REQUIRES_REVIEW' + COMMIT TX
+      PaymentSvc -> DB : BEGIN TX + Khóa chuẩn Order FOR UPDATE (-> Payment FOR UPDATE nếu markExhausted): • expireOrderInTransaction(tx, orderId): Nếu (now >= E & không có VNPay PENDING) hoặc (now >= G = E + 5m): UPDATE Order -> 'CANCELLED', hoàn Product.stock & releaseHeldCoupon (HELD -> RELEASED, giảm activeUsageCount) đúng 1 lần • Nếu chạm mốc H = E + 65m (markExhausted): Giữ Payment.status = 'PENDING', đặt reconciliationState = 'REQUIRES_REVIEW' + COMMIT TX
       activate DB
       DB --> PaymentSvc : Đã COMMIT hủy đơn quá hạn / chuyển trạng thái REQUIRES_REVIEW
       deactivate DB
