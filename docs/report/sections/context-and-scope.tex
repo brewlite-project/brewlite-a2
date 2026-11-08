@@ -1,0 +1,202 @@
+% SCRUM-99 / A2-T1.1 — fragment; requires vntex, longtable, array, hyperref.
+% Canonical content: docs/requirements/context-and-scope.md
+\section{Bối cảnh, stakeholder và phạm vi hệ thống BrewLite}
+\label{sec:context-and-scope}
+\noindent\textbf{Task:} SCRUM-99 / A2-T1.1\par
+\noindent\textbf{Trạng thái:} DRAFT -- chờ review; chưa phải biên bản nghiệm thu\par
+\noindent\textbf{Ngày soạn:} 08/11/2026\par
+\noindent\textbf{Baseline nghiệp vụ:} A1-final -- 1951dc124c83359556f04adb6ba3f0ee9f22fce4\par
+\noindent\textbf{Repository đích:} brewlite-project/brewlite-a2; PR base: dev\par
+
+\subsection{Nguồn kế thừa và nguyên tắc sử dụng}
+
+Tài liệu chuẩn hóa bối cảnh, stakeholder, mục tiêu và phạm vi cho Assignment 2 Task 1.1. Nội dung kế thừa Requirements Specification v3.1 và baseline A1-final; không thay thế toàn bộ SRS, không bổ sung nghiệp vụ, API hoặc quyền người dùng.
+\par
+
+Requirements v3.1 có business baseline BR-01--BR-06 đã được duyệt, trong khi bản đặc tả ghi trạng thái chờ review. A2 Gap Analysis là bản draft. Việc một yêu cầu nằm trong phạm vi không chứng minh chức năng đó đã triển khai hoặc được nghiệm thu.
+\par
+
+Các nguồn dùng trong tài liệu: [S1] Requirements v3.1, mục 3--6, 9.9 và 16; [S2] A2 Gap Analysis, mục 0--1 và 6--7; [S3] README A1 kế thừa trong repo A2, mục 1 và 4; [S4] A2 Implementation Plan. S4 chỉ cung cấp bối cảnh bàn giao, không được dùng để mở rộng baseline nghiệp vụ.
+\par
+
+\subsection{Bối cảnh và vấn đề}
+
+BrewLite là ứng dụng web đặt cà phê và đồ uống theo mô hình một cửa hàng (Single-Vendor), phục vụ Guest và Customer. Luồng giá trị chính là xem menu, chọn size/topping, quản lý giỏ hàng, đăng nhập, tạo đơn, thanh toán và xem xác nhận/trạng thái/lịch sử đơn.
+\par
+
+Bài toán là duy trì thông tin món, cấu hình, giá và kết quả đơn nhất quán xuyên suốt luồng đặt hàng. Giỏ hàng có thể cũ so với dữ liệu cửa hàng; nhiều khách có thể cùng đặt món cuối; request hoặc thông báo thanh toán có thể được gửi lặp hay đến trễ. Hệ thống cần kiểm tra dữ liệu phía server để tránh tính sai tiền, bán vượt tồn kho và lặp tác động thanh toán hoặc cộng điểm.
+\par
+
+Đây là bối cảnh nghiệp vụ của đồ án; chưa có khảo sát định lượng để khẳng định cửa hàng đang gặp một tỷ lệ sai sót cụ thể hoặc BrewLite đã giảm thời gian chờ. A1 cung cấp nền tảng demo local, không phải bằng chứng hệ thống đã vận hành thương mại. [S1 §3--4; S2 §0; S3 §1]
+\par
+
+\subsection{Stakeholder, vai trò và nhu cầu}
+\begingroup\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.20\linewidth}>{\raggedright\arraybackslash}p{0.43\linewidth}>{\raggedright\arraybackslash}p{0.25\linewidth}}
+\hline
+\textbf{Stakeholder} & \textbf{Vai trò và nhu cầu} & \textbf{Giới hạn} \\ \hline
+\endfirsthead
+\textbf{Stakeholder} & \textbf{Vai trò và nhu cầu} & \textbf{Giới hạn} \\ \hline
+\endhead
+Guest & Người chưa đăng nhập; cần xem menu, giá và tùy chọn size/topping để lựa chọn món. & Phải đăng nhập trước khi tạo Order. \\ \hline
+Customer & Người đặt món; cần giỏ hàng, tạo đơn, thanh toán, xác nhận, lịch sử và điểm tích lũy; cần dữ liệu đúng và bảo vệ quyền sở hữu đơn. & Chỉ truy cập tài nguyên thuộc tài khoản; không quyết định giá, tồn kho hay kết quả thanh toán. \\ \hline
+Quản lý cửa hàng / PO mô phỏng & Stakeholder xác định giá trị, ưu tiên backlog và chấp nhận increment; cần phạm vi rõ và quy tắc nhất quán. & Không suy ra có tài khoản hay UI quản trị; không gán PO cho thành viên khi chưa được xác nhận. \\ \hline
+Nhân viên quầy / Barista & Stakeholder liên quan đến chuẩn bị và hoàn tất đồ uống; cần hiểu các trạng thái PREPARING, READY, COMPLETED. & UI Barista nằm ngoài MVP; stakeholder nghiệp vụ không đồng nghĩa actor có giao diện đã triển khai. \\ \hline
+VNPay Sandbox & Hệ thống ngoài tham gia redirect và trao đổi kết quả IPN/QueryDR; cần dữ liệu giao dịch và thông báo được xác minh theo hợp đồng tích hợp. & Chỉ Sandbox; không giao dịch tiền thật. Mock và ZERO\_AMOUNT là cơ chế nội bộ, không phải actor ngoài. \\ \hline
+Nhóm phát triển & Phân tích, thiết kế, triển khai, review và kiểm thử; cần nguồn yêu cầu thống nhất, khả năng truy vết và tái tạo môi trường. & Lịch sử A1 không thay thế bằng chứng review và kiểm chứng A2. \\ \hline
+Giảng viên & Đánh giá đồ án; cần tạo phẩm, demo và bằng chứng có thể kiểm tra theo tiêu chí Assignment. & Không mặc định đã nghiệm thu khi mới có tài liệu hoặc test lịch sử. \\ \hline
+\end{longtable}
+\endgroup
+
+Guest và Customer là actor sử dụng web chính; VNPay Sandbox là actor hệ thống ngoài. Các stakeholder còn lại có lợi ích và trách nhiệm liên quan nhưng không mặc nhiên có quyền thao tác trong ứng dụng. [S1 §5--6; S2 §0]
+\par
+
+\subsection{Mục tiêu sản phẩm}
+\begingroup\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.68\linewidth}}
+\hline
+\textbf{Mục tiêu} & \textbf{Kết quả mong muốn trong baseline} \\ \hline
+\endfirsthead
+\textbf{Mục tiêu} & \textbf{Kết quả mong muốn trong baseline} \\ \hline
+\endhead
+G1 -- Đặt món rõ ràng & Khách xem món/giá, chọn size/topping và quản lý giỏ trước khi tạo đơn. \\ \hline
+G2 -- Đơn hàng nhất quán & Server kiểm tra giỏ, tính lại giá, lưu thông tin đơn và kiểm soát tồn kho để tránh oversell. \\ \hline
+G3 -- Thanh toán có kiểm soát & Kết quả thanh toán được xác minh; request lặp không lặp tác động; retry và trường hợp chưa rõ kết quả tuân thủ baseline. \\ \hline
+G4 -- Theo dõi và bảo vệ dữ liệu & Customer xem kết quả/lịch sử đơn của mình; JWT và ownership bảo vệ nghiệp vụ cần đăng nhập; coupon/điểm tuân thủ quy tắc đã có. \\ \hline
+G5 -- Có thể đánh giá và bàn giao & Tài liệu mô tả đúng hệ thống, môi trường có thể tái tạo và bằng chứng được ghi theo trạng thái thực tế. \\ \hline
+\end{longtable}
+\endgroup
+
+Đây là mục tiêu và kết quả mong muốn, không phải tuyên bố các tiêu chí đã PASS. Ngưỡng đo, FR/NFR chi tiết và Acceptance Criteria sẽ được chuẩn hóa trong SRS của task tương ứng, không tự phát minh tại Task 1.1. [S1 §1, §3--6; S2 §1]
+\par
+
+\subsection{Ranh giới hệ thống}
+
+Bên trong BrewLite: Web Client Next.js, Backend API NestJS, dữ liệu PostgreSQL qua Prisma và các cơ chế nội bộ phục vụ Order, Inventory, Payment, Promotion/Loyalty. Docker Compose là cách tái tạo môi trường kế thừa A1.
+\par
+
+Web Client hiển thị và gửi yêu cầu; Backend là nơi quyết định giá, kiểm tra tồn kho, quyền truy cập và thay đổi trạng thái nghiệp vụ. Không tin giá, userId hay kết quả thanh toán do client tự khai.
+\par
+
+Bên ngoài BrewLite: Guest/Customer và VNPay Sandbox. VNPay Sandbox là provider mặc định. Mock CARD/WALLET chỉ phục vụ automated test/demo khi backend cho phép trong môi trường không phải production và luôn bị tắt ở production. ZERO\_AMOUNT xử lý nội bộ đơn 0 VND, độc lập với Mock. Không tự fallback sang Mock khi VNPay PENDING hoặc chưa rõ kết quả. [S1 §3, §9.9, §16]
+\par
+
+\subsection{In Scope -- phạm vi nghiệp vụ kế thừa}
+\begingroup\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.20\linewidth}>{\raggedright\arraybackslash}p{0.43\linewidth}>{\raggedright\arraybackslash}p{0.25\linewidth}}
+\hline
+\textbf{Nhóm} & \textbf{Nội dung được mô tả trong phạm vi} & \textbf{Nguồn} \\ \hline
+\endfirsthead
+\textbf{Nhóm} & \textbf{Nội dung được mô tả trong phạm vi} & \textbf{Nguồn} \\ \hline
+\endhead
+Identity & Đăng ký/đăng nhập JWT, băm mật khẩu Argon2id và bảo vệ API/quyền sở hữu dữ liệu. & S1 §4.1, §7.1 \\ \hline
+Catalog và Cart & Menu, chi tiết, size/topping; thêm/sửa/xóa giỏ và tổng tạm; server tính lại khi tạo đơn. & S1 §4.1, §6 F02--F03 \\ \hline
+Order và Inventory & Tạo đơn, kiểm tra hợp lệ, snapshot, trạng thái/lịch sử, chống oversell và hết hạn/hoàn tài nguyên theo lifecycle. & S1 §6 F04--F05 \\ \hline
+Payment & VNPay Sandbox; xác minh IPN/QueryDR; PENDING/SUCCESS/FAILED; idempotency, retry có kiểm soát, grace và reconciliation; bảo lưu Mock test/demo và ZERO\_AMOUNT. & S1 §4.1, §9.9, §16 \\ \hline
+Promotion và Loyalty & Kiểm tra coupon, giới hạn lượt dùng, tính giảm giá và cộng điểm sau thanh toán hợp lệ, không cộng trùng. & S1 §6 F07 \\ \hline
+Kiểm chứng và bàn giao kế thừa & Kiểm thử, Docker Compose, README và demo; phân biệt bằng chứng lịch sử A1 với kiểm chứng A2. & S1 §4.1; S2 §0 \\ \hline
+\end{longtable}
+\endgroup
+
+Bảng xác định phạm vi yêu cầu, không xác nhận mức hoàn thành. Phạm vi QueryDR được bảo lưu nhưng Sandbox E2E còn Deferred; các giới hạn ở mục 9 áp dụng cho mọi phát biểu về tính năng.
+\par
+
+\subsection{Out of Scope và Deferred}
+\begingroup\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.68\linewidth}}
+\hline
+\textbf{Nội dung} & \textbf{Ranh giới áp dụng} \\ \hline
+\endfirsthead
+\textbf{Nội dung} & \textbf{Ranh giới áp dụng} \\ \hline
+\endhead
+Thanh toán tiền thật và refund tự động & Không kích hoạt cổng thanh toán production hoặc giao dịch thật; không tự thêm nghiệp vụ refund. \\ \hline
+Multi-vendor, microservices, mobile native & Giữ mô hình một cửa hàng và stack hiện có. \\ \hline
+Seller/Admin phức tạp và UI Barista & Module Seller/Admin phức tạp và UI Barista nằm ngoài phạm vi sản phẩm baseline; vòng đời trạng thái đơn vẫn được mô tả theo yêu cầu kế thừa. \\ \hline
+Vận chuyển và định vị thời gian thực & Không bổ sung Last-Mile, tracking hoặc nghiệp vụ giao nhận. \\ \hline
+ERP/POS và quản lý nguyên liệu đầy đủ & Tồn kho chỉ phục vụ phạm vi chống oversell và lifecycle tài nguyên của baseline. \\ \hline
+Forgot/Reset Password; hủy đơn chủ động & Forgot/Reset Password và FR-ORD-005 tiếp tục Deferred; không mô tả endpoint/UI tương ứng như đã có. \\ \hline
+\end{longtable}
+\endgroup
+
+A1 từng defer deployment chính thức và CI/CD nâng cao; không được suy diễn rằng các mục này nằm ngoài toàn bộ Assignment 2. Task 1.1 chỉ ghi nhận sự phân biệt giữa phạm vi sản phẩm kế thừa và yêu cầu bàn giao A2. Advanced monitoring không được tự bổ sung như tính năng đã có. [S1 §4.2, §6 F04; S2 §3--5; S4]
+\par
+
+\subsection{Giả định và ràng buộc}
+
+Giả định phân tích: A1-final là baseline nghiệp vụ dùng để kế thừa; chưa có quyết định được duyệt cho thay đổi nghiệp vụ ngoài baseline trong Task 1.1. Mọi đề xuất thay đổi cần được ghi riêng và review trước khi cập nhật phạm vi.
+\par
+
+Giữ Next.js, NestJS, TypeScript, PostgreSQL, Prisma và Docker; không thực hiện refactor hay đổi cấu trúc frontend/backend trong task tài liệu này.
+\par
+
+Guest có thể xem menu; tạo đơn, thanh toán và xem lịch sử cần JWT hợp lệ và kiểm tra quyền sở hữu. Backend là nguồn quyết định giá và trạng thái.
+\par
+
+Môi trường A2 cần tách khỏi A1 về Compose project và DB/volume; không kế thừa việc container A1 đang chạy thành bằng chứng A2. Hosting và chính sách payment demo A2 còn cần quyết định theo planning.
+\par
+
+Tài liệu phải phân biệt yêu cầu, hiện trạng được ghi nhận và bằng chứng nghiệm thu. Không đánh dấu PASS, Done hoặc Approved nếu chưa có review và chứng cứ tương ứng. [S1 §3--5; S2 §0, §7; S4]
+\par
+
+\subsection{Rủi ro và giới hạn kiểm chứng}
+\begingroup\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.68\linewidth}}
+\hline
+\textbf{Rủi ro / giới hạn} & \textbf{Cách thể hiện và xử lý trong Task 1.1} \\ \hline
+\endfirsthead
+\textbf{Rủi ro / giới hạn} & \textbf{Cách thể hiện và xử lý trong Task 1.1} \\ \hline
+\endhead
+Scope creep từ stakeholder cửa hàng & Ghi vai trò và nhu cầu nhưng không biến thành tính năng Admin/Barista mới. \\ \hline
+Nhầm yêu cầu với chức năng hoàn thành & Dùng ngôn ngữ mục tiêu/yêu cầu; không dùng “đã hoàn tất” nếu thiếu bằng chứng. \\ \hline
+QueryDR Sandbox E2E còn Deferred & Bảo lưu phạm vi đối soát; không dùng synthetic/local tests để tuyên bố đã chạy Sandbox E2E. \\ \hline
+Sai lệch payment-status API được Gap Analysis ghi nhận & Giữ trạng thái cần đối chiếu ở A2; không khẳng định đã có route hoặc đã sửa; xử lý ở task kỹ thuật riêng. \\ \hline
+A1 local demo; production/CI/CD/PWA A2 chưa được xác nhận & Không ghi đã deploy, đã có pipeline hoặc đạt PWA; yêu cầu kiểm chứng tại task A2 tương ứng. \\ \hline
+Nguồn tài liệu chưa chốt nghiệm thu & Ghi v3.1 chờ review đặc tả, business baseline đã duyệt; Gap Analysis draft; PR/reviewer/merge là chứng cứ còn cần bổ sung. \\ \hline
+\end{longtable}
+\endgroup
+
+Các giới hạn trên kế thừa S2, không phải kết quả chạy lại toàn bộ hệ thống trong SCRUM-99. Task này không sửa lỗi kỹ thuật hoặc thay đổi business rule để khép các gap. [S2 §0, §5--7]
+\par
+
+\subsection{Tạo phẩm và điều kiện review Task 1.1}
+
+Tạo phẩm chuẩn: docs/requirements/context-and-scope.md. Phần báo cáo tương ứng: docs/report/sections/context-and-scope.tex; đây là fragment dùng trong mẫu SGU, không phải báo cáo A2 hoàn chỉnh.
+\par
+
+Công việc thuộc các task A2 khác: SRS chi tiết, UC, diagram, kiến trúc, CI/CD và deployment được thực hiện trong các task tương ứng, không triển khai trong SCRUM-99. Đây là giới hạn công việc của Task 1.1, không phải danh sách loại trừ của sản phẩm A2. Production/CI/CD là yêu cầu bàn giao A2 theo planning, chưa được ghi nhận là đã nghiệm thu. [S2; S4]
+\par
+
+Review cần kiểm tra bối cảnh/mục tiêu rõ; từng stakeholder có vai trò và nhu cầu; In Scope/Out of Scope nhất quán với A1-final; không mô tả chức năng chưa kiểm chứng như đã hoàn thành; nội dung Markdown và LaTeX thống nhất.
+\par
+
+Thay đổi cần được đưa lên nhánh riêng từ dev có mã SCRUM-99, tạo PR về dev và có review theo quy trình nhóm. Tài liệu này chưa xác nhận đã commit, push, mở PR, review hay merge; không tự đánh dấu Jira Done.
+\par
+
+\subsection{Tài liệu tham chiếu}
+
+Phiên bản nguồn [S1]--[S4] được cố định tại commit 8b4224a907091529ca954c8b0792406cb8a0d9f2 của repository brewlite-project/brewlite-a2, đọc ngày 08/11/2026. Đây là commit nguồn tài liệu A2; baseline nghiệp vụ A1-final vẫn là 1951dc124c83359556f04adb6ba3f0ee9f22fce4.
+\par
+
+[S1] BrewLite Requirements Specification v3.1, cập nhật 30/10/2026. Nguồn tham chiếu chính: docs/BrewLite\_Requirements\_Specification\_v3.1.docx. Bản trong docs/docs\_Phase2/ có cùng nội dung tại commit nguồn được chốt bên dưới.
+\par
+
+[S2] docs/planning/A2\_Gap\_Analysis.md -- DRAFT, 08/11/2026.
+\par
+
+[S3] README.md -- tài liệu A1 kế thừa, không phải chứng nhận production A2.
+\par
+
+[S4] docs/planning/A2\_Implementation\_Plan.md -- PROPOSED / NOT APPROVED, 08/11/2026.
+\par
+
+\begin{itemize}
+\item \href{https://github.com/brewlite-project/brewlite-a2/blob/8b4224a907091529ca954c8b0792406cb8a0d9f2/docs/BrewLite_Requirements_Specification_v3.1.docx}{Requirements v3.1}
+\item \href{https://github.com/brewlite-project/brewlite-a2/blob/8b4224a907091529ca954c8b0792406cb8a0d9f2/docs/planning/A2_Gap_Analysis.md}{A2 Gap Analysis}
+\item \href{https://github.com/brewlite-project/brewlite-a2/blob/8b4224a907091529ca954c8b0792406cb8a0d9f2/README.md}{README}
+\item \href{https://github.com/brewlite-project/brewlite-a2/blob/8b4224a907091529ca954c8b0792406cb8a0d9f2/docs/planning/A2_Implementation_Plan.md}{A2 Implementation Plan}
+\end{itemize}
