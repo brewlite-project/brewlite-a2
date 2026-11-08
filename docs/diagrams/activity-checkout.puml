@@ -1,0 +1,147 @@
+@startuml activity-checkout
+title [A2-T2.1] Activity Diagram — Use Case Checkout (UC-A2-CHECKOUT-001)\nKế thừa A1 (AD-02, AD-03, AD-04, AD-06) & Chuẩn hóa theo Requirements v3.1 / API Contract v4.0
+
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam ArrowColor #334155
+skinparam ActivityBorderColor #1E293B
+skinparam ActivityBackgroundColor #F8FAFC
+skinparam ActivityDiamondBackgroundColor #FEF3C7
+skinparam ActivityDiamondBorderColor #D97706
+skinparam NoteBackgroundColor #FFFBEB
+skinparam NoteBorderColor #F59E0B
+skinparam SwimlaneTitleFontSize 13
+skinparam SwimlaneTitleFontStyle bold
+skinparam SwimlaneBorderColor #64748B
+skinparam SwimlaneBorderThickness 2
+
+|Customer|
+start
+:Mở giỏ hàng, kiểm tra món đã chọn,\nnhập mã coupon (tùy chọn)\nvà nhấn "Đặt hàng" (Checkout);
+
+|Next.js Frontend|
+if (Có phiên đăng nhập / JWT?) then (Chưa đăng nhập [EF-01])
+  :Yêu cầu đăng nhập trước Checkout\n(giữ nguyên giỏ hàng client-side);
+  stop
+endif
+:Gửi POST /orders kèm Bearer JWT\n(items, size, toppings, quantity, couponCode);
+
+|NestJS Backend|
+:Xác thực JWT Guard & kiểm tra DTO\n(cấu trúc giỏ, số lượng, Product/Size/Topping);
+if (JWT & DTO giỏ hàng hợp lệ?) then (Không [EF-01 / EF-03])
+  :Trả 401 UNAUTHORIZED hoặc\n400 VALIDATION_ERROR / INVALID_CART\n(Frontend báo lỗi, không giữ stock/coupon);
+  stop
+endif
+:Bắt đầu DB Transaction tạo Order;
+
+|PostgreSQL DB|
+:Truy vấn trong Transaction:\n1. Kiểm tra Order active của Customer\n   (PENDING / PAYMENT_FAILED còn hạn hoặc VNPay Grace)\n2. Đọc Catalog, tồn kho (stock) & mã Coupon [AF-01 / AF-02];
+
+|NestJS Backend|
+if (Đã tồn tại Order active?) then (Có [EF-05 / BR-C02])
+  :Rollback DB & trả 409 PENDING_ORDER_EXISTS\n(Frontend điều hướng tới Order đang active);
+  stop
+endif
+
+if (Đủ tồn kho & Coupon hợp lệ?) then (Không [EF-04 / EF-15])
+  :Rollback DB nguyên tử & trả lỗi:\n- 409 INSUFFICIENT_STOCK (hết hàng)\n- 400 INVALID_COUPON / 409 COUPON_UNAVAILABLE\n(Frontend báo lỗi, giữ giỏ hàng để chỉnh sửa);
+  stop
+endif
+
+:Tính giá authoritative server-side [BR-C01]:\nsize multiplier (round-half-up) + toppings - discount;\nXác định totalVnd >= 0, đặt expiresAt = E (createdAt + 15m);
+
+|PostgreSQL DB|
+:Tạo Order (status = PENDING) + OrderItem snapshots,\ntrừ/giữ tồn kho, giữ Coupon (HELD) & Commit;
+
+|NestJS Backend|
+:Trả 201 Created (Order PENDING, totalVnd, expiresAt);
+
+|Next.js Frontend|
+:Nhận Order PENDING (chưa xóa giỏ client)\nvà hiển thị bước thanh toán theo totalVnd;
+
+|Customer|
+:Xác nhận thanh toán cho Order\n(hoặc chọn Retry khi PAYMENT_FAILED còn hạn [BR-C04]);
+
+|Next.js Frontend|
+:Sinh Idempotency-Key (8..64 ký tự)\nvà gửi yêu cầu thanh toán theo nhánh phù hợp;
+
+|NestJS Backend|
+:Kiểm tra JWT, ownership (404 nếu khác chủ [EF-02]),\nIdempotency-Key (replay [AF-10] / 409 conflict [EF-06]),\nTTL (now < E [EF-08]) & không có VNPay PENDING /\nFinancial Exception đang chặn [EF-07];
+
+if (Đủ điều kiện khởi tạo / thực hiện thanh toán?) then (Không [EF-02, EF-06..EF-09])
+  :Trả lỗi 404 NOT_FOUND hoặc 409 Conflict\n(ORDER_EXPIRED / PAYMENT_IN_PROGRESS /\nIDEMPOTENCY_KEY_CONFLICT / FINANCIAL_EXCEPTION...);
+  stop
+endif
+
+if (Đơn hàng 0đ: totalVnd == 0?\n[AF-03: POST /payments/zero-amount]) then (Có: totalVnd == 0 [BR-C07])
+  :Xác minh snapshot totalVnd == 0 (409 nếu > 0 [EF-09]),\nchạy Shared Finalization (ZERO_AMOUNT, không gọi gateway):\nDB cập nhật nguyên tử Payment = SUCCESS (0đ),\nOrder = PAID, Coupon HELD -> CONSUMED, loyaltyPoints = 0;\nTrả 201/200 ZeroAmountPaymentResponseDto (Frontend báo PAID);
+  stop
+endif
+
+if (Chế độ Mock test/demo?\n[AF-04: POST /payments — CARD/WALLET]) then (Mock Mode)
+  if (MOCK_PAYMENT_ENABLED=true\n& NODE_ENV != production?) then (Không [BR-C09])
+    :Trả 403 MOCK_PAYMENT_DISABLED;
+    stop
+  endif
+  :Xử lý giả lập thẻ/ví test & cập nhật DB nguyên tử:\n- Thẻ 0002 / Ví 0000: Payment = FAILED, Order = PAYMENT_FAILED\n  (giữ stock & Coupon HELD trong TTL để cho phép Retry).\n- Hợp lệ khác: Shared Finalization -> Payment = SUCCESS,\n  Order = PAID, Coupon HELD -> CONSUMED, cộng điểm 1 lần;\nTrả 200 PaymentResponseDto (Frontend hiển thị kết quả);
+  stop
+endif
+
+:Luồng chính VNPay Sandbox (totalVnd > 0) [Main Flow]:\nXử lý POST /payments/vnpay/initiate\n(409 ZERO_AMOUNT_REQUIRED nếu totalVnd == 0 [EF-09]);
+
+|PostgreSQL DB|
+:Tạo bản ghi Payment (provider = VNPAY, status = PENDING,\nvnp_TxnRef duy nhất, amount = totalVnd * 100);
+
+|NestJS Backend|
+:Tạo URL thanh toán ký HMAC-SHA512 (paymentUrl)\nvà trả 201/200 VnpayInitiationResponseDto;
+
+|Next.js Frontend|
+:Chuyển hướng (Redirect) trình duyệt sang VNPay Sandbox;
+
+|VNPay Sandbox|
+:Hiển thị cổng thanh toán VNPay Sandbox;
+
+|Customer|
+:Thực hiện thanh toán hoặc hủy giao dịch trên VNPay Sandbox;
+
+|VNPay Sandbox|
+:Xử lý giao dịch, redirect Return URL về Frontend\nvà gửi Server-to-Server IPN độc lập (GET /payments/vnpay/ipn);
+
+|Next.js Frontend|
+:Nhận Return URL [EF-11: không tự coi Return URL là PAID],\ngọi GET /orders/me (bounded polling) để đọc trạng thái xác thực*\n(*GET /orders/me đã triển khai; GET /payments/:id/status là API v4 [VERIFY]);
+
+|NestJS Backend|
+:Tiếp nhận IPN (GET /payments/vnpay/ipn) hoặc chạy\ntiến trình đối soát nội bộ (QueryDR / Expiration)*\n(*Service/Scheduler có trong code/test; Sandbox E2E deferred theo ADR);
+:Xác minh chữ ký HMAC-SHA512, TmnCode,\nvnp_TxnRef, số tiền snapshot & bằng chứng trạng thái [EF-10];
+
+if (Bằng chứng giao dịch hợp lệ?) then (Sai chữ ký/số tiền [EF-10])
+  :Từ chối Finalization, giữ nguyên trạng thái DB\nvà phản hồi mã RspCode theo VNPay IPN contract;
+  stop
+endif
+
+:Khóa Payment & Order theo thứ tự chuẩn [EF-13 / BR-C05]\ntrong Shared Finalization Service;
+
+if (Kết quả xác minh giao dịch VNPay?) then (SUCCESS [00] & paidAt <= E\n& Order chưa CANCELLED [Main Flow])
+  :Xác định kết cục thành công đúng hạn:\nPayment -> SUCCESS, Order -> PAID;
+elseif (SUCCESS trễ sau E hoặc sau CANCELLED [EF-12]) then (Late Success)
+  :Ghi nhận ngoại lệ tài chính\n(hasFinancialException / REQUIRES_REVIEW);\nKHÔNG hồi sinh Order, KHÔNG cấp lại stock/coupon/điểm;
+elseif (Terminal FAILED xác định từ cổng [AF-05]) then (FAILED)
+  :Xác định Payment -> FAILED;\nnếu now < E thì Order -> PAYMENT_FAILED\n(giữ stock & Coupon HELD để cho phép Retry [BR-C04]);
+else (Chưa rõ / Mất IPN / Timeout [AF-06..AF-09, EF-14])
+  :Xét mốc hết hạn E (+15m) & cửa sổ Grace G (E + 5m) [BR-C03]:\n- Không có VNPay PENDING tại E [AF-08]: hủy Order tại E.\n- Có VNPay PENDING tại E [AF-07]: giữ Grace [E, G), chặn attempt mới;\n  qua mốc G vẫn unknown [AF-09]: hủy Order tại G,\n  giữ Payment.status = PENDING + reconciliationState = REQUIRES_REVIEW [BR-C10];
+endif
+
+|PostgreSQL DB|
+:Lưu bền vững kết cục nguyên tử (Atomic DB Commit):\n1. Thành công đúng hạn: Payment = SUCCESS, Order = PAID,\n   Coupon HELD -> CONSUMED, cộng điểm tích lũy đúng 1 lần.\n2. Thất bại trong TTL [AF-05]: Payment = FAILED, Order = PAYMENT_FAILED\n   (bảo toàn tồn kho & Coupon HELD để cho phép Retry).\n3. Quá hạn E / G [AF-08, AF-09]: Order = CANCELLED, hoàn trả stock &\n   giải phóng Coupon đúng 1 lần (nếu hết Grace: Payment giữ PENDING +\n   reconciliationState = REQUIRES_REVIEW).\n4. Ngoại lệ trễ [EF-12]: lưu bằng chứng tài chính, không hồi sinh Order;
+
+|Next.js Frontend|
+:Đồng bộ trạng thái Order & Payment từ Backend\nvà phân nhánh hiển thị kết quả cuối cùng:\n1. Order == PAID: xóa giỏ hàng client, hiển thị xác nhận thành công.\n2. Order == PAYMENT_FAILED (now < E): giữ giỏ/đơn, mở nút Retry\n   (yêu cầu Idempotency-Key & TxnRef mới [BR-C04]).\n3. Order == CANCELLED: hiển thị thông báo đơn hết hạn & đã hủy.\n4. PENDING / REQUIRES_REVIEW / FINANCIAL_EXCEPTION:\n   hiển thị đang đối soát / cần kiểm tra thủ công, khóa nút Retry;
+
+|Customer|
+:Nhận kết quả cuối cùng của đơn hàng:\n- Thành công (PAID): theo dõi trạng thái chế biến đơn.\n- Thất bại trong hạn (PAYMENT_FAILED): có thể chọn Retry trước mốc E.\n- Đã hủy (CANCELLED) hoặc Đang đối soát (REQUIRES_REVIEW);
+stop
+
+@enduml

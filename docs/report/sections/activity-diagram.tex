@@ -1,0 +1,106 @@
+% SCRUM-103 / A2-T2.1 — Fragment cho báo cáo Assignment 2.
+% Canonical content: docs/diagrams/A2_T2.1_Activity_Diagram_Checkout.md
+% Source diagram: docs/diagrams/activity-checkout.puml
+% Rendered exports: docs/diagrams/activity-checkout.svg, docs/diagrams/activity-checkout.pdf,
+%                   docs/report/assets/activity-checkout.pdf
+% Yêu cầu gói trong preamble chính: \usepackage{graphicx}, \usepackage{longtable}, \usepackage{array}
+
+\section{Activity Diagram --- Luồng Checkout (\texttt{UC-A2-CHECKOUT-001})}
+\label{sec:a2-activity-checkout}
+
+\noindent\textbf{Task:} SCRUM-103 / A2-T2.1\par
+\noindent\textbf{Trạng thái:} DRAFT -- chờ review PR trước khi merge vào \texttt{dev}\par
+\noindent\textbf{Ngày soạn:} 08/11/2026\par
+\noindent\textbf{Baseline đối chiếu:} \texttt{A1-final} (\texttt{1951dc124c83359556f04adb6ba3f0ee9f22fce4})\par
+\noindent\textbf{Tệp nguồn \& kết xuất:} \texttt{docs/diagrams/activity-checkout.puml}, \texttt{docs/diagrams/activity-checkout.svg}, \texttt{docs/diagrams/activity-checkout.pdf}\par
+
+\subsection{Mục tiêu và nguyên tắc kế thừa từ Assignment 1}
+
+Sơ đồ hoạt động (Activity Diagram) của Task~2.1 mô hình hóa luồng nghiệp vụ end-to-end cho Use Case trọng tâm \texttt{UC-A2-CHECKOUT-001} (\emph{Đặt hàng và thanh toán}), kế thừa bốn sơ đồ con trong bộ tạo phẩm Assignment~1 (\texttt{docs/diagram/Activity-Final.drawio.svg}: \texttt{AD-02} Quy trình đặt món tổng quan, \texttt{AD-03} Tạo đơn hàng, \texttt{AD-04} Thanh toán và \texttt{AD-06} Hủy đơn hàng quá 15 phút) và chuẩn hóa theo Requirements Specification v3.1 cùng API Contract v4.0.
+\par
+
+So với phiên bản A1 vốn chỉ chia hai phân vùng tổng quát (\emph{Người dùng} và \emph{Hệ thống}) và chỉ mô tả thanh toán giả lập (\texttt{CARD}/\texttt{WALLET}), sơ đồ chuẩn hóa ở Assignment~2 giải quyết trọn vẹn các yêu cầu của mục Task~2.1:
+\begin{itemize}
+  \item Tách rõ \textbf{5 swimlane} theo đúng kiến trúc thực tế: \texttt{Customer}, \texttt{Next.js Frontend}, \texttt{NestJS Backend}, \texttt{PostgreSQL DB} và actor ngoài \texttt{VNPay Sandbox}.
+  \item Hợp nhất mạch lạc từ thao tác xác nhận giỏ hàng, kiểm tra đăng nhập/JWT, tạo đơn nguyên tử (\texttt{POST /orders}), phân nhánh phương thức thanh toán đến hoàn tất giao dịch (\texttt{Shared Finalization}) và trả kết quả cuối cùng.
+  \item Bổ sung đầy đủ các nhánh rẽ điều kiện và ngoại lệ: chưa đăng nhập (\texttt{EF-01}), dữ liệu giỏ không hợp lệ (\texttt{EF-03}), trùng đơn active (\texttt{EF-05}), hết hàng hoặc lỗi mã giảm giá (\texttt{EF-04}), đơn hàng \(0\,\text{đ}\) (\texttt{AF-03: ZERO\_AMOUNT}), chế độ Mock giới hạn trong môi trường test/demo (\texttt{AF-04}), thanh toán thất bại cho phép thử lại trong hạn TTL (\texttt{AF-05}), hết hạn TTL \(15\text{ phút}\) / cửa sổ Grace \(5\text{ phút}\) (\texttt{AF-07..AF-09}) và ngoại lệ thanh toán đến trễ (\texttt{EF-12}).
+  \item Tuân thủ nghiêm ngặt nguyên tắc trung thực với hiện trạng mã nguồn \texttt{A1-final}: không mô tả chức năng chỉ mới có trên đặc tả như đã triển khai hoàn chỉnh.
+\end{itemize}
+
+\subsection{Phân vùng trách nhiệm (Swimlanes) và các nút quyết định chính}
+
+\begingroup\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.20\linewidth}>{\raggedright\arraybackslash}p{0.44\linewidth}>{\raggedright\arraybackslash}p{0.28\linewidth}}
+\hline
+\textbf{Swimlane} & \textbf{Hành động chính trên sơ đồ} & \textbf{Ràng buộc / Bất biến} \\ \hline
+\endfirsthead
+\hline
+\textbf{Swimlane} & \textbf{Hành động chính trên sơ đồ} & \textbf{Ràng buộc / Bất biến} \\ \hline
+\endhead
+\texttt{Customer} & Mở giỏ hàng, nhập mã coupon (tùy chọn), nhấn Đặt hàng; xác nhận thanh toán hoặc chọn Retry; thao tác trên cổng VNPay Sandbox; nhận kết quả cuối cùng. & Chỉ được Retry khi \texttt{Order == PAYMENT\_FAILED}, còn hạn \(now < E\) và không có cờ đối soát/ngoại lệ tài chính. \\ \hline
+\texttt{Next.js Frontend} & Kiểm tra JWT client-side; gửi \texttt{POST /orders}; giữ giỏ hàng cho đến khi \texttt{Order == PAID}; sinh \texttt{Idempotency-Key} (8..64 ký tự); redirect sang VNPay; nhận Return URL và gọi \texttt{GET /orders/me} (bounded polling). & Không tự coi Return URL là \texttt{PAID}; không tự xóa giỏ khi giao dịch còn \texttt{PENDING}. \\ \hline
+\texttt{NestJS Backend} & Thực thi \texttt{JwtAuthGuard}, \texttt{ValidationPipe}, \texttt{MockPaymentGuard}; tính giá authoritative (\texttt{round-half-up}); kiểm tra 1 Order active, \texttt{Idempotency-Key} và TTL; khởi tạo VNPay, xử lý IPN (\texttt{GET /payments/vnpay/ipn}), chạy \texttt{Shared Finalization} và tiến trình hết hạn/đối soát. & Không tin cậy giá/discount từ client; khóa bản ghi theo thứ tự chuẩn để chống race condition (\texttt{EF-13}). \\ \hline
+\texttt{PostgreSQL DB} & Kiểm tra Order active, tồn kho và coupon trong transaction; lưu snapshot \texttt{Order}/\texttt{OrderItem}; trừ/hoàn stock; chuyển trạng thái coupon (\texttt{HELD} \(\rightarrow\) \texttt{CONSUMED} hoặc release); cập nhật \texttt{Payment} và điểm tích lũy nguyên tử. & Rollback toàn bộ khi lỗi (\texttt{EF-15}); mỗi tài nguyên chỉ được trừ/tiêu thụ hoặc hoàn trả đúng một lần. \\ \hline
+\texttt{VNPay Sandbox} & Hiển thị cổng thanh toán cho nhánh \texttt{totalVnd > 0}; xử lý giao dịch, điều hướng trình duyệt về Return URL và gửi webhook IPN độc lập về Backend. & Chỉ tham gia trên nhánh VNPay; không tham gia nhánh \texttt{ZERO\_AMOUNT} hoặc Mock. \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Tóm tắt luồng hoạt động và các nhánh điều kiện}
+
+\begin{enumerate}
+  \item \textbf{Pha 1 --- Kiểm tra đăng nhập và tạo đơn hàng (\texttt{POST /orders}):}
+  Từ nút bắt đầu khi \texttt{Customer} nhấn Đặt hàng, \texttt{Next.js Frontend} kiểm tra phiên JWT. Nếu chưa đăng nhập (\texttt{EF-01}), hệ thống giữ nguyên giỏ client-side và yêu cầu đăng nhập. Khi có JWT, request được gửi tới \texttt{NestJS Backend}. Backend xác thực JWT (\texttt{401} nếu không hợp lệ) và cấu trúc giỏ (\texttt{400} nếu sai định dạng). Tiếp theo, trong DB Transaction nguyên tử:
+  \begin{itemize}
+    \item Nếu đã tồn tại Order active (\texttt{PENDING}/\texttt{PAYMENT\_FAILED} còn hạn hoặc đang trong VNPay Grace): rollback và trả \texttt{409 PENDING\_ORDER\_EXISTS} (\texttt{EF-05 / BR-C02}).
+    \item Nếu sản phẩm hết hàng hoặc mã giảm giá không hợp lệ/hết lượt: rollback nguyên tử và trả \texttt{409 INSUFFICIENT\_STOCK}, \texttt{400 INVALID\_COUPON} hoặc \texttt{409 COUPON\_UNAVAILABLE} (\texttt{EF-04 / EF-15}).
+    \item Nếu hợp lệ: tính giá authoritative phía server (\texttt{BR-C01}), đặt \texttt{expiresAt = E = createdAt + 15m}, tạo \texttt{Order (PENDING)} cùng snapshot, trừ tồn kho và giữ coupon (\texttt{HELD}).
+  \end{itemize}
+
+  \item \textbf{Pha 2 --- Kiểm tra điều kiện và phân nhánh thanh toán:}
+  \texttt{Next.js Frontend} sinh \texttt{Idempotency-Key} và gửi yêu cầu thanh toán. \texttt{NestJS Backend} xác minh quyền sở hữu (\texttt{404 NOT\_FOUND} nếu khác chủ --- \texttt{EF-02}), kiểm tra \texttt{Idempotency-Key} (trả kết quả replay nếu trùng request \texttt{AF-10}, hoặc \texttt{409 IDEMPOTENCY\_KEY\_CONFLICT} nếu khác payload \texttt{EF-06}), kiểm tra \texttt{now < E} (\texttt{EF-08}) và đảm bảo không có giao dịch \texttt{PENDING}/ngoại lệ tài chính đang chặn (\texttt{EF-07}). Sau đó phân thành 3 nhánh:
+  \begin{itemize}
+    \item \textbf{Nhánh \texttt{totalVnd == 0} (\texttt{AF-03 --- POST /payments/zero-amount}):} Không gọi cổng ngoài; \texttt{Shared Finalization} cập nhật nguyên tử \texttt{Payment = SUCCESS (0đ)}, \texttt{Order = PAID}, \texttt{Coupon HELD \(\rightarrow\) CONSUMED}, \texttt{loyaltyPoints = 0}.
+    \item \textbf{Nhánh Mock test/demo (\texttt{AF-04 --- POST /payments}):} Kiểm tra \texttt{MOCK\_PAYMENT\_ENABLED=true} và \texttt{NODE\_ENV != production} (nếu sai trả \texttt{403 MOCK\_PAYMENT\_DISABLED}). Thẻ đuôi \texttt{0002} hoặc ví đuôi \texttt{0000} dẫn tới \texttt{Payment = FAILED}, \texttt{Order = PAYMENT\_FAILED}; dữ liệu test hợp lệ khác hoàn tất \texttt{Order = PAID}.
+    \item \textbf{Luồng chính VNPay Sandbox (\texttt{Main Flow --- POST /payments/vnpay/initiate}):} Tạo bản ghi \texttt{Payment (PENDING)} với \texttt{vnp\_TxnRef} duy nhất (\texttt{amount = totalVnd * 100}), ký URL \texttt{HMAC-SHA512} và điều hướng \texttt{Customer} sang \texttt{VNPay Sandbox}.
+  \end{itemize}
+
+  \item \textbf{Pha 3 --- Xác minh IPN/đối soát, hết hạn TTL/Grace và kết thúc:}
+  Sau khi khách thao tác trên VNPay Sandbox, trình duyệt nhận Return URL (\texttt{EF-11}: Frontend không tự coi là \texttt{PAID} mà gọi \texttt{GET /orders/me} để đọc trạng thái xác thực), đồng thời VNPay gửi IPN độc lập (\texttt{GET /payments/vnpay/ipn}) về Backend. Backend kiểm tra chữ ký \texttt{HMAC-SHA512}, \texttt{TmnCode}, \texttt{vnp\_TxnRef} và số tiền snapshot (\texttt{EF-10}):
+  \begin{itemize}
+    \item \textbf{Thành công đúng hạn (\texttt{paidAt <= E} \& chưa \texttt{CANCELLED}):} \texttt{Shared Finalization} khóa bản ghi theo thứ tự chuẩn (\texttt{BR-C05}), cập nhật nguyên tử \texttt{Payment = SUCCESS}, \texttt{Order = PAID}, tiêu thụ coupon và cộng điểm tích lũy đúng 1 lần.
+    \item \textbf{Thanh toán thành công đến trễ (\texttt{EF-12}):} Ghi nhận bằng chứng ngoại lệ tài chính (\texttt{hasFinancialException} / \texttt{REQUIRES\_REVIEW}), không hồi sinh Order đã \texttt{CANCELLED}, không cấp lại stock/coupon/điểm.
+    \item \textbf{Thất bại xác định từ cổng (\texttt{AF-05}):} Cập nhật \texttt{Payment = FAILED}; nếu còn trong hạn \texttt{now < E} thì \texttt{Order = PAYMENT\_FAILED}, giữ nguyên stock và coupon \texttt{HELD} để cho phép Retry với \texttt{Idempotency-Key} và \texttt{TxnRef} mới.
+    \item \textbf{Chưa rõ kết quả / quá hạn TTL \& Grace (\texttt{AF-06..AF-09, BR-C03, BR-C10}):} Không có VNPay \texttt{PENDING} tại mốc \texttt{E} thì hủy đơn tại \texttt{E}; nếu có VNPay \texttt{PENDING} thì giữ cửa sổ Grace \([E, G)\) với \(G = E + 5\text{ phút}\) và chặn tạo attempt mới. Qua mốc \texttt{G} vẫn chưa xác minh được thì \texttt{Order \(\rightarrow\) CANCELLED}, hoàn trả stock và giải phóng coupon 1 lần, trong khi \texttt{Payment.status} giữ \texttt{PENDING} kèm metadata đối soát \texttt{reconciliationState = REQUIRES\_REVIEW}.
+  \end{itemize}
+\end{enumerate}
+
+\subsection{Ghi chú đối chiếu với Implementation \texttt{A1-final}}
+
+\begin{itemize}
+  \item \textbf{Endpoint tra cứu trạng thái phía Frontend:} Trong mã nguồn \texttt{A1-final}, trang xác nhận đơn hàng đồng bộ dữ liệu thực tế qua \texttt{GET /orders/me} (đã triển khai đầy đủ ở cả Frontend và Backend). Endpoint \texttt{GET /payments/:paymentId/status} thuộc đặc tả API Contract v4.0 (\texttt{API-03}) chưa có route controller tương ứng ở backend tại \texttt{A1-final}, nên được chú thích rõ là \texttt{[VERIFY]} trên sơ đồ.
+  \item \textbf{Đối soát QueryDR:} Các thành phần \texttt{VnpayIpnController}, \texttt{PaymentFinalizationService}, \texttt{OrderExpirationService}, \texttt{VnpayQuerydrService} và \texttt{PaymentReconciliationScheduler} đã hiện diện trong mã nguồn và unit/integration test; kiểm thử E2E trực tiếp với máy chủ QueryDR của VNPay Sandbox thực tế thuộc phạm vi hoãn theo \texttt{ADR-P2-QueryDR-Sandbox-E2E-Deferred}.
+\end{itemize}
+
+\subsection{Sơ đồ Activity Diagram Checkout}
+
+\begin{figure}[htbp]
+\centering
+\IfFileExists{docs/report/assets/activity-checkout.pdf}{%
+  \includegraphics[width=\linewidth,height=0.88\textheight,keepaspectratio]{docs/report/assets/activity-checkout.pdf}%
+}{%
+  \IfFileExists{../assets/activity-checkout.pdf}{%
+    \includegraphics[width=\linewidth,height=0.88\textheight,keepaspectratio]{../assets/activity-checkout.pdf}%
+  }{%
+    \IfFileExists{docs/diagrams/activity-checkout.pdf}{%
+      \includegraphics[width=\linewidth,height=0.88\textheight,keepaspectratio]{docs/diagrams/activity-checkout.pdf}%
+    }{%
+      \fbox{\parbox{0.85\linewidth}{\centering
+      Sơ đồ Activity Diagram Checkout nằm tại \texttt{docs/diagrams/activity-checkout.puml}.\\
+      Bản kết xuất vector nằm tại \texttt{docs/diagrams/activity-checkout.pdf} và \texttt{docs/report/assets/activity-checkout.pdf}.}}%
+    }%
+  }%
+}
+\caption{Activity Diagram chuẩn hóa cho Use Case Checkout (\texttt{UC-A2-CHECKOUT-001}) với 5 swimlane và đầy đủ nhánh thành công, thay thế, ngoại lệ.}
+\label{fig:a2-activity-checkout}
+\end{figure}
