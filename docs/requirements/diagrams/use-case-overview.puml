@@ -1,0 +1,57 @@
+@startuml
+left to right direction
+skinparam shadowing false
+skinparam packageStyle rectangle
+actor "Guest" as Guest
+actor "Customer" as Customer
+actor "Người vận hành demo" as Demo
+actor "VNPay Sandbox" as VNP
+rectangle "BrewLite — phạm vi kế thừa A1-final" {
+  usecase "UC-CAT-001\nXem menu" as U0
+  usecase "UC-CAT-002\nXem chi tiết / size / topping" as U1
+  usecase "UC-AUTH-001\nĐăng ký tài khoản" as U2
+  usecase "UC-AUTH-002\nĐăng nhập" as U3
+  usecase "UC-AUTH-003\nĐăng xuất" as U4
+  usecase "UC-CART-001\nQuản lý giỏ hàng" as U5
+  usecase "UC-PRO-001\nXem điểm / thông tin ưu đãi" as U6
+  usecase "UC-ORD-001\nTạo đơn từ giỏ" as U7
+  usecase "UC-ORD-002\nXem lịch sử / snapshot đơn" as U8
+  usecase "UC-ORD-003\nTự hết hạn đơn (supporting)" as U9
+  usecase "UC-ORD-004\nTiến trạng thái đơn nội bộ" as U10
+  usecase "UC-PAY-001\nThanh toán: VNPay / Mock / 0 VND" as U11
+  usecase "UC-PAY-002\nXem kết quả / xác nhận" as U12
+  usecase "UC-PRO-002\nPreview coupon — SHOULD (*)" as U13
+}
+Guest -- U0
+Guest -- U1
+Guest -- U2
+Guest -- U3
+Guest -- U5
+Customer -- U0
+Customer -- U1
+Customer -- U4
+Customer -- U5
+Customer -- U6
+Customer -- U7
+Customer -- U8
+Customer -- U11
+Customer -- U12
+Customer -- U13
+Demo -- U10
+VNP -- U11
+note bottom of U9
+Chỉ auto-expiration hỗ trợ.
+Customer Cancel FR-ORD-005 Deferred.
+Scheduler là nội bộ, không phải actor ngoài.
+end note
+note bottom of U13
+(*) Nguồn cũ SHOULD/Deferred; SCRUM-96
+confirmed implementation; A2 scope/acceptance
+cần xác nhận. Không coi code/test là PASS.
+end note
+note bottom of U11
+Mock và ZERO_AMOUNT là nội bộ.
+VNPay Sandbox: initiation/IPN/QueryDR.
+QueryDR E2E chưa nghiệm thu Sandbox.
+end note
+@enduml
