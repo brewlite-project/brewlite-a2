@@ -3,12 +3,13 @@
 | Thuộc tính | Giá trị |
 | --- | --- |
 | Task | SCRUM-105 / A2-T2.3 |
-| Trạng thái | DRAFT — đã chuẩn bị để review, chưa nghiệm thu, chưa xác nhận PR/merge. |
+| Trạng thái | UPDATED — xử lý review vòng 1 của PR #5; chờ reviewer xác nhận, chưa nghiệm thu/merge. |
 | Ngày soạn | 08/11/2026 |
+| Ngày đối chiếu sau review | 09/11/2026 |
 | Baseline nghiệp vụ | `A1-final^{commit}` = `1951dc124c83359556f04adb6ba3f0ee9f22fce4`. |
-| Đối chiếu A2 | `b542ee42be5933ac8cf34bda39908685e88aafbe`, HEAD của branch task và `origin/dev` lưu local lúc khảo sát. |
+| Đối chiếu A2 | `origin/dev` sau fetch tại `2c432159ec8eb47ea315c3af25c1739d0f04dd4d`; SRS SCRUM-102 và Checkout UC SCRUM-100 đã merge. |
 
-Backend/Prisma không có diff so với A1-final tại thời điểm này; chưa fetch để xác nhận remote mới nhất.
+Backend, frontend và database không có diff so với A1-final tại snapshot `dev` đối chiếu này. Branch SCRUM-105 chưa pull/merge/rebase `dev`; các tài liệu Task 1 mới được đọc qua Git object và ghim permalink. Chi tiết nguồn, mapping và xác nhận retry nằm trong [bản xử lý review vòng 1](domain-review-followup.md).
 
 Mô hình tập trung vào Checkout, Payment, Promotion và Loyalty. Mục tiêu là giải thích đối tượng nghiệp vụ, snapshot và quan hệ xuyên suốt vòng đời đơn hàng. Đây là mô hình phân tích domain, không phải đề xuất đổi schema hoặc khẳng định backend đã triển khai các class theo kiểu DDD.
 
@@ -22,6 +23,8 @@ Mô hình tập trung vào Checkout, Payment, Promotion và Loyalty. Mục tiêu
 | [brewlite-domain-types.svg](brewlite-domain-types.svg) | Hình vector các enum và ToppingSnapshot. |
 | [brewlite-domain-class.pdf](brewlite-domain-class.pdf) | PDF vector hai trang A3 landscape: domain chính, rồi enum/kiểu dữ liệu; có text để tìm kiếm. |
 | [domain-class-figure.tex](domain-class-figure.tex) | Fragment chèn từng trang PDF vào báo cáo LaTeX. |
+| [domain-review-followup.md](domain-review-followup.md) | Bằng chứng đối chiếu DC-03/04/05 với Task 1 đã merge và xác nhận retry ngày 09/11/2026. |
+| [domain-class-check.tex](../report/domain-class-check.tex) và [bản PDF tích hợp](../report/assets/domain-class-check.pdf) | Fixture báo cáo A4 để kiểm tra fragment, caption tiếng Việt, tham chiếu và bố cục landscape; không phải báo cáo A2 cuối. |
 
 ![Domain chính](brewlite-domain-class.svg)
 
@@ -105,6 +108,7 @@ Toàn bộ 12 enum sử dụng trong hình được giữ đúng tên/value củ
 6. Payment SUCCESS/FAILED là terminal. Timeout, Return URL và event outcome=SUCCESS đứng riêng không cho phép tự PAID hoặc FAILED. Late/conflicting SUCCESS lưu evidence/financial exception; không hồi sinh CANCELLED Order, không tự refund hoặc cộng điểm.
 7. Sau khi PAID, internal advance chỉ đi PAID→PREPARING→READY→COMPLETED, không đổi stock/coupon/points. Không thêm Cancel API/UI chủ động hoặc refund vào mô hình này.
 8. Ownership lấy từ verified JWT và kiểm ở server. Replay không tạo attempt/side effect mới. Unique `(userId,idempotencyKey)` dùng chung các Payment API; nhiều FAILED lịch sử vẫn được phép.
+9. Theo xác nhận nhận ngày 09/11/2026 cho DC-04: retry VNPay từ Order PAYMENT_FAILED **giữ Order.status=PAYMENT_FAILED** trong khi Payment attempt mới là PENDING. Đây là hai trục trạng thái riêng, phù hợp source A1-final; không tạo transition Order về PENDING trong bước initiate. Phạm vi và nguồn xác nhận được ghi trong [bản xử lý review §2](domain-review-followup.md#2-dc-04-xác-nhận-quy-tắc-retry).
 
 Các invariant được đối chiếu source/contract, chưa phải kết quả chạy lại giao dịch, integration hoặc Sandbox E2E trong task tài liệu này.
 
@@ -121,7 +125,8 @@ Các đường dẫn tương đối dưới đây thuộc repository ở commit 
 | Payment/status/evidence | API v4.0 §1/4/10/14.3–14.5; [BR-01…06](../decisions/VNPay_Phase2_Change_Request.md); [US–AC Phase 2](../docs_Phase2/BrewLite_User_Stories_Acceptance_Criteria_Phase2.docx) US-VNP-02/03/04/05; UC-PAY-001 | Prisma enums/Payment/PaymentGatewayEvent; PaymentFinalizationService |
 | Expiry và fulfillment | Requirements FR-ORD-003/007; API v4.0 §14.2; UC-ORD-003 và UC-PAY-001 | [inventory-transaction.ts](../../backend/src/orders/inventory-transaction.ts), [order-state.service.ts](../../backend/src/orders/order-state.service.ts) |
 | Giới hạn active/SUCCESS/PENDING | API v4.0 §14.3; Requirements §10.2–10.3 | [active Order migration](../../backend/prisma/migrations/20261022011000_scrum36_active_order_coupon_constraints/migration.sql), [one SUCCESS migration](../../backend/prisma/migrations/20261026065408_add_payment_schema/migration.sql), [VNPay delta migration](../../backend/prisma/migrations/20261031190100_scrum76_payment_gateway_delta/migration.sql) — chỉ đọc, không chạy migration |
-| Task 1.3 A2 bổ trợ | [Checkout UC bản 0.2](https://github.com/brewlite-project/brewlite-a2/blob/f957c2a13061aae41f119f1b497f13e9e69f0f56/docs/requirements/A2_T1.3_Checkout_Use_Case_Specification.md), đọc từ remote-tracking branch SCRUM-100 tại commit này; main flow 4–10, AF03–09, BR-C10 | Đối chiếu source riêng cho task này; không sửa hoặc tuyên bố đóng các mục R-02/R-03 của Checkout UC |
+| Task 1.2 A2 | [SRS SCRUM-102](https://github.com/brewlite-project/brewlite-a2/blob/50ef4be8beff005321ee6b44aa9e83d9d5202ee2/docs/requirements/srs.md) đã merge qua PR #7; FR/NFR và AC giữ đúng ID nguồn | Mapping 11 nhóm domain với FR/NFR được ghi ở [bản xử lý review §3](domain-review-followup.md#3-dc-05-mapping-frnfr-với-checkout-đã-merge); không gán AC PASS |
+| Task 1.3 A2 | [Checkout UC bản 0.4](https://github.com/brewlite-project/brewlite-a2/blob/ac08a3a608ad7f2cbc5ea34642aa26130a164bdc/docs/requirements/A2_T1.3_Checkout_Use_Case_Specification.md) đã merge qua PR #3; Steps 1–11, AF03–09, EF-01–15, BR-C10 và §8.1/8.3 | Đối chiếu khái niệm, snapshot, attempt, coupon/loyalty và status với SRS; giữ riêng các gap runtime được UC nêu |
 
 ### Những khác biệt đã ghi nhận
 
@@ -129,11 +134,11 @@ Các đường dẫn tương đối dưới đây thuộc repository ở commit 
 | --- | --- | --- |
 | DC-01 | Đề yêu cầu Promotion và LoyaltyTransaction, nhưng Prisma không có model mang hai tên này. Vẽ như hai bảng mới sẽ mô tả sai A1. | Promotion ánh xạ 1 khái niệm vào Coupon; LoyaltyTransaction gắn nhãn derived và không có ledger riêng. Reviewer xác nhận cách biểu diễn này đáp ứng đề; task này không thiết kế persistence mới. |
 | DC-02 | [ERD PDF cũ](../diagram/ERD/ERD.pdf) trang 1–3 và [database/schema.dbml](../../database/schema.dbml) còn PaymentStatus SUCCESS/FAILED, chưa có VNPay delta, đồng thời liệt kê InventoryMovement mà schema hiện tại không có. | Giữ nguồn lịch sử; ghi nhận lệch phiên bản. Enum/evidence lấy theo API v4.0 §14.3, Prisma và migration đã có tại A1-final; không thêm InventoryMovement vào domain hiện hành hoặc tự sửa ERD cũ. Owner ERD cần đồng bộ ở task riêng. |
-| DC-03 | API v4.0 header ghi NOT APPROVED/Review 3, nhưng §14 ghi xác nhận input Approved; Requirements/UC cũng có nhãn Candidate/VERIFY theo thời điểm biên soạn. | Giữ nguyên trạng thái nguồn, không tự tuyên bố contract/diagram đã được duyệt. Leader cần chốt Document Control trước nghiệm thu. Không phát sinh quyết định nghiệp vụ mới từ nhãn này. |
-| DC-04 | Requirements v3.1 FR-ORD-003 mô tả retry PAYMENT_FAILED→PENDING; `vnpay-initiation.service.ts` tạo Payment PENDING nhưng không cập nhật Order.status, giữ PAYMENT_FAILED nếu đó là trạng thái trước retry. | Ghi rõ xung đột; sơ đồ này liệt kê enum và quan hệ, không vẽ/chốt chuyển trạng thái retry. Cần Leader/owner Order–Payment giải quyết ở change record hoặc task state machine riêng trước khi mô tả transition đó như đã nhất quán. Không sửa backend tại đây. |
-| DC-05 | A2 Task 1.2 chưa có file trong commit dev đối chiếu; Task 1.3 là bản trên branch riêng, còn phụ thuộc review. | Không tự đặt FR/NFR A2 hoặc đánh dấu hoàn thành Task 1 gate. Cập nhật mapping khi tài liệu Task 1 được chốt/merge, rồi review lại diagram trước nghiệm thu Task 2. |
+| DC-03 | API v4.0 header ghi NOT APPROVED/Review 3, nhưng §14 ghi xác nhận input Approved; SRS/UC tiếp tục phân biệt nguồn, design và runtime. | Đã kiểm tra và giữ đúng trạng thái nguồn theo [bản xử lý review §1](domain-review-followup.md#1-snapshot-và-trạng-thái-nguồn). Không tự tuyên bố toàn bộ Contract Approved chỉ vì các task A2 đã merge/Done. Phần Document Control của nguồn còn do Leader quản lý. |
+| DC-04 | Requirements v3.1 FR-ORD-003 mô tả retry PAYMENT_FAILED→PENDING; implementation VNPay giữ Order PAYMENT_FAILED khi tạo Payment PENDING. | Đã nhận xác nhận ngày 09/11/2026: **giữ Order PAYMENT_FAILED khi Payment mới PENDING**. Ghi nguồn xác nhận, phạm vi và evidence code trong [bản xử lý review §2](domain-review-followup.md#2-dc-04-xác-nhận-quy-tắc-retry); bổ sung chú thích hình/caption, không sửa backend. Owner Requirements cần đồng bộ câu cũ ở task nguồn. |
+| DC-05 | Bản đầu thiếu tài liệu Task 1 trên dev; snapshot mới đã có SRS và Checkout UC merge. | Đã đối chiếu với SRS commit `50ef4be8` và Checkout UC 0.4 commit `ac08a3a`; mapping FR/NFR/AC và kết luận từng nhóm ở [bản xử lý review §3](domain-review-followup.md#3-dc-05-mapping-frnfr-với-checkout-đã-merge). Không cần thay class/multiplicity, không tự đóng các gap runtime hoặc nâng approval nguồn. |
 
-DC-02 là lệch phiên bản tài liệu đã có delta hỗ trợ, không phải quyền đổi schema. DC-04 được để mở: mô hình không chọn thêm transition để tự giải mâu thuẫn. Thiếu Payment Status route và QueryDR Sandbox E2E được planning ghi nhận là giới hạn riêng; hình Payment/evidence không chứng minh các route hoặc tích hợp đó đã PASS.
+DC-02 là lệch phiên bản tài liệu đã có delta hỗ trợ, không phải quyền đổi schema. DC-04 dùng xác nhận đã nhận, không tự đoán transition. Thiếu Payment Status route và QueryDR Sandbox E2E tiếp tục được SRS/UC mới giữ làm giới hạn riêng; hình Payment/evidence không chứng minh các route hoặc tích hợp đó đã PASS. Các kết quả xử lý cần reviewer PR #5 xác nhận trước khi approve.
 
 ## 7. Tái tạo và đưa vào báo cáo
 
@@ -161,7 +166,21 @@ Nếu compile từ `docs/report/`, đặt đường dẫn trước khi input:
 \input{../diagrams/domain-class-figure.tex}
 ```
 
-Fragment dùng Vietnamese theo cấu hình của report (ví dụ `vntex`), không thay đổi template chung. PDF vector không cần `--shell-escape` hay bước convert SVG trong LaTeX. Chưa compile fragment với report đầy đủ vì repo chưa có LaTeX entry point/toolchain cho báo cáo A2.
+Fragment dùng Vietnamese theo cấu hình của report (ví dụ `vntex` hoặc Unicode engine/font hỗ trợ tiếng Việt), không thay đổi template chung. PDF vector không cần `--shell-escape` hay bước convert SVG trong LaTeX.
+
+Có fixture [domain-class-check.tex](../report/domain-class-check.tex) dùng `fontspec` và TeX Gyre Termes để kiểm tra tích hợp A4 bằng XeLaTeX/LuaLaTeX hoặc Tectonic. Font được chọn theo tên file của TeX để không phụ thuộc Arial có cài trên máy hay không. Từ root repo:
+
+```powershell
+tectonic -p --keep-logs --outdir docs/report/assets docs/report/domain-class-check.tex
+```
+
+Từ `docs/report/`:
+
+```powershell
+tectonic -p --keep-logs --outdir assets domain-class-check.tex
+```
+
+Fixture tự chọn đường dẫn tương đối; bản xuất kiểm chứng là `docs/report/assets/domain-class-check.pdf`. Phạm vi và kết quả chạy thực tế được ghi trong [bản xử lý review §4](domain-review-followup.md#4-pdf-và-latex). Chưa thay thế bước ghép vào template báo cáo A2 cuối của nhóm.
 
 ## 8. Kiểm chứng và điều kiện bàn giao
 
@@ -170,6 +189,6 @@ Fragment dùng Vietnamese theo cấu hình của report (ví dụ `vntex`), khô
 - Parse nguồn Draw.io/SVG, kiểm tra PDF hai trang, text và font; render PDF thành PNG để xem clipping, overlap và độ rõ.
 - Kiểm tra generator tái tạo byte-for-byte và `git diff --check`.
 - Backend/frontend build, unit, integration, E2E không chạy lại cho thay đổi chỉ tài liệu; không có sửa source ứng dụng, schema hoặc migration. Không ghi kết quả test lịch sử là kết quả chạy trong task này.
-- Fragment LaTeX và việc import/chỉnh sửa qua UI Draw.io còn cần kiểm tra trong môi trường report/editor của nhóm; XML hợp lệ không thay thế toàn bộ bước nghiệm thu này.
+- Kiểm chứng fragment LaTeX bằng fixture A4 và render PDF tích hợp; kết quả chi tiết tại bản xử lý review §4. Việc import/chỉnh sửa qua UI Draw.io và ghép template báo cáo cuối vẫn cần reviewer kiểm tra trong môi trường của nhóm.
 
-**Trước nghiệm thu:** reviewer kiểm tra DC-01…05, đối chiếu Task 1 đã chốt, xác nhận nguồn/hình và bản ghép LaTeX. Sau khi người dùng phê duyệt Git, commit/push branch SCRUM-105, mở PR vào `dev` và chờ review trước merge. Không tự ghi Jira Done hoặc tạo bằng chứng review/merge.
+**Trước nghiệm thu:** reviewer kiểm tra bản xử lý vòng 1, xác nhận nguồn/hình và bản ghép LaTeX. PR #5 đã mở với base `dev`; thay đổi follow-up cần commit/push sau khi người dùng cho phép, rồi review lại trước merge. Không tự ghi Jira Done hoặc tạo bằng chứng approval/merge.

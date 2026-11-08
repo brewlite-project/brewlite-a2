@@ -172,4 +172,5 @@
   <text x="1354" y="790" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">0..*</text>
   <text x="30" y="1090" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#455B6B">UML: filled diamond = composition; dashed /association and /attribute = derived, not persisted separately.</text>
   <text x="30" y="1112" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#455B6B">MoneyVnd = non-negative integer VND. Multiplicities describe all history; guards limit active orders and accepted payments.</text>
+  <text x="30" y="1136" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#455B6B">VNPay retry: Order remains PAYMENT_FAILED while the new Payment attempt is PENDING; no extra resource reservation.</text>
 </svg>

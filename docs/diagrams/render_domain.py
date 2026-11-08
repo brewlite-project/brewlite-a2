@@ -135,11 +135,11 @@ ENUMS = {
 TYPES = []
 for i, (name, values) in enumerate(ENUMS.items()):
     row, col = divmod(i, 4)
-    TYPES.append(Box(name, "enumeration", 30 + col * 395, 85 + row * 295, 365, values))
-TYPES.append(Box("ToppingSnapshot", "value object / order-time values", 30, 970, 570, [
+    TYPES.append(Box(name, "enumeration", 30 + col * 395, 85 + row * 260, 365, values))
+TYPES.append(Box("ToppingSnapshot", "value object / order-time values", 30, 850, 570, [
     "code: String", "name: String", "priceVnd: MoneyVnd",
 ]))
-TYPE_HEIGHT = 1230
+TYPE_HEIGHT = 1100
 
 
 class Drawing:
@@ -270,13 +270,14 @@ def drawio_page(root, title, boxes, edges, height, notes):
 CORE_NOTES = [
     ("UML: filled diamond = composition; dashed /association and /attribute = derived, not persisted separately.", 30, 1090, 16),
     ("MoneyVnd = non-negative integer VND. Multiplicities describe all history; guards limit active orders and accepted payments.", 30, 1112, 15),
+    ("VNPay retry: Order remains PAYMENT_FAILED while the new Payment attempt is PENDING; no extra resource reservation.", 30, 1136, 16),
 ]
 TYPE_NOTES = [
-    ("OrderItem owns 0..3 ToppingSnapshot values; names and prices remain unchanged after checkout.", 640, 1000, 17),
-    ("Snapshot mapping: toppingCodeSnapshot, toppingNameSnapshot, toppingPriceSnapshotVnd.", 640, 1030, 17),
-    ("MoneyVnd = integer VND (BigInt internally); DateTime = timezone-aware instant; [0..1] = optional.", 30, 1135, 17),
-    ("GRACE is a time window. EXPIRED is a failure reason. Neither is an OrderStatus or PaymentStatus.", 30, 1160, 17),
-    ("Payment resolution is derived presentation data; REQUIRES_REVIEW belongs to reconciliation, not PaymentStatus.", 30, 1185, 16),
+    ("OrderItem owns 0..3 ToppingSnapshot values; names and prices remain unchanged after checkout.", 640, 880, 17),
+    ("Snapshot mapping: toppingCodeSnapshot, toppingNameSnapshot, toppingPriceSnapshotVnd.", 640, 910, 17),
+    ("MoneyVnd = integer VND (BigInt internally); DateTime = timezone-aware instant; [0..1] = optional.", 30, 1025, 17),
+    ("GRACE is a time window. EXPIRED is a failure reason. Neither is an OrderStatus or PaymentStatus.", 30, 1050, 17),
+    ("Payment resolution is derived presentation data; REQUIRES_REVIEW belongs to reconciliation, not PaymentStatus.", 30, 1075, 16),
 ]
 
 
