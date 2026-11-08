@@ -1,0 +1,20 @@
+% In the report preamble: \usepackage{graphicx} and \usepackage{pdflscape}
+% Default: compile from repository root.
+% From docs/report: define \BrewLiteDiagramDir as ../diagrams before input.
+% Shares the optional directory macro with the PR #5 domain-class fragment.
+% Insert with: \input{docs/diagrams/deployment-figure.tex}
+\providecommand{\BrewLiteDiagramDir}{docs/diagrams}
+
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \includegraphics[width=\linewidth,height=0.83\textheight,keepaspectratio]{\BrewLiteDiagramDir/brewlite-deployment.pdf}
+  \caption{Deployment Diagram dự kiến của BrewLite Assignment 2:
+  Next.js trên Vercel, NestJS và PostgreSQL trên Render, tích hợp VNPay Sandbox.
+  Local, CI và Production target tách biệt; DB dùng kết nối private.
+  Return qua trình duyệt, IPN tới backend. Render build và quản lý image;
+  không dùng registry ứng dụng độc lập. CI/CD và môi trường thực tế
+  chờ kiểm chứng tại Task 5.}
+  \label{fig:brewlite-deployment}
+\end{figure}
+\end{landscape}
