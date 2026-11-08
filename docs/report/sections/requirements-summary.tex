@@ -13,7 +13,7 @@
 Requirements Specification v3.1 có 46 ID FR và 49 ID NFR. Danh mục A2 giữ nguyên ID nguồn; tách FR-CAT-001 thành baseline danh sách và pagination, và FR-PRO-001 thành kiểm tra coupon khi tạo Order và coupon preview. Vì vậy danh mục có 48 dòng FR và 49 dòng NFR, không làm mất yêu cầu nguồn. Mapping UC dựa trên nội dung: UC-PRO-001 xem điểm/ưu đãi; UC-PRO-002 xem trước coupon. Bảng AC, US/UC và vị trí kiểm chứng đầy đủ nằm trong SRS.
 \par
 
-MUST/SHOULD được lấy từ mức ưu tiên và quy tắc trong nguồn. Với NFR không có mức ưu tiên tường minh, dấu MUST* là phân loại dự thảo dựa trên ràng buộc bảo mật, toàn vẹn, tin cậy hoặc khả năng tái tạo; cần reviewer xác nhận. Không tự tạo nhóm Could hoặc Won't. MVP theo 10 task A1 và phần mở rộng Phase 2 đều kế thừa In Scope; state machine, idempotency, concurrency/inventory và coupon/loyalty thuộc Task 10. “Chưa triển khai” hoặc “chưa có bằng chứng” không đổi mức ưu tiên.
+MUST/SHOULD được lấy từ mức ưu tiên và quy tắc trong nguồn A1. Riêng CI NFR-38 giữ A1 SHOULD và áp dụng A2 MUST theo Task 4.4/REQ-02 PR 7; không suy ưu tiên A2 từ ưu tiên lịch sử. Với NFR không có mức ưu tiên tường minh, dấu MUST* là phân loại dự thảo dựa trên ràng buộc bảo mật, toàn vẹn, tin cậy hoặc khả năng tái tạo; cần reviewer xác nhận. Không tự tạo nhóm Could hoặc Won't. MVP theo 10 task A1 và phần mở rộng Phase 2 đều kế thừa In Scope; state machine, idempotency, concurrency/inventory và coupon/loyalty thuộc Task 10. “Chưa triển khai” hoặc “chưa có bằng chứng” không đổi mức ưu tiên.
 \par
 
 \subsection{Một số yêu cầu tiêu biểu}
@@ -33,7 +33,7 @@ FR-34 & UI phân biệt pending/unknown, success, failure cuối và kết quả
 FR-38 & QueryDR dùng chung finalization; kết quả không rõ không được suy thành FAILED. & MUST; Phase 2 & Automated/synthetic cases kiểm tra state và side effects; QueryDR Sandbox E2E và lost-IPN recovery đang Deferred theo ADR. V-VNP; SRS AC-A2-038. \\ \hline
 FR-23 & Hủy chủ động bởi Customer được ghi nhận riêng, không đồng nhất với tự hết hạn Order. & SHOULD; Deferred & Auto-expiration và release tài nguyên vẫn thuộc In Scope; không mặc định có Cancel API/UI. V-ORDER; SRS AC-A2-023. \\ \hline
 FR-43 & Coupon preview là yêu cầu riêng với coupon validation lúc tạo Order. & SHOULD; Deferred theo S1/S3/S6 & SCRUM-96 xác nhận implementation decisions cùng request/response/error contract; route/test files có trong A1 nhưng không chứng minh acceptance. Leader cần chốt scope/acceptance A2. V-PROMO; SRS AC-A2-043. \\ \hline
-FR-45 & Loyalty points chỉ cộng đúng một lần khi thanh toán hợp lệ làm Order chuyển PAID. & MUST; Phase 2 & Điều kiện theo provider: VNPay trong grace cần payDate đúng hạn và Order chưa CANCELLED; late/ineligible không hồi sinh/cộng điểm; ZERO_AMOUNT eligible kết thúc với 0 điểm, không gateway/grace; replay không cộng lặp. SRS AC-A2-045. \\ \hline
+FR-45 & Loyalty points chỉ cộng đúng một lần khi thanh toán hợp lệ làm Order chuyển PAID. & MUST; Phase 2 & Điều kiện theo provider: VNPay trong grace cần payDate đúng hạn và Order chưa CANCELLED; late/ineligible không hồi sinh/cộng điểm; ZERO\_AMOUNT eligible kết thúc với 0 điểm, không gateway/grace; replay không cộng lặp. SRS AC-A2-045. \\ \hline
 NFR-01 & JWT được xác minh và ownership được thực thi phía server. & MUST*; bảo mật & Thử hai Customer truy cập chéo bằng integration test; dữ liệu của chủ khác không lộ. V-AUTH/V-ORDER/V-PAY; SRS AC-A2-049. \\ \hline
 NFR-03 & Password dùng Argon2id; DB được phép lưu hash/salt, nhưng không persist plaintext hoặc trả/log plaintext/hash. & MUST*; bảo mật & Đối chiếu DB, API response và log capture khi đăng ký/đăng nhập. SRS AC-A2-051. \\ \hline
 NFR-10 & Tạo Order, finalization, release, coupon và loyalty phải atomic. & MUST*; nhất quán & Inject lỗi ở từng bước trên PostgreSQL; xác nhận rollback, không có side effect một phần. V-ORDER/V-INV/V-PAY/V-PROMO; SRS AC-A2-058. \\ \hline
@@ -56,4 +56,37 @@ NFR-PERF-001 đặt mục tiêu dưới 500 ms cho xử lý nội bộ trên d�
 \noindent\textbf{Nguồn được ghim:} [S1] Requirements v3.1; [S3] User Stories/AC Phase 2 v2.3; [S5] Use Case Phase 2 v3.1 PDF; [S6] API Contract v3.0; [S7] API Contract v4.0; [S9] addenda và quyết định liên quan. Tất cả dùng snapshot A1-final commit 1951dc124c83359556f04adb6ba3f0ee9f22fce4; trạng thái và liên kết chi tiết nằm trong SRS. [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/BrewLite_Requirements_Specification_v3.1.docx}{S1}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/docs_Phase2/BrewLite_User_Stories_Acceptance_Criteria_Phase2.docx}{S3}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/docs_Phase2/BrewLite_Use_Case_Specification_v3.1_VNPay_Phase_2\%20.pdf}{S5}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/api/BrewLite_API_Contract_v3.0.md}{S6}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/api/BrewLite_API_Contract_v4.0.md}{S7}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/decisions/ADR-P2-QueryDR-Sandbox-E2E-Deferred.md}{ADR QueryDR}]\par
 
 \noindent Tài liệu đang ở trạng thái DRAFT. Chưa chạy build/test ứng dụng vì thay đổi chỉ gồm tài liệu. Fragment này chưa biên dịch; kiểm chứng bố cục sẽ thực hiện khi tích hợp báo cáo tổng hợp SGU.
+\par
+
+\subsection{Use Case Diagram tổng quát và kế thừa A1}
+SRS §10 liên kết sơ đồ A1 và bản tổng quát cập nhật gồm 14 UC. Guest, Customer, người vận hành demo và VNPay Sandbox là actor ngoài; Mock, ZERO\_AMOUNT và scheduler là nội bộ. UC-ORD-003 chỉ biểu diễn auto-expiration hỗ trợ, không mở Customer Cancel; UC-PRO-002 giữ trạng thái nguồn và acceptance riêng. Không thêm UI Admin/Barista hoặc nghiệp vụ mới.
+\par
+\noindent\href{../../requirements/diagrams/use-case-overview.svg}{Use Case Diagram (SVG)}; \href{../../requirements/diagrams/use-case-overview.puml}{Nguồn PlantUML}. Đường dẫn cần giữ tương đối với fragment này khi tích hợp hoặc điều chỉnh theo vị trí báo cáo chính.
+\par
+
+\subsection{CI bắt buộc trong A2}
+NFR-38: A1 SHOULD, A2 MUST. AC-A2-086 yêu cầu PR tạo/cập nhật vào dev kích hoạt Install  $\rightarrow$  Lint  $\rightarrow$  Unit Test  $\rightarrow$  Build cho web/API theo lockfiles; lỗi không bị che, required checks chặn merge, PR hợp lệ phải có checks xanh trên commit mới nhất. Task 4.4 phải cung cấp workflow/run URL/commit, cấu hình required checks và evidence PR đỏ/xanh. SCRUM-102 không triển khai hoặc tuyên bố CI đã đạt.
+\par
+
+\subsection{Truy vết vận hành và triển khai A2}
+Các dòng A2-OPS là bảng truy vết bổ sung cho nghĩa vụ bàn giao A2 theo REQ-03 của review PR \#7 (do người dùng cung cấp) và S11, không đổi 46 ID FR/49 ID NFR nguồn A1 hoặc viết lại 97 AC-A2 hiện có. A2-OPS-01--07 có ưu tiên A2 MUST; liên kết NFR/FR là phần hỗ trợ, không khẳng định các NFR A1 đã bao phủ đầy đủ yêu cầu A2. AC-OPS-01--07 là tiêu chí bổ sung, chưa có kết quả PASS. Chi tiết provider/hosting/PWA và thiết kế health được task chịu trách nhiệm chốt; không triển khai tính năng trong SCRUM-102. Không gán Jira key hoặc người phụ trách chưa được xác nhận.
+\par
+\begingroup\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.17\linewidth}>{\raggedright\arraybackslash}p{0.25\linewidth}>{\raggedright\arraybackslash}p{0.44\linewidth}}
+\hline
+\textbf{ID / ưu tiên} & \textbf{Task / liên kết} & \textbf{Tiêu chí tiêu biểu} \\ \hline
+\endfirsthead
+\textbf{ID / ưu tiên} & \textbf{Task / liên kết} & \textbf{Tiêu chí tiêu biểu} \\ \hline
+\endhead
+A2-OPS-01 / MUST: PWA / mobile-first & Task 3 kiến trúc; Task 4 giao diện; Task 5 kiểm chứng; NFR-25, NFR-28; S11 Task 3/5 & AC-OPS-01: Given web chạy trên trình duyệt/viewport mục tiêu được ghi rõ, When kiểm tra manifest, icons, installability và UI, Then có bằng chứng PWA theo khả năng hỗ trợ của trình duyệt; ghi giới hạn hỗ trợ. Không tự yêu cầu offline checkout, sync hay native app. \\ \hline
+A2-OPS-02 / MUST: HTTPS và ranh giới triển khai & Task 3 deployment/ADR; Task 5 production; NFR-04/43/44/49; S11 Task 3/5 & AC-OPS-02: Given URLs public của web/API, When truy cập từ ngoài môi trường local, Then HTTPS/certificate hợp lệ, không mixed content; DB không public; secrets chỉ backend. Lưu URLs và kết quả kiểm tra không chứa secret. \\ \hline
+A2-OPS-03 / MUST: CI bắt buộc & Task 4.4; NFR-38 / AC-A2-086; REQ-02 PR \#7; S11 Task 4 & AC-OPS-03: Thực hiện toàn bộ AC-A2-086: Install  $\rightarrow$  Lint  $\rightarrow$  Unit Test  $\rightarrow$  Build; required checks chặn merge, evidence PR xanh/đỏ trên đúng commit. \\ \hline
+A2-OPS-04 / MUST: CD và release & Task 3 ADR; Task 5 CD/deploy; NFR-32/40/41/42/49; S11 Task 5 & AC-OPS-04: Given release đã qua quality gates, When CD thực thi, Then deploy đúng artifact/image có version truy vết tới commit, cấu hình secrets an toàn và migration có kiểm soát; lỗi gate/migration/deploy làm dừng luồng hoặc xử lý theo rollback đã định. Lưu workflow/run URL, version và deploy evidence. \\ \hline
+A2-OPS-05 / MUST: Health và DB readiness & Task 3 thiết kế; Task 5 implementation/verification; NFR-16/40/49; S11 Task 5 & AC-OPS-05: Given hệ thống chạy, When kiểm tra health và trạng thái DB, Then xác định được khả năng phục vụ và DB readiness theo cơ chế được task thiết kế chốt; thử DB mất kết nối cho kết quả degraded/not-ready phù hợp. Không coi GET / liveness hiện có là bằng chứng DB-ready; không tự định nghĩa route mới tại đây. \\ \hline
+A2-OPS-06 / MUST: Production smoke test & Task 5 QA/deployment; FR-08/19/22/30/34; NFR-25/33/40; S11 Task 5 & AC-OPS-06: Given version vừa deploy, When chạy smoke trên web/API HTTPS và luồng menu  $\rightarrow$  auth  $\rightarrow$  tạo đơn  $\rightarrow$  payment demo được cho phép  $\rightarrow$  xác nhận/lịch sử, Then các bước đạt expected result theo contract. Ghi version, URLs, thời điểm, môi trường và kết quả từng bước; lỗi làm dừng release hoặc kích hoạt xử lý đã định. Không dùng tiền thật, không bật Mock production trái policy, không dùng synthetic làm Sandbox E2E. \\ \hline
+A2-OPS-07 / MUST: Rollback và runbook & Task 3 chiến lược; Task 5 release/rollback; NFR-10/16/32/40/41; S11 Task 5 & AC-OPS-07: Given release lỗi, When thực hiện runbook rollback đã duyệt, Then có thể quay về artifact/version trước tương thích dữ liệu và xác minh lại health/smoke; ghi trigger, người thực hiện, version và kết quả. Migration có giới hạn/chiến lược tương thích rõ, không giả định có thể đảo DB phá hủy tự động. \\ \hline
+\end{longtable}
+\endgroup
+Các dòng trên là yêu cầu/bằng chứng cần thu, chưa PASS. Rate limit NFR-08 giữ SHOULD; threshold và rate-window chưa chốt. Commit b542ee4 trong SRS là nền lịch sử khi bắt đầu soạn, không phải HEAD của PR. LaTeX chưa biên dịch; bố cục kiểm chứng khi tích hợp báo cáo.
 \par

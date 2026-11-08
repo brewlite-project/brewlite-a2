@@ -4,7 +4,7 @@
 **Trạng thái:** DRAFT — chờ Leader/reviewer xác nhận các mục nêu trong bảng gap; chưa phải biên bản nghiệm thu
 **Ngày:** 08/11/2026
 **Baseline nghiệp vụ A1-final:** commit 1951dc124c83359556f04adb6ba3f0ee9f22fce4
-**Nhánh đang soạn:** SCRUM-102-normalize-requirements, HEAD b542ee42be5933ac8cf34bda39908685e88aafbe
+**Nhánh:** SCRUM-102-normalize-requirements; commit nền khi bắt đầu soạn: b542ee42be5933ac8cf34bda39908685e88aafbe (không phải HEAD của PR).
 
 Tài liệu này chuẩn hóa danh mục yêu cầu để truy vết và kiểm chứng. Đây không phải bản viết lại toàn bộ SRS A1, không thay đổi tài liệu nguồn A1 và không phải xác nhận tính năng đã hoàn thành. Tất cả tiêu chí dưới đây là điều kiện cần đạt; trạng thái PASS chỉ được ghi khi có bằng chứng gắn đúng phiên bản, môi trường và cấu hình.
 
@@ -14,7 +14,7 @@ Tài liệu này chuẩn hóa danh mục yêu cầu để truy vết và kiểm 
 
 | Mã | Nguồn và phiên bản | Trạng thái nguồn được ghi nhận | Snapshot |
 |---|---|---|---|
-| S0 | Phạm vi kế thừa Task 1.1, docs/requirements/context-and-scope.md | DRAFT — chờ review | brewlite-a2 commit bccfe58f6fc81f88a75e25a36a029f3d6a1f4f5e; nội dung nằm trong HEAD b542ee4 |
+| S0 | Phạm vi kế thừa Task 1.1, docs/requirements/context-and-scope.md | DRAFT — chờ review | brewlite-a2 commit bccfe58f6fc81f88a75e25a36a029f3d6a1f4f5e; được tích hợp vào commit nền b542ee4 |
 | S1 | BrewLite Requirements Specification v3.1, 30/10/2026 | Header ghi chờ review v3.1; business baseline BR-01–BR-06 được ghi Approved | A1-final, commit 1951dc124c83359556f04adb6ba3f0ee9f22fce4 |
 | S2 | User Stories & Acceptance Criteria v2.2 | 43 Story, 205 AC; trạng thái nguồn “Đã chốt” | A1-final, commit 1951dc124c83359556f04adb6ba3f0ee9f22fce4 |
 | S3 | User Stories & Acceptance Criteria Phase 2 v2.3 | 49 Story, 253 AC; “Review Fixed”; đầu vào ghi Requirements v3.1 và BR-01–BR-06 đã Approved | A1-final, commit 1951dc124c83359556f04adb6ba3f0ee9f22fce4 |
@@ -75,6 +75,8 @@ AC-A2-001…048 lần lượt gắn với FR-01…48; AC-A2-049…097 gắn vớ
 MUST/SHOULD trong S1/S3 được giữ theo nội dung, lý do và phạm vi nguồn. Các yêu cầu MUST Phase 2 vẫn là MUST. Những NFR S1 không ghi ưu tiên được gán nhãn tạm dựa trên ràng buộc bảo mật, toàn vẹn dữ liệu, lifecycle, testability và bàn giao S0/S11; các mục suy luận phải được reviewer xác nhận, không phải quyết định mới về nghiệp vụ.
 
 Không có yêu cầu nào được gán **Could** chỉ vì là phần mở rộng hoặc chưa triển khai. Không gán **Won’t** cho mục Deferred. Các hạng mục Out of Scope là ranh giới sản phẩm, không phải yêu cầu Won’t được thêm vào backlog. Nguồn không có căn cứ đủ để tạo nhóm Could/Won’t; hai nhóm này để trống.
+
+Đối với yêu cầu bàn giao riêng của A2, ưu tiên nguồn A1 được giữ để truy vết nhưng không thay thế nghĩa vụ bắt buộc A2. NFR-38 có ưu tiên A1 SHOULD và ưu tiên A2 MUST theo Task 4.4/REQ-02 của review PR #7; các yêu cầu vận hành A2 được truy vết riêng tại §11. Không đổi ID hoặc viết lại danh mục nguồn A1.
 
 ## 3. Vị trí đối chiếu ở A1-final
 
@@ -224,7 +226,7 @@ NFR không có ưu tiên ghi tường minh trong S1 được gán nhãn tạm (*
 | NFR-05 | NFR-SEC-005 | DTO allowlist/validation chống mass assignment; extra fields không trở thành userId/amount/status/role authority. | MUST* — BR-003 | V-AUTH/V-ORDER/V-PAY; request tampering test cần evidence. |
 | NFR-06 | NFR-SEC-006 | Endpoint nội bộ dùng riêng X-Internal-Key; thiếu/sai khóa 403; JWT Customer không cấp quyền nội bộ. | MUST* — BR-012 | V-ORDER; integration negative test. |
 | NFR-07 | NFR-SEC-007 | Không lưu số thẻ đầy đủ hoặc secret payment credentials; chỉ giữ dữ liệu tối thiểu được contract cho phép. | MUST* — payment data minimization | V-PAY/V-EVIDENCE; inspect DB/log redaction. |
-| NFR-08 | NFR-SEC-008 | Giới hạn thử login sai nếu được ưu tiên; source không đặt ngưỡng/tần suất. | SHOULD — explicit; threshold cần Leader chốt trước khi đo | V-AUTH; chưa có tiêu chí số để nghiệm thu. |
+| NFR-08 | NFR-SEC-008 | Giới hạn thử login sai nếu được ưu tiên; threshold và rate-window chưa chốt, không tự đặt số hoặc coi đã nghiệm thu. | SHOULD — explicit; threshold cần Leader chốt trước khi đo | V-AUTH; chưa có tiêu chí số để nghiệm thu. |
 | NFR-09 | NFR-SEC-009 | Có negative test Customer A không đọc/thanh toán Order B; cancel test chỉ khi FR-ORD-005 được duyệt; IPN test theo provider security. | MUST* — S1/ownership | V-ORDER/V-PAY/V-VNP; không thay sandbox bằng test giả. |
 | NFR-10 | NFR-DATA-001 | Tạo Order/payment/finalization/release/coupon/loyalty là atomic transaction; lỗi giữa chừng rollback toàn bộ. | MUST* — BR-004/Task 10 | V-ORDER/V-INV/V-PAY/V-PROMO; PG integration. |
 | NFR-11 | NFR-DATA-002 | Order snapshots giữ nguyên khi catalog/coupon thay đổi. | MUST* — lịch sử Order đúng | V-ORDER; snapshot DB test. |
@@ -254,7 +256,7 @@ NFR không có ưu tiên ghi tường minh trong S1 được gán nhãn tạm (*
 | NFR-35 | NFR-TEST-003 | Unit test giá size/topping, tổng/discount/points và transition matrix. | MUST* — Techstack §10 | V-CAT/V-ORDER/V-PROMO/V-PAY; cần chạy. |
 | NFR-36 | NFR-TEST-004 | Regression Mock + VNPay signature/amount/ref/duplicate/late, QueryDR, grace/retry/ZERO_AMOUNT; ghi dữ liệu và kết quả. | MUST* — Phase2/BR | V-PAY/V-VNP; automated/synthetic không phải Sandbox E2E. |
 | NFR-37 | NFR-TEST-005 | Postman collection bao phủ endpoint theo contract và dữ liệu demo nguồn. | MUST* — Techstack §3 | V-EVIDENCE/README; kiểm tra collection và chạy trên local A2. |
-| NFR-38 | NFR-TEST-006 | CI chạy lint/test/build khi PR được tạo/cập nhật. | SHOULD — explicit | CI/branch evidence; chưa xác nhận từ A1 code. |
+| NFR-38 | NFR-TEST-006 | Pipeline PR A2 chạy Install → Lint → Unit Test → Build khi tạo/cập nhật PR vào dev; checks bắt buộc chặn merge khi lỗi. | A1: SHOULD — S1; A2: MUST — Task 4.4 theo REQ-02 PR #7, S11 | Yêu cầu bắt buộc A2, không phải tuyên bố pipeline đã có ở A1; kiểm chứng tại Task 4.4 theo AC-A2-086. |
 | NFR-39 | NFR-PRIV-001 | Chỉ lưu email/tên tùy chọn cần thiết; chỉ trả cho chính chủ theo token. | MUST* — privacy/ownership baseline | V-AUTH/V-ORDER; response/DB/log review. |
 | NFR-40 | NFR-OPS-001 | Docker Compose khởi động FE/BE/DB; README có run/seed/test/demo. | MUST* — A2 handover/Task 1 gap | V-OPS; fresh clone, project/DB/volume A2 tách A1. |
 | NFR-41 | NFR-OPS-002 | Lockfile và database image tag được pin; không dùng latest. | MUST* — reproducibility constraint | V-OPS; inspect lockfiles/Compose. |
@@ -310,7 +312,7 @@ NFR kỹ thuật không có UC trực tiếp được ghi “không áp dụng�
 | NFR-35 | AC-A2-083 | Given source gold cases, When unit suites run, Then size+topping price, discount, loyalty floor and state matrix equal expected values. | US-CAT-03, US-PRO-02/03, US-ORD-03 | UC-CAT-002, UC-ORD-003, UC-PRO-001/002 | Unit test outputs and reviewed expected values. |
 | NFR-36 | AC-A2-084 | Given protocol and lifecycle test vectors, When regression runs, Then mock and synthetic VNPay branches cover invalid/duplicate/late/timeout/retry/zero cases; no synthetic case is labeled Sandbox E2E. | US-VNP-02/03/04/05/06 | UC-PAY-001/002 | Unit/PG outputs; separate real Sandbox evidence remains Deferred. |
 | NFR-37 | AC-A2-085 | Given endpoint inventory, When operator runs Postman suite, Then requests/expected responses cover only contract-defined endpoints and use documented fixtures. | US-OPS-02 AC-US-OPS-02-01..04 | Không áp dụng — test/demonstration enabler | Inspect collection and run against isolated A2 Compose. |
-| NFR-38 | AC-A2-086 | Given a PR opens or updates, When CI configured per policy runs, Then lint/test/build gates report result and failure blocks acceptance according to branch policy. | US-OPS-02 AC-US-OPS-02-01..04 | Không áp dụng — delivery enabler | CI run/required-check evidence; SHOULD, not asserted present. |
+| NFR-38 | AC-A2-086 | Given PR A2 được mở hoặc cập nhật vào dev, When CI chạy trên đúng commit, Then pipeline dùng dependency lockfile để Install → Lint → Unit Test → Build cho web/API; mỗi bước trả exit code đúng, lỗi không được bỏ qua hoặc che bởi continue-on-error. Given một bước lỗi, When đánh giá PR, Then required checks không đạt và merge bị chặn theo branch protection/ruleset; các job phụ thuộc không được báo thành công thay cho bước lỗi. Given PR hợp lệ, Then các required checks thành công trên commit mới nhất. Given cố ý gây một lỗi an toàn trong test PR, Then có bằng chứng pipeline đỏ và merge bị chặn; sau sửa có bằng chứng pipeline xanh. Bằng chứng gồm workflow, run URL/commit SHA, trạng thái từng bước và cấu hình required checks; không thu hoặc công bố secret. | A1: US-OPS-02 AC-US-OPS-02-01..04; A2: Task 4.4, REQ-02 PR #7, S11 | Không áp dụng — delivery enabler | A1 SHOULD; A2 MUST. Task 4.4 triển khai/xác minh; SCRUM-102 chỉ chuẩn hóa yêu cầu, chưa ghi nhận CI PASS. |
 | NFR-39 | AC-A2-087 | Given profile/order response, When another user requests the same data, Then no unnecessary PII or foreign-owner data is returned. | US-AUTHZ-02, US-ORD-04, US-PRO-05 | UC-ORD-002, UC-PRO-001 | API response schema and cross-owner tests. |
 | NFR-40 | AC-A2-088 | Given clean clone and separated A2 DB/volume, When follow README Compose steps, Then FE/BE/DB start and health/seed checks complete using one documented flow. | US-OPS-01/02 | Không áp dụng — deployment/operability enabler | Fresh-clone isolated Compose; capture logs/config/DB identity. |
 | NFR-41 | AC-A2-089 | Given dependency/container files, When inspect release inputs, Then lockfile committed and DB tag pinned, not latest. | US-OPS-01 AC-US-OPS-01-01..03 | Không áp dụng — reproducibility constraint | Static review of lockfiles and Compose. |
@@ -345,4 +347,50 @@ NFR kỹ thuật không có UC trực tiếp được ghi “không áp dụng�
 - NFR đo được có phương pháp/môi trường/bằng chứng; yêu cầu external provider phân biệt synthetic test với Sandbox E2E.
 - Không sửa ứng dụng, API, schema, migration, tài liệu gốc A1, Jira hoặc thay đổi Git history. Không build/test ứng dụng vì diff chỉ tài liệu.
 - Kiểm tra thực hiện khi bàn giao: uniqueness ID/AC; coverage/mapping source; Markdown links; diff và whitespace. LaTeX fragment được kiểm tra cấu trúc nhưng chưa biên dịch; bố cục sẽ kiểm chứng khi tích hợp báo cáo tổng hợp SGU.
-- Tài liệu vẫn DRAFT cho đến khi Leader xác nhận các gap §8 và review consistency với UC/contract; không commit/push/PR/merge.
+- Tài liệu vẫn DRAFT cho đến khi Leader xác nhận các gap §8 và reviewer xác nhận consistency với UC/contract; PR #7 là nơi review, không tự đánh dấu task đã nghiệm thu hoặc Jira Done.
+
+## 10. Use Case Diagram tổng quát — REQ-01
+
+Kế thừa catalog 14 UC và actor/nhóm chức năng từ [sơ đồ A1](../diagram/UseCase_Diagram.drawio.svg), S4/S5. Bản A1 có nhãn hủy đơn chưa phân biệt Deferred và thiếu actor VNPay, nên bản tổng quát bên dưới cập nhật biểu diễn theo S0/S1/BR-01–06, không thêm nghiệp vụ hoặc UC mới.
+
+![Use Case Diagram tổng quát BrewLite](diagrams/use-case-overview.svg)
+
+[Sơ đồ SVG](diagrams/use-case-overview.svg) · [Nguồn PlantUML](diagrams/use-case-overview.puml).
+
+Guest xem menu/chi tiết và đăng ký/đăng nhập; Customer xem menu/chi tiết, quản lý giỏ, đăng xuất, tạo đơn, xem lịch sử, thanh toán/xác nhận và xem điểm/ưu đãi. Người vận hành demo chỉ gắn UC-ORD-004; không thêm UI Admin/Barista. VNPay Sandbox là actor ngoài gắn UC-PAY-001 cho initiation/IPN/QueryDR; Mock, ZERO_AMOUNT và scheduler vẫn là thành phần nội bộ. UC-ORD-003 trên sơ đồ chỉ biểu diễn auto-expiration hỗ trợ; không có actor Customer hủy chủ động. UC-PRO-002 giữ SHOULD, phân biệt Deferred trong nguồn cũ với SCRUM-96 đã confirmed implementation; phạm vi/nghiệm thu A2 cần xác nhận. Association không tự cấp quyền hoặc chứng minh tính năng đã nghiệm thu.
+
+| Nhóm UC | FR A2 liên quan |
+|---|---|
+| UC-AUTH-001/002/003 | FR-01/02/04; FR-03/05/06/07 là quy tắc xuyên suốt |
+| UC-CAT-001/002; UC-CART-001 | FR-08/10–12/14–18; FR-09 pagination vẫn Deferred |
+| UC-ORD-001/002/003/004 | FR-19–22/24–29; FR-23 active cancel vẫn Deferred |
+| UC-PAY-001/002 | FR-30–41; FR-45 loyalty là tác động khi PAID hợp lệ |
+| UC-PRO-001/002 | FR-42–47 theo mapping chi tiết §5; FR-43 preview có trạng thái nguồn/nghiệm thu riêng |
+
+Seed FR-13/48 và các NFR kỹ thuật là supporting behavior/enabler, không tạo actor hoặc UC giả.
+
+## 11. Truy vết yêu cầu vận hành/triển khai A2 — REQ-03
+
+Các dòng A2-OPS là bảng truy vết bổ sung cho nghĩa vụ bàn giao A2 theo REQ-03 của review PR #7 (do người dùng cung cấp) và S11, không đổi 46 ID FR/49 ID NFR nguồn A1 hoặc viết lại 97 AC-A2 hiện có. A2-OPS-01–07 có ưu tiên A2 MUST; liên kết NFR/FR là phần hỗ trợ, không khẳng định các NFR A1 đã bao phủ đầy đủ yêu cầu A2. AC-OPS-01–07 là tiêu chí bổ sung, chưa có kết quả PASS. Chi tiết provider/hosting/PWA và thiết kế health được task chịu trách nhiệm chốt; không triển khai tính năng trong SCRUM-102. Không gán Jira key hoặc người phụ trách chưa được xác nhận.
+
+| ID | Yêu cầu A2 | Liên kết nguồn/yêu cầu | Task chịu trách nhiệm | AC / bằng chứng cần thu | Trạng thái |
+| --- | --- | --- | --- | --- | --- |
+| A2-OPS-01 | PWA / mobile-first | NFR-25, NFR-28; S11 Task 3/5 | Task 3 kiến trúc; Task 4 giao diện; Task 5 kiểm chứng | AC-OPS-01: Given web chạy trên trình duyệt/viewport mục tiêu được ghi rõ, When kiểm tra manifest, icons, installability và UI, Then có bằng chứng PWA theo khả năng hỗ trợ của trình duyệt; ghi giới hạn hỗ trợ. Không tự yêu cầu offline checkout, sync hay native app. | VERIFY — responsive A1 không chứng minh PWA đạt. |
+| A2-OPS-02 | HTTPS và ranh giới triển khai | NFR-04/43/44/49; S11 Task 3/5 | Task 3 deployment/ADR; Task 5 production | AC-OPS-02: Given URLs public của web/API, When truy cập từ ngoài môi trường local, Then HTTPS/certificate hợp lệ, không mixed content; DB không public; secrets chỉ backend. Lưu URLs và kết quả kiểm tra không chứa secret. | NEW/VERIFY — chưa ghi production PASS. |
+| A2-OPS-03 | CI bắt buộc | NFR-38 / AC-A2-086; REQ-02 PR #7; S11 Task 4 | Task 4.4 | AC-OPS-03: Thực hiện toàn bộ AC-A2-086: Install → Lint → Unit Test → Build; required checks chặn merge, evidence PR xanh/đỏ trên đúng commit. | NEW — A1 SHOULD, A2 MUST; không triển khai workflow trong SCRUM-102. |
+| A2-OPS-04 | CD và release | NFR-32/40/41/42/49; S11 Task 5 | Task 3 ADR; Task 5 CD/deploy | AC-OPS-04: Given release đã qua quality gates, When CD thực thi, Then deploy đúng artifact/image có version truy vết tới commit, cấu hình secrets an toàn và migration có kiểm soát; lỗi gate/migration/deploy làm dừng luồng hoặc xử lý theo rollback đã định. Lưu workflow/run URL, version và deploy evidence. | NEW — chưa có bằng chứng CD A2. |
+| A2-OPS-05 | Health và DB readiness | NFR-16/40/49; S11 Task 5 | Task 3 thiết kế; Task 5 implementation/verification | AC-OPS-05: Given hệ thống chạy, When kiểm tra health và trạng thái DB, Then xác định được khả năng phục vụ và DB readiness theo cơ chế được task thiết kế chốt; thử DB mất kết nối cho kết quả degraded/not-ready phù hợp. Không coi GET / liveness hiện có là bằng chứng DB-ready; không tự định nghĩa route mới tại đây. | VERIFY — health A1 không tự chứng minh readiness A2. |
+| A2-OPS-06 | Production smoke test | FR-08/19/22/30/34; NFR-25/33/40; S11 Task 5 | Task 5 QA/deployment | AC-OPS-06: Given version vừa deploy, When chạy smoke trên web/API HTTPS và luồng menu → auth → tạo đơn → payment demo được cho phép → xác nhận/lịch sử, Then các bước đạt expected result theo contract. Ghi version, URLs, thời điểm, môi trường và kết quả từng bước; lỗi làm dừng release hoặc kích hoạt xử lý đã định. Không dùng tiền thật, không bật Mock production trái policy, không dùng synthetic làm Sandbox E2E. | VERIFY — payment-status/QueryDR gap và policy demo phải được triage bởi task chịu trách nhiệm. |
+| A2-OPS-07 | Rollback và runbook | NFR-10/16/32/40/41; S11 Task 5 | Task 3 chiến lược; Task 5 release/rollback | AC-OPS-07: Given release lỗi, When thực hiện runbook rollback đã duyệt, Then có thể quay về artifact/version trước tương thích dữ liệu và xác minh lại health/smoke; ghi trigger, người thực hiện, version và kết quả. Migration có giới hạn/chiến lược tương thích rõ, không giả định có thể đảo DB phá hủy tự động. | NEW — cần runbook và bằng chứng diễn tập phù hợp. |
+
+## 12. Đối chiếu REQUEST CHANGES PR #7
+
+| Mục review | Vị trí xử lý | Giới hạn |
+|---|---|---|
+| REQ-01 | §10, use-case-overview.puml/.svg; kế thừa catalog và sơ đồ A1 | Biểu diễn phạm vi yêu cầu, không phải nghiệm thu runtime |
+| REQ-02 | NFR-38, AC-A2-086, §2.2 và A2-OPS-03 | A1 SHOULD / A2 MUST; CI do Task 4.4 triển khai |
+| REQ-03 | §11, A2-OPS-01–07 và AC-OPS-01–07 | Chỉ chuẩn hóa/truy vết; không ghi đã có PWA/production/CD/rollback |
+| REQ-04 | NFR-08 / AC-A2-056 | SHOULD; threshold/rate-window chưa chốt, không tự đặt số |
+| REQ-05 | Metadata đầu tài liệu và S0 | b542ee4 là commit nền lịch sử, không phải HEAD PR hiện tại |
+
+Biên dịch và kiểm tra bố cục LaTeX được thực hiện khi tích hợp báo cáo tổng hợp theo review; chưa ghi đã biên dịch.
