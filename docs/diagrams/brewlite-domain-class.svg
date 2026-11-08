@@ -1,0 +1,175 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1160" viewBox="0 0 1600 1160" role="img">
+  <title>BrewLite domain class diagram - SCRUM-105</title>
+  <desc>UML classes, typed attributes and relationship multiplicities. See README.md for source mapping and limitations.</desc>
+  <rect x="0" y="0" width="1600" height="1160" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="30" y="38" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#182B3A" font-weight="bold">Domain class diagram</text>
+  <text x="30" y="64" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#455B6B">BrewLite | SCRUM-105 / A2-T2.3 | A1-final | DRAFT - pending review</text>
+  <polyline points="785,248 785,365" fill="none" stroke="#536C7E" stroke-width="1.8" />
+  <polyline points="1000,155 1110,155" fill="none" stroke="#536C7E" stroke-width="1.8" stroke-dasharray="7 5" />
+  <polyline points="1000,390 1045,390 1045,285 1340,285 1340,227" fill="none" stroke="#536C7E" stroke-width="1.8" stroke-dasharray="7 5" />
+  <polyline points="480,230 520,230 520,435 570,435" fill="none" stroke="#536C7E" stroke-width="1.8" />
+  <polyline points="255,368 255,530" fill="none" stroke="#536C7E" stroke-width="1.8" />
+  <polyline points="570,625 480,625" fill="none" stroke="#536C7E" stroke-width="1.8" />
+  <polyline points="1000,530 1110,530" fill="none" stroke="#536C7E" stroke-width="1.8" />
+  <polyline points="785,672 785,805" fill="none" stroke="#536C7E" stroke-width="1.8" />
+  <polyline points="480,945 570,945" fill="none" stroke="#536C7E" stroke-width="1.8" />
+  <polyline points="1340,648 1340,805" fill="none" stroke="#536C7E" stroke-width="1.8" />
+  <rect x="30" y="85" width="450" height="283" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="30" y="85" width="450" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="42" y="105" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;entity / implemented as Coupon&gt;&gt;</text>
+  <text x="42" y="130" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">Promotion</text>
+  <text x="42" y="167" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">id: UUID</text>
+  <text x="42" y="191" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">code: String</text>
+  <text x="42" y="215" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">type: CouponType</text>
+  <text x="42" y="239" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">value: Integer</text>
+  <text x="42" y="263" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">minSubtotalVnd: MoneyVnd</text>
+  <text x="42" y="287" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">maxDiscountVnd: MoneyVnd [0..1]</text>
+  <text x="42" y="311" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">startsAt, expiresAt: DateTime</text>
+  <text x="42" y="335" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">usageLimit, perUserLimit: Integer</text>
+  <text x="42" y="359" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">activeUsageCount: Integer</text>
+  <rect x="570" y="85" width="430" height="163" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="570" y="85" width="430" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="582" y="105" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;entity&gt;&gt;</text>
+  <text x="582" y="130" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">User</text>
+  <text x="582" y="167" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">id: UUID</text>
+  <text x="582" y="191" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">email: String</text>
+  <text x="582" y="215" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">fullName: String [0..1]</text>
+  <text x="582" y="239" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">loyaltyPoints: Integer</text>
+  <rect x="1110" y="85" width="460" height="142" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="1110" y="85" width="460" height="58" fill="#F2ECFA" stroke="#536C7E" stroke-width="1.4" />
+  <text x="1122" y="105" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;derived concept / no separate ledger&gt;&gt;</text>
+  <text x="1122" y="130" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">LoyaltyTransaction</text>
+  <text x="1122" y="167" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">/points: Integer</text>
+  <text x="1122" y="191" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">/occurredAt: DateTime</text>
+  <text x="1122" y="215" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#455B6B">From Order.pointsEarned and paidAt</text>
+  <rect x="30" y="530" width="450" height="163" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="30" y="530" width="450" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="42" y="550" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;entity / coupon reservation&gt;&gt;</text>
+  <text x="42" y="575" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">CouponRedemption</text>
+  <text x="42" y="612" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">status: RedemptionStatus</text>
+  <text x="42" y="636" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">heldAt: DateTime</text>
+  <text x="42" y="660" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">consumedAt: DateTime [0..1]</text>
+  <text x="42" y="684" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">releasedAt: DateTime [0..1]</text>
+  <rect x="570" y="365" width="430" height="307" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="570" y="365" width="430" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="582" y="385" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;entity / checkout aggregate&gt;&gt;</text>
+  <text x="582" y="410" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">Order</text>
+  <text x="582" y="447" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">id: UUID</text>
+  <text x="582" y="471" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">status: OrderStatus</text>
+  <text x="582" y="495" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">subtotalVnd: MoneyVnd</text>
+  <text x="582" y="519" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">discountVnd: MoneyVnd</text>
+  <text x="582" y="543" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">totalVnd: MoneyVnd</text>
+  <text x="582" y="567" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">pointsEarned: Integer</text>
+  <text x="582" y="591" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">couponCodeSnapshot: String [0..1]</text>
+  <text x="582" y="615" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">createdAt, expiresAt: DateTime</text>
+  <text x="582" y="639" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">paidAt: DateTime [0..1]</text>
+  <text x="582" y="663" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">cancelledAt: DateTime [0..1]</text>
+  <rect x="1110" y="365" width="460" height="283" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="1110" y="365" width="460" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="1122" y="385" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;entity / one payment attempt&gt;&gt;</text>
+  <text x="1122" y="410" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">Payment</text>
+  <text x="1122" y="447" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">id: UUID</text>
+  <text x="1122" y="471" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">amountVnd: MoneyVnd</text>
+  <text x="1122" y="495" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">status: PaymentStatus</text>
+  <text x="1122" y="519" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">provider: PaymentProvider</text>
+  <text x="1122" y="543" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">method: PaymentMethod [0..1]</text>
+  <text x="1122" y="567" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">reconciliationState:</text>
+  <text x="1122" y="591" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">  PaymentReconciliationState</text>
+  <text x="1122" y="615" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">hasFinancialException: Boolean</text>
+  <text x="1122" y="639" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">createdAt: DateTime</text>
+  <rect x="30" y="835" width="450" height="187" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="30" y="835" width="450" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="42" y="855" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;entity / current catalog&gt;&gt;</text>
+  <text x="42" y="880" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">Product</text>
+  <text x="42" y="917" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">id: UUID</text>
+  <text x="42" y="941" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">name: String</text>
+  <text x="42" y="965" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">basePriceVnd: MoneyVnd</text>
+  <text x="42" y="989" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">stock: Integer</text>
+  <text x="42" y="1013" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">sizePolicy: ProductSizePolicy</text>
+  <rect x="570" y="805" width="430" height="259" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="570" y="805" width="430" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="582" y="825" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;owned entity / immutable price snapshot&gt;&gt;</text>
+  <text x="582" y="850" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">OrderItem</text>
+  <text x="582" y="887" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">productNameSnapshot: String</text>
+  <text x="582" y="911" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">size: DrinkSize</text>
+  <text x="582" y="935" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">sizePercentSnapshot: Integer</text>
+  <text x="582" y="959" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">basePriceSnapshotVnd: MoneyVnd</text>
+  <text x="582" y="983" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">unitPriceVnd: MoneyVnd</text>
+  <text x="582" y="1007" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">quantity: Integer</text>
+  <text x="582" y="1031" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">lineTotalVnd: MoneyVnd</text>
+  <text x="582" y="1055" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">toppings: ToppingSnapshot [0..3]</text>
+  <rect x="1110" y="805" width="460" height="211" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="1110" y="805" width="460" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="1122" y="825" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;entity / verified gateway evidence&gt;&gt;</text>
+  <text x="1122" y="850" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">PaymentGatewayEvent</text>
+  <text x="1122" y="887" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">source: PaymentGatewaySource</text>
+  <text x="1122" y="911" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">outcome: PaymentGatewayOutcome</text>
+  <text x="1122" y="935" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">disposition: PaymentGatewayDisposition</text>
+  <text x="1122" y="959" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">amountVnd: MoneyVnd [0..1]</text>
+  <text x="1122" y="983" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">gatewayPaidAt: DateTime [0..1]</text>
+  <text x="1122" y="1007" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">verifiedAt: DateTime</text>
+  <rect x="797" y="253" width="15.452000000000002" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="800" y="270" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">1</text>
+  <rect x="797" y="288" width="55.13" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="800" y="305" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">places</text>
+  <rect x="797" y="333" width="31.517000000000003" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="800" y="350" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">0..*</text>
+  <rect x="1007" y="126" width="15.452000000000002" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="1010" y="143" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">1</text>
+  <rect x="1017" y="167" width="53.242999999999995" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="1020" y="184" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">/earns</text>
+  <rect x="1062" y="126" width="31.517000000000003" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="1065" y="143" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">0..*</text>
+  <rect x="1007" y="398" width="15.452000000000002" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="1010" y="415" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">1</text>
+  <rect x="1157" y="257" width="57.016999999999996" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="1160" y="274" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">/award</text>
+  <rect x="1349" y="239" width="34.355999999999995" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="1352" y="256" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">0..1</text>
+  <rect x="485" y="201" width="34.355999999999995" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="488" y="218" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">0..1</text>
+  <rect x="525" y="293" width="60.80800000000001" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="528" y="310" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">applied</text>
+  <rect x="522" y="443" width="31.517000000000003" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="525" y="460" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">0..*</text>
+  <rect x="265" y="376" width="15.452000000000002" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="268" y="393" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">1</text>
+  <rect x="265" y="435" width="71.178" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="268" y="452" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">reserves</text>
+  <rect x="265" y="497" width="31.517000000000003" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="268" y="514" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">0..*</text>
+  <rect x="545" y="592" width="15.452000000000002" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="548" y="609" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">1</text>
+  <rect x="484" y="592" width="34.355999999999995" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="487" y="609" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">0..1</text>
+  <rect x="492" y="634" width="46.63" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="495" y="651" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">holds</text>
+  <rect x="1007" y="498" width="15.452000000000002" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="1010" y="515" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">1</text>
+  <rect x="1063" y="498" width="31.517000000000003" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="1066" y="515" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">0..*</text>
+  <rect x="1007" y="541" width="71.195" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="1010" y="558" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">attempts</text>
+  <polygon points="785,672 778,683 785,694 792,683" fill="#182B3A" />
+  <rect x="797" y="683" width="15.452000000000002" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="800" y="700" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">1</text>
+  <rect x="797" y="727" width="69.308" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="800" y="744" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">contains</text>
+  <rect x="797" y="773" width="43.80800000000001" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="800" y="790" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">1..20</text>
+  <rect x="485" y="913" width="15.452000000000002" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="488" y="930" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">1</text>
+  <rect x="523" y="913" width="31.517000000000003" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="526" y="930" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">0..*</text>
+  <rect x="480" y="959" width="87.26" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="483" y="976" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">ordered as</text>
+  <rect x="1351" y="659" width="15.452000000000002" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="1354" y="676" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">1</text>
+  <rect x="1351" y="709" width="102.373" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="1354" y="726" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">observations</text>
+  <rect x="1351" y="773" width="31.517000000000003" height="22" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="1354" y="790" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">0..*</text>
+  <text x="30" y="1090" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#455B6B">UML: filled diamond = composition; dashed /association and /attribute = derived, not persisted separately.</text>
+  <text x="30" y="1112" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#455B6B">MoneyVnd = non-negative integer VND. Multiplicities describe all history; guards limit active orders and accepted payments.</text>
+</svg>

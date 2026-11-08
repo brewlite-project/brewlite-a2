@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1230" viewBox="0 0 1600 1230" role="img">
+  <title>BrewLite domain class diagram - SCRUM-105</title>
+  <desc>UML classes, typed attributes and relationship multiplicities. See README.md for source mapping and limitations.</desc>
+  <rect x="0" y="0" width="1600" height="1230" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.4" />
+  <text x="30" y="38" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#182B3A" font-weight="bold">Domain types and enums</text>
+  <text x="30" y="64" font-family="Arial, Helvetica, sans-serif" font-size="15" fill="#455B6B">BrewLite | SCRUM-105 / A2-T2.3 | A1-final | DRAFT - pending review</text>
+  <rect x="30" y="85" width="365" height="235" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="30" y="85" width="365" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="42" y="105" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;enumeration&gt;&gt;</text>
+  <text x="42" y="130" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">OrderStatus</text>
+  <text x="42" y="167" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">PENDING</text>
+  <text x="42" y="191" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">PAYMENT_FAILED</text>
+  <text x="42" y="215" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">PAID</text>
+  <text x="42" y="239" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">PREPARING</text>
+  <text x="42" y="263" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">READY</text>
+  <text x="42" y="287" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">COMPLETED</text>
+  <text x="42" y="311" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">CANCELLED</text>
+  <rect x="425" y="85" width="365" height="139" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="425" y="85" width="365" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="437" y="105" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;enumeration&gt;&gt;</text>
+  <text x="437" y="130" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">PaymentStatus</text>
+  <text x="437" y="167" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">PENDING</text>
+  <text x="437" y="191" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">SUCCESS</text>
+  <text x="437" y="215" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">FAILED</text>
+  <rect x="820" y="85" width="365" height="139" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="820" y="85" width="365" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="832" y="105" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;enumeration&gt;&gt;</text>
+  <text x="832" y="130" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">PaymentProvider</text>
+  <text x="832" y="167" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">MOCK</text>
+  <text x="832" y="191" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">VNPAY</text>
+  <text x="832" y="215" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">ZERO_AMOUNT</text>
+  <rect x="1215" y="85" width="365" height="163" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="1215" y="85" width="365" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="1227" y="105" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;enumeration&gt;&gt;</text>
+  <text x="1227" y="130" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">PaymentReconciliationState</text>
+  <text x="1227" y="167" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">NONE</text>
+  <text x="1227" y="191" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">SCHEDULED</text>
+  <text x="1227" y="215" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">RESOLVED</text>
+  <text x="1227" y="239" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">REQUIRES_REVIEW</text>
+  <rect x="30" y="380" width="365" height="187" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="30" y="380" width="365" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="42" y="400" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;enumeration&gt;&gt;</text>
+  <text x="42" y="425" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">PaymentGatewayDisposition</text>
+  <text x="42" y="462" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">OBSERVED</text>
+  <text x="42" y="486" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">FINALIZED</text>
+  <text x="42" y="510" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">DUPLICATE</text>
+  <text x="42" y="534" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">CONFLICT</text>
+  <text x="42" y="558" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">FINANCIAL_EXCEPTION</text>
+  <rect x="425" y="380" width="365" height="139" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="425" y="380" width="365" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="437" y="400" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;enumeration&gt;&gt;</text>
+  <text x="437" y="425" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">RedemptionStatus</text>
+  <text x="437" y="462" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">HELD</text>
+  <text x="437" y="486" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">CONSUMED</text>
+  <text x="437" y="510" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">RELEASED</text>
+  <rect x="820" y="380" width="365" height="115" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="820" y="380" width="365" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="832" y="400" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;enumeration&gt;&gt;</text>
+  <text x="832" y="425" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">CouponType</text>
+  <text x="832" y="462" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">PERCENT</text>
+  <text x="832" y="486" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">FIXED</text>
+  <rect x="1215" y="380" width="365" height="115" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="1215" y="380" width="365" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="1227" y="400" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;enumeration&gt;&gt;</text>
+  <text x="1227" y="425" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">PaymentMethod</text>
+  <text x="1227" y="462" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">CARD</text>
+  <text x="1227" y="486" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">WALLET</text>
+  <rect x="30" y="675" width="365" height="163" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="30" y="675" width="365" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="42" y="695" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;enumeration&gt;&gt;</text>
+  <text x="42" y="720" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">DrinkSize</text>
+  <text x="42" y="757" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">S</text>
+  <text x="42" y="781" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">M</text>
+  <text x="42" y="805" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">L</text>
+  <text x="42" y="829" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">ONE_SIZE</text>
+  <rect x="425" y="675" width="365" height="115" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="425" y="675" width="365" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="437" y="695" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;enumeration&gt;&gt;</text>
+  <text x="437" y="720" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">ProductSizePolicy</text>
+  <text x="437" y="757" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">STANDARD</text>
+  <text x="437" y="781" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">ONE_SIZE</text>
+  <rect x="820" y="675" width="365" height="115" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="820" y="675" width="365" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="832" y="695" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;enumeration&gt;&gt;</text>
+  <text x="832" y="720" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">PaymentGatewaySource</text>
+  <text x="832" y="757" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">IPN</text>
+  <text x="832" y="781" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">QUERYDR</text>
+  <rect x="1215" y="675" width="365" height="139" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="1215" y="675" width="365" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="1227" y="695" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;enumeration&gt;&gt;</text>
+  <text x="1227" y="720" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">PaymentGatewayOutcome</text>
+  <text x="1227" y="757" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">UNKNOWN</text>
+  <text x="1227" y="781" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">SUCCESS</text>
+  <text x="1227" y="805" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">FAILED</text>
+  <rect x="30" y="970" width="570" height="139" fill="#FFFFFF" stroke="#536C7E" stroke-width="1.4" />
+  <rect x="30" y="970" width="570" height="58" fill="#EAF2F7" stroke="#536C7E" stroke-width="1.4" />
+  <text x="42" y="990" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#455B6B">&lt;&lt;value object / order-time values&gt;&gt;</text>
+  <text x="42" y="1015" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#182B3A" font-weight="bold">ToppingSnapshot</text>
+  <text x="42" y="1052" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">code: String</text>
+  <text x="42" y="1076" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">name: String</text>
+  <text x="42" y="1100" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#182B3A">priceVnd: MoneyVnd</text>
+  <text x="640" y="1000" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#455B6B">OrderItem owns 0..3 ToppingSnapshot values; names and prices remain unchanged after checkout.</text>
+  <text x="640" y="1030" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#455B6B">Snapshot mapping: toppingCodeSnapshot, toppingNameSnapshot, toppingPriceSnapshotVnd.</text>
+  <text x="30" y="1135" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#455B6B">MoneyVnd = integer VND (BigInt internally); DateTime = timezone-aware instant; [0..1] = optional.</text>
+  <text x="30" y="1160" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#455B6B">GRACE is a time window. EXPIRED is a failure reason. Neither is an OrderStatus or PaymentStatus.</text>
+  <text x="30" y="1185" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#455B6B">Payment resolution is derived presentation data; REQUIRES_REVIEW belongs to reconciliation, not PaymentStatus.</text>
+</svg>

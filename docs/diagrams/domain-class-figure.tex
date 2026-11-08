@@ -1,0 +1,31 @@
+% SCRUM-105 / A2-T2.3. Fragment, not a standalone LaTeX document.
+% Preamble: \usepackage{graphicx} \usepackage{pdflscape}
+% Vietnamese support follows the report template (e.g. vntex).
+% Default: compile from repository root.
+% From docs/report/: define \newcommand{\BrewLiteDiagramDir}{../diagrams}
+% before \input{../diagrams/domain-class-figure.tex}.
+\providecommand{\BrewLiteDiagramDir}{docs/diagrams}
+
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \includegraphics[page=1,width=\linewidth,height=0.83\textheight,keepaspectratio]
+    {\BrewLiteDiagramDir/brewlite-domain-class.pdf}
+  \caption{Domain Class Diagram của BrewLite theo baseline A1-final.
+    Promotion ánh xạ vào Coupon; LoyaltyTransaction là khái niệm suy ra
+    từ Order, chưa có ledger riêng. Bản thiết kế chờ review.}
+  \label{fig:brewlite-domain-class}
+\end{figure}
+\end{landscape}
+
+\begin{landscape}
+\begin{figure}[p]
+  \centering
+  \includegraphics[page=2,width=\linewidth,height=0.83\textheight,keepaspectratio]
+    {\BrewLiteDiagramDir/brewlite-domain-class.pdf}
+  \caption{Các enum và kiểu dữ liệu dùng trong mô hình domain.
+    OrderStatus, PaymentStatus và PaymentReconciliationState
+    là các trục trạng thái riêng biệt.}
+  \label{fig:brewlite-domain-types}
+\end{figure}
+\end{landscape}

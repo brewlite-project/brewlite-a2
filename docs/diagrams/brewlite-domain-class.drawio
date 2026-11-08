@@ -1,0 +1,249 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" version="24.7.17" type="device">
+  <diagram name="Domain class diagram" id="Domain-class-diagram">
+    <mxGraphModel dx="1600" dy="1160" grid="1" gridSize="10" page="1" pageWidth="1600" pageHeight="1160" math="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Domain class diagram" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=26;fontStyle=1;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="30" y="12" width="1400" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="BrewLite | SCRUM-105 / A2-T2.3 | A1-final | DRAFT - pending review" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=15;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="30" y="49" width="1400" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="Promotion" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;entity / implemented as Coupon&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;Promotion&lt;/div&gt;&lt;hr&gt;&lt;div&gt;id: UUID&lt;/div&gt;&lt;div&gt;code: String&lt;/div&gt;&lt;div&gt;type: CouponType&lt;/div&gt;&lt;div&gt;value: Integer&lt;/div&gt;&lt;div&gt;minSubtotalVnd: MoneyVnd&lt;/div&gt;&lt;div&gt;maxDiscountVnd: MoneyVnd [0..1]&lt;/div&gt;&lt;div&gt;startsAt, expiresAt: DateTime&lt;/div&gt;&lt;div&gt;usageLimit, perUserLimit: Integer&lt;/div&gt;&lt;div&gt;activeUsageCount: Integer&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="30" y="85" width="450" height="283" as="geometry" />
+        </mxCell>
+        <mxCell id="User" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;entity&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;User&lt;/div&gt;&lt;hr&gt;&lt;div&gt;id: UUID&lt;/div&gt;&lt;div&gt;email: String&lt;/div&gt;&lt;div&gt;fullName: String [0..1]&lt;/div&gt;&lt;div&gt;loyaltyPoints: Integer&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="570" y="85" width="430" height="163" as="geometry" />
+        </mxCell>
+        <mxCell id="LoyaltyTransaction" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;derived concept / no separate ledger&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;LoyaltyTransaction&lt;/div&gt;&lt;hr&gt;&lt;div&gt;/points: Integer&lt;/div&gt;&lt;div&gt;/occurredAt: DateTime&lt;/div&gt;&lt;div style=&quot;font-size:15px;color:#455B6B&quot;&gt;From Order.pointsEarned and paidAt&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#F2ECFA;strokeColor=#536C7E;">
+          <mxGeometry x="1110" y="85" width="460" height="142" as="geometry" />
+        </mxCell>
+        <mxCell id="CouponRedemption" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;entity / coupon reservation&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;CouponRedemption&lt;/div&gt;&lt;hr&gt;&lt;div&gt;status: RedemptionStatus&lt;/div&gt;&lt;div&gt;heldAt: DateTime&lt;/div&gt;&lt;div&gt;consumedAt: DateTime [0..1]&lt;/div&gt;&lt;div&gt;releasedAt: DateTime [0..1]&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="30" y="530" width="450" height="163" as="geometry" />
+        </mxCell>
+        <mxCell id="Order" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;entity / checkout aggregate&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;Order&lt;/div&gt;&lt;hr&gt;&lt;div&gt;id: UUID&lt;/div&gt;&lt;div&gt;status: OrderStatus&lt;/div&gt;&lt;div&gt;subtotalVnd: MoneyVnd&lt;/div&gt;&lt;div&gt;discountVnd: MoneyVnd&lt;/div&gt;&lt;div&gt;totalVnd: MoneyVnd&lt;/div&gt;&lt;div&gt;pointsEarned: Integer&lt;/div&gt;&lt;div&gt;couponCodeSnapshot: String [0..1]&lt;/div&gt;&lt;div&gt;createdAt, expiresAt: DateTime&lt;/div&gt;&lt;div&gt;paidAt: DateTime [0..1]&lt;/div&gt;&lt;div&gt;cancelledAt: DateTime [0..1]&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="570" y="365" width="430" height="307" as="geometry" />
+        </mxCell>
+        <mxCell id="Payment" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;entity / one payment attempt&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;Payment&lt;/div&gt;&lt;hr&gt;&lt;div&gt;id: UUID&lt;/div&gt;&lt;div&gt;amountVnd: MoneyVnd&lt;/div&gt;&lt;div&gt;status: PaymentStatus&lt;/div&gt;&lt;div&gt;provider: PaymentProvider&lt;/div&gt;&lt;div&gt;method: PaymentMethod [0..1]&lt;/div&gt;&lt;div&gt;reconciliationState:&lt;/div&gt;&lt;div&gt;  PaymentReconciliationState&lt;/div&gt;&lt;div&gt;hasFinancialException: Boolean&lt;/div&gt;&lt;div&gt;createdAt: DateTime&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="1110" y="365" width="460" height="283" as="geometry" />
+        </mxCell>
+        <mxCell id="Product" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;entity / current catalog&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;Product&lt;/div&gt;&lt;hr&gt;&lt;div&gt;id: UUID&lt;/div&gt;&lt;div&gt;name: String&lt;/div&gt;&lt;div&gt;basePriceVnd: MoneyVnd&lt;/div&gt;&lt;div&gt;stock: Integer&lt;/div&gt;&lt;div&gt;sizePolicy: ProductSizePolicy&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="30" y="835" width="450" height="187" as="geometry" />
+        </mxCell>
+        <mxCell id="OrderItem" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;owned entity / immutable price snapshot&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;OrderItem&lt;/div&gt;&lt;hr&gt;&lt;div&gt;productNameSnapshot: String&lt;/div&gt;&lt;div&gt;size: DrinkSize&lt;/div&gt;&lt;div&gt;sizePercentSnapshot: Integer&lt;/div&gt;&lt;div&gt;basePriceSnapshotVnd: MoneyVnd&lt;/div&gt;&lt;div&gt;unitPriceVnd: MoneyVnd&lt;/div&gt;&lt;div&gt;quantity: Integer&lt;/div&gt;&lt;div&gt;lineTotalVnd: MoneyVnd&lt;/div&gt;&lt;div&gt;toppings: ToppingSnapshot [0..3]&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="570" y="805" width="430" height="259" as="geometry" />
+        </mxCell>
+        <mxCell id="PaymentGatewayEvent" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;entity / verified gateway evidence&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;PaymentGatewayEvent&lt;/div&gt;&lt;hr&gt;&lt;div&gt;source: PaymentGatewaySource&lt;/div&gt;&lt;div&gt;outcome: PaymentGatewayOutcome&lt;/div&gt;&lt;div&gt;disposition: PaymentGatewayDisposition&lt;/div&gt;&lt;div&gt;amountVnd: MoneyVnd [0..1]&lt;/div&gt;&lt;div&gt;gatewayPaidAt: DateTime [0..1]&lt;/div&gt;&lt;div&gt;verifiedAt: DateTime&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="1110" y="805" width="460" height="211" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0" edge="1" parent="1" source="User" target="Order" style="edgeStyle=none;html=1;rounded=0;endArrow=none;strokeColor=#536C7E;strokeWidth=1.8;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0-label-0" value="1" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="800" y="253" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0-label-1" value="places" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="800" y="288" width="59" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0-label-2" value="0..*" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="800" y="333" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1" edge="1" parent="1" source="User" target="LoyaltyTransaction" style="edgeStyle=none;html=1;rounded=0;endArrow=none;strokeColor=#536C7E;strokeWidth=1.8;exitX=1.0;exitY=0.4294478527607362;exitPerimeter=0;entryX=0.0;entryY=0.49295774647887325;entryPerimeter=0;dashed=1;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-label-0" value="1" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="1010" y="126" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-label-1" value="/earns" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="1020" y="167" width="57" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1-label-2" value="0..*" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="1065" y="126" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2" edge="1" parent="1" source="Order" target="LoyaltyTransaction" style="edgeStyle=none;html=1;rounded=0;endArrow=none;strokeColor=#536C7E;strokeWidth=1.8;exitX=1.0;exitY=0.08143322475570032;exitPerimeter=0;entryX=0.5;entryY=1.0;entryPerimeter=0;dashed=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1045" y="390" />
+              <mxPoint x="1045" y="285" />
+              <mxPoint x="1340" y="285" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-2-label-0" value="1" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="1010" y="398" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-label-1" value="/award" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="1160" y="257" width="61" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-label-2" value="0..1" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="1352" y="239" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3" edge="1" parent="1" source="Promotion" target="Order" style="edgeStyle=none;html=1;rounded=0;endArrow=none;strokeColor=#536C7E;strokeWidth=1.8;exitX=1.0;exitY=0.5123674911660777;exitPerimeter=0;entryX=0.0;entryY=0.2280130293159609;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="230" />
+              <mxPoint x="520" y="435" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="edge-3-label-0" value="0..1" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="488" y="201" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3-label-1" value="applied" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="528" y="293" width="64" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3-label-2" value="0..*" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="525" y="443" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4" edge="1" parent="1" source="Promotion" target="CouponRedemption" style="edgeStyle=none;html=1;rounded=0;endArrow=none;strokeColor=#536C7E;strokeWidth=1.8;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4-label-0" value="1" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="268" y="376" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4-label-1" value="reserves" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="268" y="435" width="75" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4-label-2" value="0..*" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="268" y="497" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5" edge="1" parent="1" source="Order" target="CouponRedemption" style="edgeStyle=none;html=1;rounded=0;endArrow=none;strokeColor=#536C7E;strokeWidth=1.8;exitX=0.0;exitY=0.8469055374592834;exitPerimeter=0;entryX=1.0;entryY=0.5828220858895705;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5-label-0" value="1" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="548" y="592" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5-label-1" value="0..1" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="487" y="592" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5-label-2" value="holds" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="495" y="634" width="50" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6" edge="1" parent="1" source="Order" target="Payment" style="edgeStyle=none;html=1;rounded=0;endArrow=none;strokeColor=#536C7E;strokeWidth=1.8;exitX=1.0;exitY=0.5374592833876222;exitPerimeter=0;entryX=0.0;entryY=0.5830388692579506;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6-label-0" value="1" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="1010" y="498" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6-label-1" value="0..*" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="1066" y="498" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6-label-2" value="attempts" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="1010" y="541" width="75" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7" edge="1" parent="1" source="Order" target="OrderItem" style="edgeStyle=none;html=1;rounded=0;endArrow=none;strokeColor=#536C7E;strokeWidth=1.8;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;startArrow=diamond;startFill=1;startSize=14;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7-label-0" value="1" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="800" y="683" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7-label-1" value="contains" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="800" y="727" width="73" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7-label-2" value="1..20" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="800" y="773" width="47" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8" edge="1" parent="1" source="Product" target="OrderItem" style="edgeStyle=none;html=1;rounded=0;endArrow=none;strokeColor=#536C7E;strokeWidth=1.8;exitX=1.0;exitY=0.5882352941176471;exitPerimeter=0;entryX=0.0;entryY=0.5405405405405406;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8-label-0" value="1" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="488" y="913" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8-label-1" value="0..*" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="526" y="913" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8-label-2" value="ordered as" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="483" y="959" width="91" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-9" edge="1" parent="1" source="Payment" target="PaymentGatewayEvent" style="edgeStyle=none;html=1;rounded=0;endArrow=none;strokeColor=#536C7E;strokeWidth=1.8;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-9-label-0" value="1" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="1354" y="659" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-9-label-1" value="observations" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="1354" y="709" width="106" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-9-label-2" value="0..*" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="1354" y="773" width="40" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="note-0" value="UML: filled diamond = composition; dashed /association and /attribute = derived, not persisted separately." vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=16;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="30" y="1074" width="1500" height="27" as="geometry" />
+        </mxCell>
+        <mxCell id="note-1" value="MoneyVnd = non-negative integer VND. Multiplicities describe all history; guards limit active orders and accepted payments." vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=15;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="30" y="1097" width="1500" height="27" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="Domain types and enums" id="Domain-types-and-enums">
+    <mxGraphModel dx="1600" dy="1230" grid="1" gridSize="10" page="1" pageWidth="1600" pageHeight="1230" math="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Domain types and enums" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=26;fontStyle=1;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="30" y="12" width="1400" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="BrewLite | SCRUM-105 / A2-T2.3 | A1-final | DRAFT - pending review" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=15;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="30" y="49" width="1400" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="OrderStatus" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;OrderStatus&lt;/div&gt;&lt;hr&gt;&lt;div&gt;PENDING&lt;/div&gt;&lt;div&gt;PAYMENT_FAILED&lt;/div&gt;&lt;div&gt;PAID&lt;/div&gt;&lt;div&gt;PREPARING&lt;/div&gt;&lt;div&gt;READY&lt;/div&gt;&lt;div&gt;COMPLETED&lt;/div&gt;&lt;div&gt;CANCELLED&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="30" y="85" width="365" height="235" as="geometry" />
+        </mxCell>
+        <mxCell id="PaymentStatus" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;PaymentStatus&lt;/div&gt;&lt;hr&gt;&lt;div&gt;PENDING&lt;/div&gt;&lt;div&gt;SUCCESS&lt;/div&gt;&lt;div&gt;FAILED&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="425" y="85" width="365" height="139" as="geometry" />
+        </mxCell>
+        <mxCell id="PaymentProvider" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;PaymentProvider&lt;/div&gt;&lt;hr&gt;&lt;div&gt;MOCK&lt;/div&gt;&lt;div&gt;VNPAY&lt;/div&gt;&lt;div&gt;ZERO_AMOUNT&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="820" y="85" width="365" height="139" as="geometry" />
+        </mxCell>
+        <mxCell id="PaymentReconciliationState" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;PaymentReconciliationState&lt;/div&gt;&lt;hr&gt;&lt;div&gt;NONE&lt;/div&gt;&lt;div&gt;SCHEDULED&lt;/div&gt;&lt;div&gt;RESOLVED&lt;/div&gt;&lt;div&gt;REQUIRES_REVIEW&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="1215" y="85" width="365" height="163" as="geometry" />
+        </mxCell>
+        <mxCell id="PaymentGatewayDisposition" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;PaymentGatewayDisposition&lt;/div&gt;&lt;hr&gt;&lt;div&gt;OBSERVED&lt;/div&gt;&lt;div&gt;FINALIZED&lt;/div&gt;&lt;div&gt;DUPLICATE&lt;/div&gt;&lt;div&gt;CONFLICT&lt;/div&gt;&lt;div&gt;FINANCIAL_EXCEPTION&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="30" y="380" width="365" height="187" as="geometry" />
+        </mxCell>
+        <mxCell id="RedemptionStatus" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;RedemptionStatus&lt;/div&gt;&lt;hr&gt;&lt;div&gt;HELD&lt;/div&gt;&lt;div&gt;CONSUMED&lt;/div&gt;&lt;div&gt;RELEASED&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="425" y="380" width="365" height="139" as="geometry" />
+        </mxCell>
+        <mxCell id="CouponType" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;CouponType&lt;/div&gt;&lt;hr&gt;&lt;div&gt;PERCENT&lt;/div&gt;&lt;div&gt;FIXED&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="820" y="380" width="365" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="PaymentMethod" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;PaymentMethod&lt;/div&gt;&lt;hr&gt;&lt;div&gt;CARD&lt;/div&gt;&lt;div&gt;WALLET&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="1215" y="380" width="365" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="DrinkSize" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;DrinkSize&lt;/div&gt;&lt;hr&gt;&lt;div&gt;S&lt;/div&gt;&lt;div&gt;M&lt;/div&gt;&lt;div&gt;L&lt;/div&gt;&lt;div&gt;ONE_SIZE&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="30" y="675" width="365" height="163" as="geometry" />
+        </mxCell>
+        <mxCell id="ProductSizePolicy" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;ProductSizePolicy&lt;/div&gt;&lt;hr&gt;&lt;div&gt;STANDARD&lt;/div&gt;&lt;div&gt;ONE_SIZE&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="425" y="675" width="365" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="PaymentGatewaySource" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;PaymentGatewaySource&lt;/div&gt;&lt;hr&gt;&lt;div&gt;IPN&lt;/div&gt;&lt;div&gt;QUERYDR&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="820" y="675" width="365" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="PaymentGatewayOutcome" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;enumeration&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;PaymentGatewayOutcome&lt;/div&gt;&lt;hr&gt;&lt;div&gt;UNKNOWN&lt;/div&gt;&lt;div&gt;SUCCESS&lt;/div&gt;&lt;div&gt;FAILED&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="1215" y="675" width="365" height="139" as="geometry" />
+        </mxCell>
+        <mxCell id="ToppingSnapshot" value="&lt;div style=&quot;font-size:14px;color:#455B6B&quot;&gt;&amp;lt;&amp;lt;value object / order-time values&amp;gt;&amp;gt;&lt;/div&gt;&lt;div style=&quot;font-size:20px;font-weight:bold&quot;&gt;ToppingSnapshot&lt;/div&gt;&lt;hr&gt;&lt;div&gt;code: String&lt;/div&gt;&lt;div&gt;name: String&lt;/div&gt;&lt;div&gt;priceVnd: MoneyVnd&lt;/div&gt;" vertex="1" parent="1" style="rounded=0;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;fontFamily=Arial;fontSize=17;fillColor=#EAF2F7;strokeColor=#536C7E;">
+          <mxGeometry x="30" y="970" width="570" height="139" as="geometry" />
+        </mxCell>
+        <mxCell id="note-0" value="OrderItem owns 0..3 ToppingSnapshot values; names and prices remain unchanged after checkout." vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="640" y="983" width="1500" height="27" as="geometry" />
+        </mxCell>
+        <mxCell id="note-1" value="Snapshot mapping: toppingCodeSnapshot, toppingNameSnapshot, toppingPriceSnapshotVnd." vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="640" y="1013" width="1500" height="27" as="geometry" />
+        </mxCell>
+        <mxCell id="note-2" value="MoneyVnd = integer VND (BigInt internally); DateTime = timezone-aware instant; [0..1] = optional." vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="30" y="1118" width="1500" height="27" as="geometry" />
+        </mxCell>
+        <mxCell id="note-3" value="GRACE is a time window. EXPIRED is a failure reason. Neither is an OrderStatus or PaymentStatus." vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=17;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="30" y="1143" width="1500" height="27" as="geometry" />
+        </mxCell>
+        <mxCell id="note-4" value="Payment resolution is derived presentation data; REQUIRES_REVIEW belongs to reconciliation, not PaymentStatus." vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontFamily=Arial;fontSize=16;fontStyle=0;fontColor=#182B3A;fillColor=#FFFFFF;">
+          <mxGeometry x="30" y="1169" width="1500" height="27" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
