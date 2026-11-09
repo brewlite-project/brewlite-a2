@@ -42,10 +42,17 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   );
 
   // State quản lý gọi API Backend thật GET /products/:id (SCRUM-32)
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [lookupResult, setLookupResult] =
-    useState<ProductDetailLookupResult | null>(null);
+  const [lookupState, setLookupState] = useState<{
+    productId: string;
+    reloadKey: number;
+    result: ProductDetailLookupResult | null;
+  }>({ productId: id, reloadKey: 0, result: null });
   const [reloadKey, setReloadKey] = useState<number>(0);
+  const isLoading =
+    lookupState.productId !== id ||
+    lookupState.reloadKey !== reloadKey ||
+    lookupState.result === null;
+  const lookupResult = isLoading ? null : lookupState.result;
 
   // State hiển thị thông báo (Toast) khi bấm "Thêm vào giỏ hàng" hoặc bấm vào ô "Giỏ hàng"
   const [toastVisible, setToastVisible] = useState<boolean>(false);
@@ -68,26 +75,25 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       });
 
     // 2. Gọi API GET /products/:id thật đến Backend
-    setIsLoading(true);
     fetchProductDetailById(id, abortController.signal)
       .then((res) => {
         if (isCancelled) return;
-        setLookupResult(res);
+        setLookupState({ productId: id, reloadKey, result: res });
       })
       .catch((err: unknown) => {
         if (isCancelled) return;
-        setLookupResult({
-          status: 500,
-          message:
-            err instanceof Error && err.message
-              ? err.message
-              : "Không thể kết nối đến máy chủ Backend (cổng 3001).",
-          error: "Internal Server Error",
+        setLookupState({
+          productId: id,
+          reloadKey,
+          result: {
+            status: 500,
+            message:
+              err instanceof Error && err.message
+                ? err.message
+                : "Không thể kết nối đến máy chủ Backend (cổng 3001).",
+            error: "Internal Server Error",
+          },
         });
-      })
-      .finally(() => {
-        if (isCancelled) return;
-        setIsLoading(false);
       });
 
     return () => {
