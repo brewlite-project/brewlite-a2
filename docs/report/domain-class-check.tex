@@ -1,0 +1,54 @@
+% SCRUM-105: standalone A4 integration fixture; not the final A2 report.
+% Compile from repository root with XeLaTeX/LuaLaTeX or Tectonic:
+% tectonic -p --keep-logs --outdir docs/report/assets docs/report/domain-class-check.tex
+% Compile from docs/report/ after defining the path at the command line, or
+% use the automatic relative-path fallback below.
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=12mm]{geometry}
+\usepackage{fontspec}
+\setmainfont{texgyretermes-regular.otf}[
+  BoldFont=texgyretermes-bold.otf,
+  ItalicFont=texgyretermes-italic.otf,
+  BoldItalicFont=texgyretermes-bolditalic.otf
+]
+\usepackage{graphicx}
+\usepackage{pdflscape}
+\usepackage[unicode,hidelinks]{hyperref}
+
+\IfFileExists{docs/diagrams/domain-class-figure.tex}{%
+  \newcommand{\BrewLiteDiagramDir}{docs/diagrams}%
+}{%
+  \newcommand{\BrewLiteDiagramDir}{../diagrams}%
+}
+
+\begin{document}
+\section*{Kiểm chứng tích hợp Domain Class Diagram}
+\noindent BrewLite A2 -- SCRUM-105 / PR \#5\par
+\noindent Ngày đối chiếu: 09/11/2026\par
+
+Đây là bản ghép kiểm tra trên khổ A4, dùng fragment chèn hình của SCRUM-105.
+Tài liệu này kiểm tra chữ tiếng Việt, caption, số hình, tham chiếu và hai
+trang sơ đồ landscape. Đây chưa phải báo cáo A2 đầy đủ theo template cuối.
+
+\subsection*{Nguồn và phạm vi}
+Đối chiếu SRS SCRUM-102 và Checkout Use Case SCRUM-100 đã merge vào
+\texttt{dev}. Commit nguồn và mapping FR/NFR được ghi trong bản xử lý
+review vòng 1 của SCRUM-105.
+Hình~\ref{fig:brewlite-domain-class} mô tả các class và multiplicity;
+Hình~\ref{fig:brewlite-domain-types} trình bày các enum và kiểu dữ liệu.
+
+\subsection*{Kết luận retry dùng trong mô hình}
+Theo xác nhận nhận ngày 09/11/2026, khi retry VNPay, Order giữ
+\texttt{PAYMENT\_FAILED}; Payment attempt mới mang trạng thái
+\texttt{PENDING}. Hai trạng thái thuộc hai đối tượng khác nhau.
+Retry không tạo Order mới, không gia hạn TTL và không giữ thêm stock/coupon.
+Đây là xác nhận dùng cho tài liệu SCRUM-105, không phải thay đổi backend.
+
+\subsection*{Giới hạn bằng chứng}
+Compile thành công chứng minh fragment có thể ghép và đọc được trong fixture
+này. Việc merge các task nguồn không tự đổi trạng thái approval của API
+Contract v4.0, không chứng minh runtime/Sandbox đã PASS và không thay thế
+review hoặc nghiệm thu báo cáo cuối của nhóm.
+
+\input{\BrewLiteDiagramDir/domain-class-figure.tex}
+\end{document}

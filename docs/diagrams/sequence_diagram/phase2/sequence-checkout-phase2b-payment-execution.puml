@@ -1,0 +1,112 @@
+@startuml sequence-checkout-phase2b-payment-execution
+title [A2-T2.2] Sequence Diagram — Pha 2B: Phân nhánh Thực thi Thanh toán (ZERO_AMOUNT / Mock / VNPay Sandbox Initiate)\nĐối chiếu UC-A2-CHECKOUT-001 (Steps 7–8, AF-03..AF-05), API Contract v4.0 & Kế thừa A1 SD-02
+
+skinparam dpi 96
+skinparam maxMessageSize 260
+skinparam responseMessageBelowArrow false
+skinparam sequenceMessageAlign left
+skinparam Padding 2
+skinparam ParticipantPadding 14
+skinparam BoxPadding 5
+skinparam Shadowing false
+skinparam RoundCorner 6
+skinparam style strictuml
+skinparam defaultFontName "Segoe UI", "Roboto", "Arial", sans-serif
+skinparam defaultFontSize 13
+
+skinparam sequence {
+  ArrowColor #334155
+  ArrowFontColor #0F172A
+  ArrowFontSize 13
+  LifeLineBorderColor #64748B
+  LifeLineBackgroundColor #F8FAFC
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F1F5F9
+  ParticipantFontColor #0F172A
+  ParticipantFontSize 14
+  ParticipantFontStyle bold
+  ActorBorderColor #1E293B
+  ActorBackgroundColor #E2E8F0
+  ActorFontColor #0F172A
+  ActorFontSize 14
+  ActorFontStyle bold
+  DatabaseBorderColor #1E293B
+  DatabaseBackgroundColor #E0F2FE
+  DatabaseFontColor #0F172A
+  DatabaseFontSize 14
+  DatabaseFontStyle bold
+  GroupBorderColor #2563EB
+  GroupBackgroundColor #EFF6FF
+  GroupHeaderFontColor #1E3A8A
+  GroupFontColor #1E293B
+  GroupFontSize 13
+  GroupFontStyle bold
+  DividerBorderColor #475569
+  DividerBackgroundColor #F1F5F9
+  DividerFontColor #0F172A
+  DividerFontSize 13
+  DividerFontStyle bold
+}
+
+skinparam note {
+  BackgroundColor #FEFCE8
+  BorderColor #D97706
+  FontColor #1E293B
+  FontSize 12
+}
+
+autonumber "<b>[P2B-00]"
+
+actor "Customer" as Customer
+participant "Next.js UI\n(CartDrawer /\nPaymentPageView)" as UI
+participant "NestJS API\n(Payments / ZeroAmount\nControllers)" as API
+database "Database\n(PostgreSQL /\nPrisma Tx)" as DB
+participant "Payment Service\n(ZeroAmount / Mock / VnpayInit /\nPaymentFinalizationService)" as PaymentSvc
+
+note over API, DB
+  **Tiếp nối Pha 2A:** Đã xác thực JWT, Order thuộc về Customer, kiểm tra Idempotency đạt,\nđã giữ khóa tư vấn ""pg_try_advisory_xact_lock"" & khóa dòng ""Order FOR UPDATE"", đơn còn hạn (now < E).
+end note
+
+== 3. Phân nhánh Thực thi Thanh toán (ZERO_AMOUNT / Mock / VNPay Sandbox) ==
+
+activate UI
+activate API
+activate PaymentSvc
+activate DB
+
+alt Nhánh A: Đơn hàng 0 VND (totalVnd == 0) — POST /payments/zero-amount [AF-03, BR-C07]
+  PaymentSvc -> DB : finalizeInTransaction(provider = 'ZERO_AMOUNT'):\nCoupon HELD -> CONSUMED, UPDATE Order -> PAID (pointsEarned = 0, paidAt = clock.now),\nINSERT Payment (ZERO_AMOUNT, SUCCESS) + COMMIT TX
+  DB --> PaymentSvc : Đã COMMIT TX
+  deactivate DB
+  PaymentSvc --> API : 201 Created (replayed: false, ZeroAmountPaymentResponseDto { orderStatus: 'PAID' })
+  deactivate PaymentSvc
+  API --> UI : 201 Created (Header: Idempotency-Replayed: false)
+  deactivate API
+  UI -> UI : Xóa giỏ hàng phía Client
+  UI --> Customer : Hiển thị màn hình xác nhận đơn hàng PAID (0 VND)
+
+else Nhánh B: Thanh toán Giả lập Mock (totalVnd > 0) — POST /payments [AF-04, AF-05, Kế thừa SD-02]
+  PaymentSvc -> PaymentSvc : MockPaymentService.evaluate(dto) (Thẻ *0002 / Ví *0000 -> FAILED 'PAYMENT_DECLINED'; còn lại -> SUCCESS)
+  PaymentSvc -> DB : finalizeInTransaction(provider = 'MOCK', outcome):\n• Nếu SUCCESS [AF-04]: Coupon HELD -> CONSUMED, cộng điểm floor(totalVnd / 10000), Order -> PAID (paidAt = clock.now), INSERT Payment (MOCK, SUCCESS)\n• Nếu FAILED [AF-05]: Giữ nguyên tồn kho & coupon HELD, Order -> PAYMENT_FAILED, INSERT Payment (MOCK, FAILED) + COMMIT TX
+  DB --> PaymentSvc : Đã COMMIT TX
+  deactivate DB
+  PaymentSvc --> API : 200 OK (replayed: false, PaymentResponseDto { paymentStatus: SUCCESS/FAILED, orderStatus: PAID/PAYMENT_FAILED })
+  deactivate PaymentSvc
+  API --> UI : 200 OK (Header: Idempotency-Replayed: false)
+  deactivate API
+  UI -> UI : Nếu PAID: Xóa giỏ hàng. Nếu PAYMENT_FAILED: Giữ nguyên giỏ & sinh Idempotency-Key mới cho lần Retry
+  UI --> Customer : Hiển thị kết quả thanh toán Mock (Thành công + điểm thưởng HOẶC Từ chối + nút Thử lại trước mốc E)
+
+else Nhánh C: Luồng chính VNPay Sandbox (totalVnd > 0) — POST /payments/vnpay/initiate [Main Flow Steps 7–8]
+  PaymentSvc -> PaymentSvc : Sinh paymentId (UUID), vnpTxnRef (32-hex) & ký HMAC-SHA512 tạo paymentUrl\n(vnp_Amount = totalVnd * 100, vnp_ExpireDate = E)
+  PaymentSvc -> DB : INSERT Payment (id = paymentId, provider = 'VNPAY', status = 'PENDING', vnpTxnRef, gatewayExpiresAt = E,\nreconciliationState = 'SCHEDULED', nextQueryAt = E, reconcileUntil = E + 65m, initiationSnapshot = { paymentUrl }) + COMMIT TX
+  DB --> PaymentSvc : Đã COMMIT tạo Payment PENDING
+  deactivate DB
+  PaymentSvc --> API : 201 Created (VnpayInitiationResponseDto { paymentId, orderId, provider: 'VNPAY', paymentStatus: 'PENDING', orderStatus, amountVnd, paymentUrl, expiresAt })
+  deactivate PaymentSvc
+  API --> UI : 201 Created (Header: Idempotency-Replayed: false, body chứa paymentUrl)
+  deactivate API
+  UI --> Customer : Chuyển hướng (Redirect) trình duyệt sang cổng VNPay Sandbox (tiếp tục sang Pha 3)
+  deactivate UI
+end
+@enduml
