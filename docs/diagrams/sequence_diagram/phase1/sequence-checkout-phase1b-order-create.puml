@@ -1,0 +1,120 @@
+@startuml sequence-checkout-phase1b-order-create
+title [A2-T2.2] Sequence Diagram — Pha 1B: Giao dịch Tạo đơn hàng Nguyên tử (Tính giá, Khóa kho, Giữ Coupon & INSERT Order)\nĐối chiếu UC-A2-CHECKOUT-001 (Steps 5–6, AF-01..AF-02, EF-03..EF-04), API Contract v4.0, Baseline A1-final & Kế thừa A1 SD-01
+
+skinparam dpi 96
+skinparam maxMessageSize 260
+skinparam responseMessageBelowArrow false
+skinparam sequenceMessageAlign left
+skinparam Padding 2
+skinparam ParticipantPadding 14
+skinparam BoxPadding 5
+skinparam Shadowing false
+skinparam RoundCorner 6
+skinparam style strictuml
+skinparam defaultFontName "Segoe UI", "Roboto", "Arial", sans-serif
+skinparam defaultFontSize 13
+
+skinparam sequence {
+  ArrowColor #334155
+  ArrowFontColor #0F172A
+  ArrowFontSize 13
+  LifeLineBorderColor #64748B
+  LifeLineBackgroundColor #F8FAFC
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F1F5F9
+  ParticipantFontColor #0F172A
+  ParticipantFontSize 14
+  ParticipantFontStyle bold
+  ActorBorderColor #1E293B
+  ActorBackgroundColor #E2E8F0
+  ActorFontColor #0F172A
+  ActorFontSize 14
+  ActorFontStyle bold
+  DatabaseBorderColor #1E293B
+  DatabaseBackgroundColor #E0F2FE
+  DatabaseFontColor #0F172A
+  DatabaseFontSize 14
+  DatabaseFontStyle bold
+  GroupBorderColor #2563EB
+  GroupBackgroundColor #EFF6FF
+  GroupHeaderFontColor #1E3A8A
+  GroupFontColor #1E293B
+  GroupFontSize 13
+  GroupFontStyle bold
+  DividerBorderColor #475569
+  DividerBackgroundColor #F1F5F9
+  DividerFontColor #0F172A
+  DividerFontSize 13
+  DividerFontStyle bold
+}
+
+skinparam note {
+  BackgroundColor #FEFCE8
+  BorderColor #D97706
+  FontColor #1E293B
+  FontSize 12
+}
+
+autonumber "<b>[P1B-00]"
+
+actor "Customer" as Customer
+participant "Next.js UI\n(CartDrawer /\nPaymentPageView)" as UI
+participant "NestJS API\n(OrdersController /\nOrdersService)" as API
+database "Database\n(PostgreSQL /\nPrisma Tx)" as DB
+
+note over API, DB
+  **Tiếp nối Pha 1A:** Đang trong Transaction sạch (phase = 1) có giữ khóa tư vấn ""pg_advisory_xact_lock('create-order:' || userId)"".
+  Không còn đơn cũ nào đang mở. Tiến hành tính giá server-side, trừ tồn kho và tạo Order.
+end note
+
+== 3. Tính giá chuẩn Server, Trừ giữ chỗ Tồn kho, Giữ chỗ Coupon & Tạo Order PENDING ==
+
+activate UI
+activate API
+activate DB
+
+API -> DB : priceCart(tx, items): Đọc Product (category.isActive, sizePolicy), Topping (isAvailable)\n& tính sizePrice = round_half_up, subtotalVnd
+DB --> API : Kết quả kiểm tra danh mục & subtotalVnd chuẩn Server
+
+alt Sản phẩm / Category / Size / Topping không hợp lệ (400 INVALID_CART) [EF-03]
+  API -> DB : ROLLBACK TX (Đóng transaction, giải phóng khóa advisory)
+  DB --> API : Đã ROLLBACK TX
+  deactivate DB
+  API --> UI : 400 BAD_REQUEST (code: 'INVALID_CART', details[])
+  deactivate API
+  UI --> Customer : Báo món/topping không còn khả dụng (giữ nguyên giỏ hàng)
+
+else Danh mục hợp lệ — Khóa & trừ giữ chỗ Product.stock (reserveInventory)
+  API -> DB : reserveInventory(tx, quantities): UPDATE products SET stock = stock - qty WHERE id = ? AND stock >= qty
+  DB --> API : Kết quả khóa dòng & trừ Product.stock
+
+  alt Không đủ tồn kho (409 INSUFFICIENT_STOCK) [EF-04]
+    API -> DB : ROLLBACK TX (Hoàn lại các dòng Product vừa trừ trong cùng TX)
+    DB --> API : Đã ROLLBACK TX
+    deactivate DB
+    API --> UI : 409 CONFLICT (code: 'INSUFFICIENT_STOCK', details[])
+    deactivate API
+    UI --> Customer : Thông báo sản phẩm không đủ tồn kho (giữ nguyên giỏ hàng)
+
+  else Đủ tồn kho — Kiểm tra & giữ chỗ Coupon (nếu có) và Tạo Order PENDING
+    alt Có gửi kèm couponCode nhưng mã không hợp lệ (400) hoặc hết lượt / vượt quota (409) [EF-04]
+      API -> DB : reserveCoupon(tx, userId, couponId, subtotal): SELECT coupons FOR UPDATE + Kiểm tra hạn & quota -> ROLLBACK TX
+      DB --> API : Đã ROLLBACK TX (Tự động hoàn trả toàn bộ Product.stock vừa trừ)
+      deactivate DB
+      API --> UI : 400 INVALID_COUPON hoặc 409 COUPON_UNAVAILABLE
+      deactivate API
+      UI --> Customer : Báo mã ưu đãi không hợp lệ/hết lượt & yêu cầu gỡ hoặc đổi mã (giữ nguyên giỏ)
+
+    else Không dùng coupon [AF-01] HOẶC giữ chỗ coupon hợp lệ [AF-02] (tăng activeUsageCount, tạo CouponRedemption HELD)
+      API -> DB : INSERT Order (status = 'PENDING', createdAt = now, expiresAt = E = now + 15m, subtotalVnd, discountVnd, totalVnd)\n+ INSERT OrderItem & OrderItemTopping snapshots + CouponRedemption (HELD) + COMMIT TX
+      DB --> API : Đã COMMIT tạo Order PENDING (tự động giải phóng pg_advisory_xact_lock)
+      deactivate DB
+      API --> UI : 201 Created (CreateOrderResponseDto { id, status: 'PENDING', items[], subtotalVnd, discountVnd, totalVnd, createdAt })\n*[SD-R04: expiresAt lưu trong DB = E]*
+      deactivate API
+      UI -> UI : Lưu activeOrder & bảo toàn giỏ hàng khi Order đang PENDING (chỉ xóa giỏ khi Order == PAID)
+      UI --> Customer : Hiển thị đơn hàng PENDING & chuyển sang khởi tạo thanh toán (Pha 2)
+      deactivate UI
+    end
+  end
+end
+@enduml

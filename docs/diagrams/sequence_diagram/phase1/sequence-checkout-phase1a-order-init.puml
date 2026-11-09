@@ -1,0 +1,132 @@
+@startuml sequence-checkout-phase1a-order-init
+title [A2-T2.2] Sequence Diagram — Pha 1A: Xác thực JWT, Khóa tư vấn & Kiểm tra / Dọn dẹp đơn cũ\nĐối chiếu UC-A2-CHECKOUT-001 (Steps 1–4, AF-01, EF-01, EF-05), API Contract v4.0, Baseline A1-final & Kế thừa A1 SD-01, SD-04
+
+skinparam dpi 96
+skinparam maxMessageSize 260
+skinparam responseMessageBelowArrow false
+skinparam sequenceMessageAlign left
+skinparam Padding 2
+skinparam ParticipantPadding 12
+skinparam BoxPadding 5
+skinparam Shadowing false
+skinparam RoundCorner 6
+skinparam style strictuml
+skinparam defaultFontName "Segoe UI", "Roboto", "Arial", sans-serif
+skinparam defaultFontSize 13
+
+skinparam sequence {
+  ArrowColor #334155
+  ArrowFontColor #0F172A
+  ArrowFontSize 13
+  LifeLineBorderColor #64748B
+  LifeLineBackgroundColor #F8FAFC
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F1F5F9
+  ParticipantFontColor #0F172A
+  ParticipantFontSize 14
+  ParticipantFontStyle bold
+  ActorBorderColor #1E293B
+  ActorBackgroundColor #E2E8F0
+  ActorFontColor #0F172A
+  ActorFontSize 14
+  ActorFontStyle bold
+  DatabaseBorderColor #1E293B
+  DatabaseBackgroundColor #E0F2FE
+  DatabaseFontColor #0F172A
+  DatabaseFontSize 14
+  DatabaseFontStyle bold
+  GroupBorderColor #2563EB
+  GroupBackgroundColor #EFF6FF
+  GroupHeaderFontColor #1E3A8A
+  GroupFontColor #1E293B
+  GroupFontSize 13
+  GroupFontStyle bold
+  DividerBorderColor #475569
+  DividerBackgroundColor #F1F5F9
+  DividerFontColor #0F172A
+  DividerFontSize 13
+  DividerFontStyle bold
+}
+
+skinparam note {
+  BackgroundColor #FEFCE8
+  BorderColor #D97706
+  FontColor #1E293B
+  FontSize 12
+}
+
+autonumber "<b>[P1A-00]"
+
+actor "Customer" as Customer
+participant "Next.js UI\n(CartDrawer /\nPaymentPageView)" as UI
+participant "NestJS API\n(OrdersController /\nOrdersService)" as API
+database "Database\n(PostgreSQL /\nPrisma Tx)" as DB
+participant "Payment Service\n(OrderExpiration /\nGrace Policy)" as PaymentSvc
+
+== 1. Kiểm tra giỏ hàng & Phiên đăng nhập JWT trước khi tạo đơn ==
+
+Customer -> UI : Bấm "Thanh toán" (items[], couponCode?)
+activate UI
+UI -> UI : Kiểm tra giỏ khác rỗng & verifySession() / getValidToken()
+
+alt Chưa đăng nhập hoặc JWT hết hạn [AF-01 / Kế thừa SD-04]
+  UI --> Customer : Mở Login Modal / chuyển hướng /login (giữ nguyên giỏ hàng)
+  ref over Customer, UI, API, DB : **Kế thừa A1 SD-04 (POST /auth/login):** Xác thực tài khoản, cấp Bearer JWT hợp lệ rồi quay lại Checkout
+else Đã có Bearer JWT hợp lệ
+  note over UI, API : **[VERIFY — Scope A2]:** ""POST /coupons/preview"" (SCRUM-96) thuộc nhóm ""SHOULD / Deferred"".\n""POST /orders"" luôn kiểm tra độc lập & giữ chỗ mã giảm giá nguyên tử phía Server.
+
+  UI -> API : POST /orders (Bearer <JWT>, CreateOrderDto { items[], couponCode? })
+  activate API
+  API -> API : JwtAuthGuard xác thực JWT & ValidationPipe kiểm tra DTO
+
+  alt JWT không hợp lệ (401) [EF-01] hoặc CreateOrderDto lỗi / giỏ rỗng (400) [EF-03]
+    API --> UI : 401 UNAUTHORIZED hoặc 400 BAD_REQUEST (VALIDATION_ERROR)
+    deactivate API
+    UI --> Customer : Yêu cầu đăng nhập lại (401) hoặc báo lỗi dữ liệu (400) — giữ nguyên giỏ
+
+  else JWT & DTO hợp lệ — OrdersService.create(): Vòng lặp for (phase = 0; phase < 2; phase++)
+
+    == 2. Khóa tư vấn (Advisory Lock) & Kiểm tra / Dọn dẹp lười đơn cũ (Lazy Expiration — SD-R01 & SD-R05) ==
+
+    API -> DB : BEGIN TX (phase = 0) + Kiểm tra User\n+ SELECT pg_advisory_xact_lock(hashtextextended('create-order:' || userId, 0))\n+ Tìm active Order (WHERE userId = ? AND status IN ('PENDING', 'PAYMENT_FAILED'))
+    activate DB
+    DB --> API : Đã giữ khóa tư vấn cấp transaction & trả đơn cũ đang mở (nếu có)
+
+    alt Nhánh 1 (Lỗi 409 — Loại trừ tạo đơn): Có đơn cũ đang mở VÀ còn hạn (now < E) HOẶC đang trong Grace 5m (E <= now < G) với VNPay PENDING [EF-05]
+      API -> PaymentSvc : expireOrderInTransaction(tx, active.id)
+      activate PaymentSvc
+      PaymentSvc -> DB : SELECT orders FOR UPDATE + Kiểm tra now < expiresAt (E) hoặc (VNPay PENDING & now < G = E + 5m)
+      DB --> PaymentSvc : Đơn cũ vẫn đang hiệu lực (PENDING / PAYMENT_FAILED)
+      PaymentSvc --> API : Trả status còn hiệu lực -> Không hủy đơn cũ
+      deactivate PaymentSvc
+      API -> DB : ROLLBACK TX (Ném ConflictException 409 PENDING_ORDER_EXISTS — tự giải phóng pg_advisory_xact_lock)
+      DB --> API : Đã ROLLBACK TX (Đóng transaction, kết thúc request trước bước tạo đơn)
+      deactivate DB
+      API --> UI : 409 CONFLICT (code: 'PENDING_ORDER_EXISTS') *[SD-R04: body không kèm activeOrderId]*
+      deactivate API
+      UI --> Customer : Báo còn đơn chưa hoàn tất & đồng bộ đơn hiện có qua GET /orders/me
+
+    else Nhánh 2 (Tiếp tục tạo đơn): Không có đơn cũ HOẶC đơn cũ đã quá hạn E / quá Grace G [Main Flow]
+
+      opt Có đơn cũ nhưng đã quá hạn E VÀ (không có VNPay PENDING hoặc now >= G = E + 5m) [SD-R05: 2-phase loop trong OrdersService]
+        API -> PaymentSvc : expireOrderInTransaction(tx, active.id)
+        activate PaymentSvc
+        PaymentSvc -> DB : SELECT orders FOR UPDATE -> UPDATE Order = 'CANCELLED'\n+ Hoàn Product.stock & releaseHeldCoupon (HELD -> RELEASED)
+        DB --> PaymentSvc : Đã hủy đơn cũ & hoàn tài nguyên đúng 1 lần
+        PaymentSvc --> API : Trả 'CANCELLED' (createOrCleanup trả null để chốt dọn dẹp)
+        deactivate PaymentSvc
+        API -> DB : COMMIT TX dọn dẹp (phase = 0) — *tự động giải phóng pg_advisory_xact_lock của TX phase 0*
+        DB --> API : Đã COMMIT dọn dẹp đơn cũ
+        deactivate DB
+        API -> DB : BEGIN TX mới (phase = 1) + Kiểm tra lại User\n+ Gọi lại SELECT pg_advisory_xact_lock('create-order:' || userId)\n+ Kiểm tra lại active Order (active == null)
+        activate DB
+        DB --> API : Đã lấy lại khóa tư vấn trong TX mới (phase = 1) & xác nhận không còn đơn đang mở
+      end
+
+      note over API, DB : Chuyển sang **Pha 1B (sequence-checkout-phase1b-order-create):**\nThực thi tính giá chuẩn Server, trừ kho, giữ coupon & tạo Order PENDING trong TX phase 1.
+    end
+  end
+end
+
+deactivate UI
+@enduml
