@@ -803,7 +803,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const currentAuthIdentity = authenticatedUserId ?? null;
   const currentAuthGeneration = authContextGeneration + providerAuthGeneration;
   const currentAuthGenerationRef = useRef<number>(currentAuthGeneration);
-  currentAuthGenerationRef.current = currentAuthGeneration;
 
   const [items, setItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
@@ -865,16 +864,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     isApplyingCouponRef.current = false;
   }, []);
 
-  const useIsomorphicLayoutEffect =
-    typeof window !== "undefined" ? useLayoutEffect : useEffect;
-
-  useIsomorphicLayoutEffect(() => {
+  // Đồng bộ stale-response guards trước paint. Effect auth bên dưới chạy sau
+  // effect này để hủy request coupon cũ ngay khi identity thay đổi.
+  useLayoutEffect(() => {
+    currentAuthGenerationRef.current = currentAuthGeneration;
     latestItemsRef.current = items;
     latestCouponCodeRef.current = couponCode;
     latestAuthUserIdRef.current = authenticatedUserId;
-  }, [items, couponCode, authenticatedUserId]);
+  }, [currentAuthGeneration, items, couponCode, authenticatedUserId]);
 
-  useIsomorphicLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (
       prevAuthenticatedUserIdRef.current !== undefined &&
       prevAuthenticatedUserIdRef.current !== authenticatedUserId
