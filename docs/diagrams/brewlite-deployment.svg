@@ -194,7 +194,7 @@
 </g>
 <g id="gates-body">
 <text x="930" y="1033" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Frontend: CI Vercel build -&gt; prebuilt upload to Vercel.</text>
-<text x="930" y="1054.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Backend: Git SHA + backend/Dockerfile -&gt; Render Docker build</text>
+<text x="930" y="1054.25" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Backend: Git SHA + apps/api/Dockerfile -&gt; Render Docker build</text>
 <text x="930" y="1075.5" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">-&gt; Render-managed private image registry -&gt; runtime.</text>
 <text x="930" y="1096.75" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">No separate BrewLite image registry (GHCR / Docker Hub).</text>
 <text x="930" y="1118" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="normal" fill="#52637a">Task 5: tagged-image / release / rollback evidence required.</text>

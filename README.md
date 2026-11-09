@@ -25,8 +25,8 @@
 | Lịch sử pull request         | [GitHub Pull Requests](https://github.com/brewlite-project/brewlite/pulls?q=is%3Apr)                                           |
 | Các thay đổi README Phase 2  | [PR #143](https://github.com/brewlite-project/brewlite/pull/143)                                                               |
 | Jira                         | Theo board Scrum của nhóm, dùng issue key `SCRUM-*` trong tên nhánh/PR; URL chính xác cần được nhóm xác nhận trước khi công bố |
-| API Contract hiện có         | [BrewLite API Contract v4.0](docs/api/BrewLite_API_Contract_v4.0.md)                                                           |
-| Bằng chứng kiểm chứng README | [SCRUM-94 Verification Evidence](docs/verification/SCRUM94_Verification_Evidence.md)                                           |
+| API Contract hiện có         | [BrewLite API Contract v4.0](docs/a1-archive/api/BrewLite_API_Contract_v4.0.md)                                                |
+| Bằng chứng kiểm chứng README | [SCRUM-94 Verification Evidence](docs/a1-archive/verification/SCRUM94_Verification_Evidence.md)                                |
 
 ## 2. Thành viên và trách nhiệm
 
@@ -127,11 +127,11 @@ Trình duyệt người dùng
          |
          | HTTP localhost (A1) / Next.js same-origin /api/backend/*
          v
-Next.js frontend (frontend/)
+Next.js web app (apps/web/)
          |
          | REST/JSON — BACKEND_INTERNAL_URL cho server-side proxy
          v
-NestJS backend (backend/)
+NestJS API (apps/api/)
          |                  \
          |                   \--> Mock Payment hoặc VNPay Sandbox (test)
          v
@@ -158,9 +158,9 @@ Các trạng thái này cần được đọc riêng:
 - **Test:** automated tests chỉ chứng minh các nhánh và môi trường mà chúng chạy; Mock hoặc giả lập gateway không chứng minh Sandbox E2E.
 - **Nghiệm thu:** quyết định Leader/PR/Jira. README này không tự chuyển task sang Done.
 
-Tại code commit được kiểm tra, frontend có gọi `GET /payments/:paymentId/status` sau VNPay Return nhưng backend chưa có route đó. Một smoke trước đó ghi `POST` đăng ký qua proxy là 502, còn POST trực tiếp là 201; hai rerun hiện tại (Next host với BACKEND_INTERNAL_URL=http://127.0.0.1:3002 và Compose với backend:3001) đều trả 201 qua proxy lẫn direct. Vì vậy 502 trước đó chưa tái hiện và chưa đủ căn cứ quy cho implementation hoặc một owner; nguyên nhân vẫn chưa xác định. Chi tiết expected/actual và log an toàn nằm trong [SCRUM-94 evidence](docs/verification/SCRUM94_Verification_Evidence.md).
+Tại code commit được kiểm tra, frontend có gọi `GET /payments/:paymentId/status` sau VNPay Return nhưng backend chưa có route đó. Một smoke trước đó ghi `POST` đăng ký qua proxy là 502, còn POST trực tiếp là 201; hai rerun hiện tại (Next host với BACKEND_INTERNAL_URL=http://127.0.0.1:3002 và Compose với backend:3001) đều trả 201 qua proxy lẫn direct. Vì vậy 502 trước đó chưa tái hiện và chưa đủ căn cứ quy cho implementation hoặc một owner; nguyên nhân vẫn chưa xác định. Chi tiết expected/actual và log an toàn nằm trong [SCRUM-94 evidence](docs/a1-archive/verification/SCRUM94_Verification_Evidence.md).
 
-## 7. Stack và cấu trúc repository A1
+## 7. Stack và cấu trúc repository A2
 
 - Node.js: Dockerfiles dùng Node 26. Một số dependency trong lockfile yêu cầu Node 22.22.2/22.22.3 trở lên; Node 22.18.0 đã phát cảnh báo EBADENGINE khi kiểm chứng. Dùng Node 26 để khớp container hoặc Node 22.22.3 trở lên.
 - npm: dùng npm ci theo package-lock.json; không nâng dependency chỉ để chạy tài liệu này.
@@ -170,14 +170,9 @@ Tại code commit được kiểm tra, frontend có gọi `GET /payments/:paymen
 - Containers: Docker Compose; service postgres, migrate, backend, frontend.
 
 ```text
-frontend/          Next.js UI, same-origin API proxy, frontend tests
-backend/           NestJS API, Prisma schema/migrations/seed, backend tests
-docs/api/          API contracts và handoff
-docs/docs_Phase2/  Requirements, US/AC, Use Case, ERD Phase 2
-docs/design/       Architecture và payment finalization
-docs/decisions/    Quyết định/ADR
-docs/integration/  Tài liệu tích hợp VNPay
-docs/verification/ Test evidence
+apps/web/          Next.js UI, same-origin API proxy, web tests
+apps/api/          NestJS API, Prisma schema/migrations/seed, API tests
+docs/a1-archive/   A1-final immutable documentation snapshot
 docker-compose.yml
 compose.env.example
 ```
@@ -218,7 +213,7 @@ Trong PowerShell, thay lệnh cuối bằng:
 if (!(Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
-Chỉ tạo file nếu chưa có; không ghi đè cấu hình local. Mở backend/.env và thay toàn bộ giá trị mẫu. Đặc biệt, DATABASE_URL trong file mẫu trỏ tới brewlite_db tại port 5433; tuyệt đối không chạy migration hoặc seed trước khi thay bằng database disposable riêng của bạn, ví dụ brewlite_seed_local trên PostgreSQL local. URL của host dùng địa chỉ host như `127.0.0.1:<port>`; không dùng tên service Docker postgres.
+Chỉ tạo file nếu chưa có; không ghi đè cấu hình local. Mở apps/api/.env và thay toàn bộ giá trị mẫu. Đặc biệt, DATABASE_URL trong file mẫu trỏ tới brewlite_db tại port 5433; tuyệt đối không chạy migration hoặc seed trước khi thay bằng database disposable riêng của bạn, ví dụ brewlite_seed_local trên PostgreSQL local. URL của host dùng địa chỉ host như `127.0.0.1:<port>`; không dùng tên service Docker postgres.
 
 Các biến:
 
@@ -236,11 +231,11 @@ Các biến:
 | VNPAY_ALLOW_HTTP_LOCAL_RETURN_URL                           | Backend runtime, optional              | Chỉ để Compose production runtime cho phép Return URL HTTP trên localhost; không cho phép endpoint public HTTP.                                                                                                                                                                                                |
 | PAYMENT*RECONCILIATION_ENABLED và PAYMENT_RECONCILIATION*\* | Backend runtime                        | Scheduler, lease, cooldown, batch và IP server. Với host local không có cấu hình Sandbox, đặt enabled=false rõ ràng; không dùng cách này cho production.                                                                                                                                                       |
 
-Giữ các secret chỉ trong backend/.env. Không lưu JWT, cookie, Authorization header, password, HashSecret hoặc URL có chữ ký trong log/evidence.
+Giữ các secret chỉ trong apps/api/.env. Không lưu JWT, cookie, Authorization header, password, HashSecret hoặc URL có chữ ký trong log/evidence.
 
 ### Generate, migrate, seed và chạy
 
-Từ backend/ sau khi đã thay DATABASE_URL:
+Từ apps/api/ sau khi đã thay DATABASE_URL:
 
 ```bash
 npm run db:validate
@@ -258,7 +253,7 @@ db:seed chỉ được chạy khi DATABASE*URL trỏ tới DB có tên brewlite_
 Mở terminal khác từ repository root để chạy frontend:
 
 ```bash
-cd frontend
+cd apps/web
 npm ci
 if [ ! -f .env.local ]; then cp .env.example .env.local; fi
 ```
@@ -269,7 +264,7 @@ Trong PowerShell, chỉ tạo file nếu chưa có:
 if (!(Test-Path .env.local)) { Copy-Item .env.example .env.local }
 ```
 
-Nếu frontend/.env.local đã tồn tại, sửa các giá trị hiện có thay vì ghi đè. Trong frontend/.env.local, khi frontend và backend chạy trên host, dùng:
+Nếu apps/web/.env.local đã tồn tại, sửa các giá trị hiện có thay vì ghi đè. Trong apps/web/.env.local, khi web và API chạy trên host, dùng:
 
 ```dotenv
 NEXT_PUBLIC_API_URL=http://localhost:3001
@@ -284,7 +279,7 @@ $env:BACKEND_INTERNAL_URL = 'http://127.0.0.1:3001'
 npm run dev
 ```
 
-NEXT_PUBLIC_API_URL là biến public có thể được nhúng lúc build; không đặt secret vào đây. BACKEND_INTERNAL_URL là runtime server-only cho Next Route Handler/SSR. Khi chạy trong Compose, server-side URL phải là http://backend:3001; trình duyệt dùng localhost:3000 và đường dẫn same-origin /api/backend/\*.
+NEXT_PUBLIC_API_URL là biến public có thể được nhúng lúc build; không đặt secret vào đây. BACKEND_INTERNAL_URL là runtime server-only cho Next Route Handler/SSR. Khi chạy trong Compose, server-side URL phải là http://backend:3001; trình duyệt dùng localhost:13000 và đường dẫn same-origin /api/backend/\*.
 
 Khởi động frontend bằng npm run dev. Mặc định frontend ở http://localhost:3000; backend ở http://localhost:3001. Backend `GET /` là liveness, không query PostgreSQL. `GET /api-docs` mở Swagger.
 
@@ -296,13 +291,13 @@ curl --fail http://localhost:3001/api-docs
 curl --fail http://localhost:3000/api/backend/products
 ```
 
-Kết quả catalog kỳ vọng gồm 9 items sau seed. Smoke Compose SCRUM-94 mới nhất nhận GET 200 và POST đăng ký 201 qua same-origin proxy; Next dev trên host với cấu hình backend đích tương ứng cũng trả POST 201, giống backend trực tiếp. Kết quả 502 từ lượt host smoke trước chưa tái hiện. Nếu gặp 502, so sánh đúng method/path, BACKEND_INTERNAL_URL và lệnh direct với proxy; xem [evidence](docs/verification/SCRUM94_Verification_Evidence.md), không suy đoán lỗi database.
+Kết quả catalog kỳ vọng gồm 9 items sau seed. Smoke Compose SCRUM-94 mới nhất nhận GET 200 và POST đăng ký 201 qua same-origin proxy; Next dev trên host với cấu hình backend đích tương ứng cũng trả POST 201, giống backend trực tiếp. Kết quả 502 từ lượt host smoke trước chưa tái hiện. Nếu gặp 502, so sánh đúng method/path, BACKEND_INTERNAL_URL và lệnh direct với proxy; xem [evidence](docs/a1-archive/verification/SCRUM94_Verification_Evidence.md), không suy đoán lỗi database.
 
 ## 9. Chạy bằng Docker Compose
 
-Dockerfile dùng Node 26; Compose project mặc định brewlite_compose tạo network/container/database và named volume riêng. Host ports mặc định: frontend 3000, backend 3001, PostgreSQL loopback 15432; có thể đổi bằng FRONTEND_HOST_PORT, BACKEND_HOST_PORT, POSTGRES_HOST_PORT. Trong network, frontend gọi backend:3001 và backend kết nối postgres:5432. Không dùng hostname Docker từ host hoặc host port bên trong DATABASE_URL.
+Dockerfile dùng Node 26; Compose project mặc định `brewlite_a2` tạo network/container/database và named volume A2 riêng. Host ports mặc định: web 13000, API 13001, PostgreSQL loopback 15492; có thể đổi bằng FRONTEND_HOST_PORT, BACKEND_HOST_PORT, POSTGRES_HOST_PORT. Trong network, frontend gọi backend:3001 và backend kết nối postgres:5432. Không dùng hostname Docker từ host hoặc host port bên trong DATABASE_URL.
 
-Compose dùng compose.env, không tự đọc backend/.env hoặc frontend/.env.local. Từ root, chỉ tạo compose.env nếu file chưa có; nếu đã có, cập nhật file hiện tại để tránh ghi đè cấu hình local:
+Compose dùng compose.env A2-local, không tự đọc apps/api/.env hoặc apps/web/.env.local. Từ root, chỉ tạo compose.env nếu file chưa có; nếu đã có, cập nhật file hiện tại để tránh ghi đè cấu hình local:
 
 ```bash
 if [ ! -f compose.env ]; then cp compose.env.example compose.env; fi
@@ -316,35 +311,35 @@ Kết quả SCRUM-94 Compose mặc định là lịch sử tại source fb293e2:
 
 Lượt smoke ứng dụng riêng trước đó dùng development override tạm do SCRUM-94 tạo; đây không phải workflow/profile được commit trong repository. Override đặt `NODE_ENV=development`, `ORDER_EXPIRATION_ENABLED=false`, `PAYMENT_RECONCILIATION_ENABLED=false`, `MOCK_PAYMENT_ENABLED=true` và host port riêng để chạy demo không cần scheduler/credential Sandbox. Build, đăng nhập, tạo đơn, Mock, lịch sử và persistence chỉ được xác nhận trong môi trường development tạm. Không suy kết quả đó thành production hoặc Sandbox.
 
-Tài liệu chi tiết có lệnh cho Git Bash/Linux/macOS và Windows PowerShell, gồm copy env không ghi đè, preflight, health, seed guard và persistence: xem docs/Docker_Compose.md. Preflight Bash bên dưới từ repository root kiểm tra exported variables trước Compose.
+Tài liệu chi tiết có lệnh cho Git Bash/Linux/macOS và Windows PowerShell, gồm copy env không ghi đè, preflight, health, seed guard và persistence: xem docs/a1-archive/Docker_Compose.md. Preflight Bash bên dưới từ repository root kiểm tra exported variables trước Compose.
 
 ```bash
 bash scripts/compose-preflight-env.sh
-bash scripts/compose-preflight-env.sh && docker compose -p brewlite-local-a7f3 --env-file compose.env config --services
-bash scripts/compose-preflight-env.sh && docker compose -p brewlite-local-a7f3 --env-file compose.env up --build -d
-bash scripts/compose-preflight-env.sh && docker compose -p brewlite-local-a7f3 --env-file compose.env ps
-bash scripts/compose-preflight-env.sh && docker compose -p brewlite-local-a7f3 --env-file compose.env logs --tail 100 postgres migrate backend frontend
+bash scripts/compose-preflight-env.sh && docker compose -p brewlite_a2 --env-file compose.env config --services
+bash scripts/compose-preflight-env.sh && docker compose -p brewlite_a2 --env-file compose.env up --build -d
+bash scripts/compose-preflight-env.sh && docker compose -p brewlite_a2 --env-file compose.env ps
+bash scripts/compose-preflight-env.sh && docker compose -p brewlite_a2 --env-file compose.env logs --tail 100 postgres migrate backend frontend
 ```
 
 Migration service đợi PostgreSQL health rồi chạy db:migrate và phải hiện Exited (0); backend chỉ start sau migrate thành công; frontend đợi backend health. Backend/frontend healthcheck hiện chỉ gọi GET /, không xác nhận kết nối database. Đọc log của migrate và gọi GET /api/backend/products để kiểm tra ứng dụng với dữ liệu đã seed.
 
-Seed Compose là thao tác riêng, không tự chạy khi up. Trước khi seed, dùng lệnh và checklist trong [Docker Compose guide](docs/Docker_Compose.md) để xác minh đúng project/database, 9 migrations và chưa có products. Chỉ seed DB demo riêng bằng lệnh đúng allowlist:
+Seed Compose là thao tác riêng, không tự chạy khi up. Trước khi seed, dùng lệnh và checklist trong [Docker Compose guide](docs/a1-archive/Docker_Compose.md) để xác minh đúng project/database, 9 migrations và chưa có products. Chỉ seed DB demo riêng bằng lệnh đúng allowlist:
 
 ```bash
-bash scripts/compose-preflight-env.sh && docker compose -p brewlite-local-a7f3 --env-file compose.env run --rm --no-deps -e ALLOW_COMPOSE_DEMO_SEED=true migrate npm run db:seed
+bash scripts/compose-preflight-env.sh && docker compose -p brewlite_a2 --env-file compose.env run --rm --no-deps -e ALLOW_COMPOSE_DEMO_SEED=true migrate npm run db:seed
 ```
 
-Seed catalog db:seed ở trên khác coupon helper dev/test. Coupon helper host-side hiện hard-code port 55432 trong khi Compose default mới là 15432; kết quả tại eef344c chạy trong network namespace task-local expose 55432 và không chứng minh helper tương thích host mapping mặc định. Không dùng helper trên DB ứng dụng/chia sẻ. Xem coupon guide trước khi dùng.
+Seed catalog db:seed ở trên khác coupon helper dev/test. Coupon helper host-side chỉ chấp nhận A2 Compose database `brewlite_a2` và host mapping `15492`; không dùng helper trên DB ứng dụng/chia sẻ. Xem coupon guide trước khi dùng.
 
 Logs, stop, start lại và kiểm tra persistence:
 
 ```bash
-bash scripts/compose-preflight-env.sh && docker compose -p brewlite-local-a7f3 --env-file compose.env ps
-bash scripts/compose-preflight-env.sh && docker compose -p brewlite-local-a7f3 --env-file compose.env logs --tail 100 backend frontend
-bash scripts/compose-preflight-env.sh && docker compose -p brewlite-local-a7f3 --env-file compose.env stop
-bash scripts/compose-preflight-env.sh && docker compose -p brewlite-local-a7f3 --env-file compose.env start
-bash scripts/compose-preflight-env.sh && docker compose -p brewlite-local-a7f3 --env-file compose.env restart
-bash scripts/compose-preflight-env.sh && docker compose -p brewlite-local-a7f3 --env-file compose.env ps
+bash scripts/compose-preflight-env.sh && docker compose -p brewlite_a2 --env-file compose.env ps
+bash scripts/compose-preflight-env.sh && docker compose -p brewlite_a2 --env-file compose.env logs --tail 100 backend frontend
+bash scripts/compose-preflight-env.sh && docker compose -p brewlite_a2 --env-file compose.env stop
+bash scripts/compose-preflight-env.sh && docker compose -p brewlite_a2 --env-file compose.env start
+bash scripts/compose-preflight-env.sh && docker compose -p brewlite_a2 --env-file compose.env restart
+bash scripts/compose-preflight-env.sh && docker compose -p brewlite_a2 --env-file compose.env ps
 ```
 
 Named volume giữ PostgreSQL data qua stop/start. Không dùng down -v hoặc prune để dọn project khi chưa xác minh đúng tài nguyên; nếu xóa containers/network bằng down, phải giữ named volume cần thiết.
@@ -361,7 +356,7 @@ Frontend gọi GET /payments/:paymentId/status sau Return nhưng backend hiện 
 
 ### Phạm vi A1 đã điều chỉnh — nguồn xác nhận
 
-[ADR-P2-QueryDR-Sandbox-E2E-Deferred](docs/decisions/ADR-P2-QueryDR-Sandbox-E2E-Deferred.md) được APPROVED ngày 03/11/2026: A1 của SCRUM-81 bao gồm IPN Sandbox thật đã thử thành công, QueryDR client và automated tests; QueryDR Sandbox E2E/khôi phục khi mất IPN chuyển sang A2/SCRUM-95. ADR ghi giao dịch 42.000 VND qua HTTPS/ngrok, IPN RspCode 00, Payment SUCCESS, Order PAID, event FINALIZED và không financial exception; test counts trong ADR là historical evidence, không phải SCRUM-94 rerun. [PR #127](https://github.com/brewlite-project/brewlite/pull/127) được review APPROVED và merge; [PR #142](https://github.com/brewlite-project/brewlite/pull/142) cập nhật QueryDR parser/tests nhưng không cung cấp Sandbox E2E mới. Khang bổ sung credential/public HTTPS IPN và evidence Sandbox hiện hành theo phân công. Không tìm thấy Jira/Leader record xác nhận tổng thể A1; chỉ xác nhận được phạm vi ADR và PR history, không suy diễn trạng thái Done. Không dùng synthetic config/Mock làm Sandbox PASS.
+[ADR-P2-QueryDR-Sandbox-E2E-Deferred](docs/a1-archive/decisions/ADR-P2-QueryDR-Sandbox-E2E-Deferred.md) được APPROVED ngày 03/11/2026: A1 của SCRUM-81 bao gồm IPN Sandbox thật đã thử thành công, QueryDR client và automated tests; QueryDR Sandbox E2E/khôi phục khi mất IPN chuyển sang A2/SCRUM-95. ADR ghi giao dịch 42.000 VND qua HTTPS/ngrok, IPN RspCode 00, Payment SUCCESS, Order PAID, event FINALIZED và không financial exception; test counts trong ADR là historical evidence, không phải SCRUM-94 rerun. [PR #127](https://github.com/brewlite-project/brewlite/pull/127) được review APPROVED và merge; [PR #142](https://github.com/brewlite-project/brewlite/pull/142) cập nhật QueryDR parser/tests nhưng không cung cấp Sandbox E2E mới. Khang bổ sung credential/public HTTPS IPN và evidence Sandbox hiện hành theo phân công. Không tìm thấy Jira/Leader record xác nhận tổng thể A1; chỉ xác nhận được phạm vi ADR và PR history, không suy diễn trạng thái Done. Không dùng synthetic config/Mock làm Sandbox PASS.
 
 ## 11. Kịch bản demo end-to-end A1
 
@@ -382,7 +377,7 @@ Kịch bản demo được đề xuất để **kiểm chứng tại máy local 
 - Xác nhận đã chạy đúng commit/branch, chế độ môi trường, FE/BE URL và IPN public HTTPS.
 - ID giao dịch chỉ công bố ở mức mã thử nghiệm không chứa token/chữ ký; thời gian, số tiền test và nhánh thành công/thất bại.
 - `IPN RspCode`, trạng thái Payment/Order, sự kiện finalization, kết quả Return phía UI và tình trạng các chức năng còn giới hạn.
-- Phân biệt bằng chứng lịch sử ở [ADR APPROVED](docs/decisions/ADR-P2-QueryDR-Sandbox-E2E-Deferred.md) với lượt rerun mới; không ghi rerun đã xảy ra nếu chưa chạy.
+- Phân biệt bằng chứng lịch sử ở [ADR APPROVED](docs/a1-archive/decisions/ADR-P2-QueryDR-Sandbox-E2E-Deferred.md) với lượt rerun mới; không ghi rerun đã xảy ra nếu chưa chạy.
 
 ---
 
@@ -392,7 +387,7 @@ Chạy lệnh từ đúng thư mục package:
 
 ```bash
 # Backend unit/service
-cd backend
+cd apps/api
 npm test
 
 # Backend HTTP/Nest E2E (không phải browser E2E)
@@ -402,14 +397,14 @@ npm run test:e2e
 npm run test:integration
 
 # Frontend Node/JSDOM test suite
-cd ../frontend
+cd ../web
 npm test
 
 # Production build
 npm run build
 ```
 
-Backend PostgreSQL integration cần database test disposable đã migrate và các biến AUTH_TEST_DATABASE_URL / ORDERS_TEST_DATABASE_URL phù hợp. Một số suite có guard cố định `localhost:5433/brewlite_test`; không chạy trên DB dùng chung hoặc nới guard. Có thể đáp ứng guard trong Docker bằng cách chạy PostgreSQL và test runner trong cùng network namespace riêng, không publish cổng host. Lượt SCRUM-94 với `PAYMENT_CONCURRENCY_TESTS=1` đã xác minh database identity `brewlite_test`, server port 5433, 9 migrations và kết nối runner trước test; ba file concurrency-related cho kết quả 83 passed, 0 failed, 0 skipped, gồm 23 test trong các gate. Kết quả này là lần chạy riêng, chồng lấp một phần với lượt integration chọn lọc trước đó (147 passed, 10 skipped), nên không cộng hai bộ số liệu. Xem [concurrency log](docs/verification/SCRUM94_Concurrency_Test_Safe.log).
+Backend PostgreSQL integration cần database test disposable đã migrate và các biến AUTH_TEST_DATABASE_URL / ORDERS_TEST_DATABASE_URL phù hợp. Một số suite có guard cố định `localhost:5433/brewlite_test`; không chạy trên DB dùng chung hoặc nới guard. Có thể đáp ứng guard trong Docker bằng cách chạy PostgreSQL và test runner trong cùng network namespace riêng, không publish cổng host. Lượt SCRUM-94 với `PAYMENT_CONCURRENCY_TESTS=1` đã xác minh database identity `brewlite_test`, server port 5433, 9 migrations và kết nối runner trước test; ba file concurrency-related cho kết quả 83 passed, 0 failed, 0 skipped, gồm 23 test trong các gate. Kết quả này là lần chạy riêng, chồng lấp một phần với lượt integration chọn lọc trước đó (147 passed, 10 skipped), nên không cộng hai bộ số liệu. Xem [concurrency log](docs/a1-archive/verification/SCRUM94_Concurrency_Test_Safe.log).
 
 Frontend npm test chạy Node test runner với JSDOM, không phải browser thật. Suite payment-confirmation-flow khởi động backend và PostgreSQL test, cần DATABASE_URL hoặc ORDERS_TEST_DATABASE_URL cùng cổng API trống; test tạo database riêng brewlite_scrum69_test_db. Lần host chạy ban đầu thiếu biến DB nên có 2 cancelled; rerun trong Docker task-local không sửa guard và đạt 174 passed, 0 failed, 0 cancelled, 0 skipped. Không dùng kết quả này làm Browser/Sandbox E2E.
 
@@ -418,8 +413,8 @@ Frontend npm test chạy Node test runner với JSDOM, không phải browser th�
 - Backend hiện chưa có GET /payments/:paymentId/status dù API Contract v4.0 §5 và frontend payment service cần endpoint protected, owner-scoped. Probe direct/proxy 404 chạy trên source fb293e2; static inventory sau sync origin/dev dba36a5 vẫn không thấy route. JWT/ownership cases chưa chạy vì route chưa có.
 - POST qua frontend same-origin proxy từng báo 502 trong host smoke, nhưng Next host và Compose rerun đều trả 201 cả direct và proxy với backend URL đúng môi trường. Lỗi cũ chưa tái hiện, nguyên nhân chưa xác định; không quy cho implementation hay gán owner.
 - ADR A1 APPROVED ghi nhận IPN Sandbox thật đã thành công trong nghiệm thu SCRUM-81 lịch sử. Verifier Compose sau sync chỉ gọi local initiation/replay với config VNPay synthetic; không redirect, không gửi IPN/QueryDR hoặc gọi VNPay. Vì vậy SCRUM-94 chưa có Sandbox E2E mới; Khang bổ sung credential, public HTTPS IPN và evidence hiện hành. QueryDR Sandbox E2E chuyển sang A2/SCRUM-95 theo ADR; không dùng Mock/synthetic để claim PASS.
-- Sau sync, isolated SCRUM-92 verifier chạy tại checkout HEAD 304a7c6 bằng docker-compose.yml mặc định với project/DB/cổng riêng, NODE_ENV=test, scheduler tắt và VNPay synthetic. Build/health, migration/seed, FE→BE→PostgreSQL, đăng ký/đăng nhập, tạo Order, Mock guard, ZERO_AMOUNT, initiation/replay nội bộ và persistence sau restart đạt. Không redirect/gọi gateway; không phải production hoặc Sandbox PASS. Lượt Compose thường ở fb293e2 thiếu VNPAY_TMN_CODE là kết quả lịch sử riêng. Evidence: docs/verification/SCRUM94_Verification_Evidence.md. Không tự kết luận SCRUM-92 Done.
-- Kết quả test hiện hành và các phần BLOCKED được ghi tại docs/verification/SCRUM94_Verification_Evidence.md.
+- Sau sync, isolated SCRUM-92 verifier chạy tại checkout HEAD 304a7c6 bằng docker-compose.yml mặc định với project/DB/cổng riêng, NODE_ENV=test, scheduler tắt và VNPay synthetic. Build/health, migration/seed, FE→BE→PostgreSQL, đăng ký/đăng nhập, tạo Order, Mock guard, ZERO_AMOUNT, initiation/replay nội bộ và persistence sau restart đạt. Không redirect/gọi gateway; không phải production hoặc Sandbox PASS. Lượt Compose thường ở fb293e2 thiếu VNPAY_TMN_CODE là kết quả lịch sử riêng. Evidence: docs/a1-archive/verification/SCRUM94_Verification_Evidence.md. Không tự kết luận SCRUM-92 Done.
+- Kết quả test hiện hành và các phần BLOCKED được ghi tại docs/a1-archive/verification/SCRUM94_Verification_Evidence.md.
 
 ## 14. Troubleshooting
 
@@ -436,20 +431,20 @@ Frontend npm test chạy Node test runner với JSDOM, không phải browser th�
 
 ## 15. Tài liệu liên quan
 
-- [API Contract v4.0](docs/api/BrewLite_API_Contract_v4.0.md)
-- [Requirements v3.1](docs/docs_Phase2/BrewLite_Requirements_Specification_v3.1.docx)
-- [US/AC Phase 2](docs/docs_Phase2/BrewLite_User_Stories_Acceptance_Criteria_Phase2.docx)
-- [Use Case v3.1](docs/docs_Phase2/BrewLite_Use_Case_Specification_v3.1_VNPay_Phase_2%20.pdf)
-- [ERD/Prisma Delta v0.2.2](docs/docs_Phase2/BrewLite_ERD_Prisma_Delta_Phase2_v0.2.2_CK-R01-R03_UPDATED.md)
-- [Payment Architecture Phase 2](docs/design/payment/BrewLite_Payment_Architecture_Phase2_v1.0.md)
-- [Shared Payment Finalization handoff](docs/design/payment/Shared_Payment_Finalization_Handoff_SCRUM-78.md)
-- [Concurrency test handoff](docs/design/payment/Payment_Finalization_Concurrency_Test_Handoff_SCRUM-79.md)
-- [Docker Compose setup and limitations](docs/Docker_Compose.md)
-- [SCRUM-92 clean setup verification](docs/verification/SCRUM92_Docker_Clean_Setup_Verification.md)
-- [Optional dev Compose coupon seed](backend/prisma/README-dev-compose-coupons.md)
-- [VNPay Sandbox setup](docs/integration/VNPay_Sandbox_Setup.md)
-- [QueryDR Sandbox E2E deferral decision](docs/decisions/ADR-P2-QueryDR-Sandbox-E2E-Deferred.md)
-- [Verification evidence SCRUM-94](docs/verification/SCRUM94_Verification_Evidence.md)
+- [API Contract v4.0](docs/a1-archive/api/BrewLite_API_Contract_v4.0.md)
+- [Requirements v3.1](docs/a1-archive/docs_Phase2/BrewLite_Requirements_Specification_v3.1.docx)
+- [US/AC Phase 2](docs/a1-archive/docs_Phase2/BrewLite_User_Stories_Acceptance_Criteria_Phase2.docx)
+- [Use Case v3.1](docs/a1-archive/docs_Phase2/BrewLite_Use_Case_Specification_v3.1_VNPay_Phase_2%20.pdf)
+- [ERD/Prisma Delta v0.2.2](docs/a1-archive/docs_Phase2/BrewLite_ERD_Prisma_Delta_Phase2_v0.2.2_CK-R01-R03_UPDATED.md)
+- [Payment Architecture Phase 2](docs/a1-archive/design/payment/BrewLite_Payment_Architecture_Phase2_v1.0.md)
+- [Shared Payment Finalization handoff](docs/a1-archive/design/payment/Shared_Payment_Finalization_Handoff_SCRUM-78.md)
+- [Concurrency test handoff](docs/a1-archive/design/payment/Payment_Finalization_Concurrency_Test_Handoff_SCRUM-79.md)
+- [Docker Compose setup and limitations](docs/a1-archive/Docker_Compose.md)
+- [SCRUM-92 clean setup verification](docs/a1-archive/verification/SCRUM92_Docker_Clean_Setup_Verification.md)
+- [Optional dev Compose coupon seed](apps/api/prisma/README-dev-compose-coupons.md)
+- [VNPay Sandbox setup](docs/a1-archive/integration/VNPay_Sandbox_Setup.md)
+- [QueryDR Sandbox E2E deferral decision](docs/a1-archive/decisions/ADR-P2-QueryDR-Sandbox-E2E-Deferred.md)
+- [Verification evidence SCRUM-94](docs/a1-archive/verification/SCRUM94_Verification_Evidence.md)
 
 ## 16. Kiểm tra trước khi đóng băng Assignment 1
 

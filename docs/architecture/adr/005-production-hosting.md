@@ -6,7 +6,7 @@
 
 ## Context
 
-The deployment view proposes Vercel Hobby for Next.js, Render Web Service for NestJS, Render PostgreSQL for managed data, and VNPay Sandbox for payment integration ([deployment.md](../deployment.md#2-deployment-nodes-và-artifacts), dòng 51-66). It explicitly records missing URLs, provider IDs, tier, region, branch, runtime configuration and deployment evidence ([deployment.md](../deployment.md#8-đối-chiếu-môi-trường-thực-tế-trước-nghiệm-thu-cuối), dòng 281-320).
+The deployment view proposes Vercel Hobby for Next.js, Render Web Service for NestJS, Render PostgreSQL for managed data, and VNPay Sandbox for payment integration ([deployment.md](../../deployment.md#2-deployment-nodes-và-artifacts), dòng 51-66). It explicitly records missing URLs, provider IDs, tier, region, branch, runtime configuration and deployment evidence ([deployment.md](../../deployment.md#8-đối-chiếu-môi-trường-thực-tế-trước-nghiệm-thu-cuối), dòng 281-320).
 
 ## Decision
 
@@ -48,7 +48,7 @@ The candidate separates frontend delivery, backend runtime and managed PostgreSQ
 
 ## References
 
-- [Deployment View](../deployment.md)
+- [Deployment View](../../deployment.md)
 - [Architecture Overview](../architecture.md#10-deployment-view)
-- [`frontend/app/api/backend/[[...path]]/route.ts`](../../../frontend/app/api/backend/[[...path]]/route.ts)
-- [`backend/src/main.ts`](../../../backend/src/main.ts)
+- [`apps/web/app/api/backend/[[...path]]/route.ts`](../../../apps/web/app/api/backend/[[...path]]/route.ts)
+- [`apps/api/src/main.ts`](../../../apps/api/src/main.ts)

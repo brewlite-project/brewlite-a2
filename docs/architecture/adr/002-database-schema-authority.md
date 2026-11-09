@@ -6,7 +6,7 @@
 
 ## Context
 
-BrewLite uses multiple artifacts that describe different aspects of the system. Prisma models provide ORM mapping; tracked SQL migrations contain PostgreSQL-specific partial indexes and CHECK constraints that Prisma cannot fully express. For example, the active-order partial unique index is defined in SQL ([`20261022011000_scrum36_active_order_coupon_constraints/migration.sql:6-12`](../../../backend/prisma/migrations/20261022011000_scrum36_active_order_coupon_constraints/migration.sql#L6-L12)); Phase 2 payment constraints are also SQL migration content ([`20261031190100_scrum76_payment_gateway_delta/migration.sql:78-117`](../../../backend/prisma/migrations/20261031190100_scrum76_payment_gateway_delta/migration.sql#L78-L117)).
+BrewLite uses multiple artifacts that describe different aspects of the system. Prisma models provide ORM mapping; tracked SQL migrations contain PostgreSQL-specific partial indexes and CHECK constraints that Prisma cannot fully express. For example, the active-order partial unique index is defined in SQL ([`20261022011000_scrum36_active_order_coupon_constraints/migration.sql:6-12`](../../../apps/api/prisma/migrations/20261022011000_scrum36_active_order_coupon_constraints/migration.sql#L6-L12)); Phase 2 payment constraints are also SQL migration content ([`20261031190100_scrum76_payment_gateway_delta/migration.sql:78-117`](../../../apps/api/prisma/migrations/20261031190100_scrum76_payment_gateway_delta/migration.sql#L78-L117)).
 
 ## Decision
 
@@ -50,5 +50,5 @@ The decision avoids a false hierarchy across unrelated concerns while making mig
 ## References
 
 - [Architecture Overview](../architecture.md#6-postgresql-prisma-and-schema-management)
-- [`backend/prisma/schema.prisma`](../../../backend/prisma/schema.prisma)
-- [`backend/prisma/migrations/`](../../../backend/prisma/migrations/)
+- [`apps/api/prisma/schema.prisma`](../../../apps/api/prisma/schema.prisma)
+- [`apps/api/prisma/migrations/`](../../../apps/api/prisma/migrations/)

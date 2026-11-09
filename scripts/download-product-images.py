@@ -11,9 +11,9 @@ from PIL import Image
 
 root = Path.cwd()
 manifest = Path(__file__).with_name("product-images.json")
-target = root / "frontend" / "public" / "images"
-if not (root / "frontend" / "public").is_dir():
-    raise SystemExit("Run script from BrewLite repository root (frontend/public missing)")
+target = root / "apps" / "web" / "public" / "images"
+if not (root / "apps" / "web" / "public").is_dir():
+    raise SystemExit("Run script from BrewLite repository root (apps/web/public missing)")
 target.mkdir(parents=True, exist_ok=True)
 products = json.loads(manifest.read_text(encoding="utf-8"))
 for item in products:
@@ -29,4 +29,4 @@ for item in products:
     with Image.open(BytesIO(data)) as img:
         img.convert("RGB").save(dest, format="JPEG", quality=86, optimize=True)
     print("OK", item["name"], "->", dest)
-print("Done. Commit frontend/public/images/*.jpg with the seed changes.")
+print("Done. Commit apps/web/public/images/*.jpg with the seed changes.")

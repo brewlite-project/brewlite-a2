@@ -2,7 +2,7 @@
 /db-backups/
 
 # Temporary SQL migration drafts
-/backend/product-catalog-upgrade-draft.sql
+/apps/api/product-catalog-upgrade-draft.sql
 
 # Local Docker Compose configuration
 /compose.env
