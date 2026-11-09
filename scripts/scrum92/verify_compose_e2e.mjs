@@ -9,9 +9,9 @@
  *
  * Determinism & Isolation Guarantees:
  * - Enforces an isolated Docker Compose project (`-p brewlite_scrum92_e2e`), isolated named volume
- *   (`brewlite_scrum92_e2e_brewlite_pgdata`), isolated database (`brewlite_seed_scrum92_e2e`), and
- *   dedicated host ports (`13000` frontend, `13001` backend, `15492` postgres) so it never collides
- *   with or requires stopping an active `brewlite_compose` development stack.
+ *   (`brewlite_scrum92_e2e_brewlite_a2_pgdata`), isolated database (`brewlite_seed_scrum92_e2e`), and
+ *   dedicated host ports (`23000` frontend, `23001` backend, `25492` postgres) so it never collides
+ *   with or requires stopping an active `brewlite_a2` development stack.
  * - Revalidates project/DB/volume metadata (fail-closed) before every lifecycle or cleanup action.
  * - Ensures isolated `postgres` is started and healthy before running `finally` cleanup even if a
  *   prior stack restart (`stop -> start`) failed mid-way, and never swallows cleanup errors.
@@ -29,12 +29,12 @@ const ENV_FILE = path.join(ROOT, 'compose.env');
 export const ARTIFACT_STATE_FILE = path.join(os.tmpdir(), 'brewlite-scrum92-e2e-artifacts.json');
 
 export const ISOLATED_PROJECT_NAME = 'brewlite_scrum92_e2e';
-export const ISOLATED_VOLUME_NAME = 'brewlite_scrum92_e2e_brewlite_pgdata';
+export const ISOLATED_VOLUME_NAME = 'brewlite_scrum92_e2e_brewlite_a2_pgdata';
 export const ISOLATED_DATABASE_NAME = 'brewlite_seed_scrum92_e2e';
 
-export const ISOLATED_POSTGRES_HOST_PORT = '15492';
-export const ISOLATED_BACKEND_HOST_PORT = '13001';
-export const ISOLATED_FRONTEND_HOST_PORT = '13000';
+export const ISOLATED_POSTGRES_HOST_PORT = '25492';
+export const ISOLATED_BACKEND_HOST_PORT = '23001';
+export const ISOLATED_FRONTEND_HOST_PORT = '23000';
 
 const FE_URL = `http://127.0.0.1:${ISOLATED_FRONTEND_HOST_PORT}`;
 const BE_URL = `http://127.0.0.1:${ISOLATED_BACKEND_HOST_PORT}`;
@@ -43,9 +43,9 @@ const PROXY_API = `${FE_URL}/api/backend`;
 export const TEST_COUPON_ID = 'c9200000-0000-4000-8000-000000000092';
 export const TEST_COUPON_CODE = 'SCRUM92FREE';
 
-const FORBIDDEN_PROJECTS = new Set(['brewlite_compose', 'cnpm', 'default']);
-const FORBIDDEN_VOLUMES = new Set(['brewlite_compose_brewlite_pgdata', 'brewlite_pgdata']);
-const FORBIDDEN_DATABASES = new Set(['brewlite_compose', 'brewlite_db', 'postgres']);
+const FORBIDDEN_PROJECTS = new Set(['brewlite_a2', 'brewlite_compose', 'cnpm', 'default']);
+const FORBIDDEN_VOLUMES = new Set(['brewlite_a2_brewlite_a2_pgdata', 'brewlite_a2_pgdata', 'brewlite_compose_brewlite_pgdata', 'brewlite_pgdata']);
+const FORBIDDEN_DATABASES = new Set(['brewlite_a2', 'brewlite_compose', 'brewlite_db', 'postgres']);
 
 export const COMPOSE_VARIABLES = [
   'NODE_ENV',
@@ -126,7 +126,7 @@ export function parseEnvFile(filePath) {
 
 export function buildIsolatedComposeEnv(baseEnvCfg, hostEnv = process.env) {
   const dbUrl = new URL(
-    baseEnvCfg.DATABASE_URL || 'postgresql://brewlite:change_me@postgres:5432/brewlite_compose?schema=public',
+    baseEnvCfg.DATABASE_URL || 'postgresql://brewlite:change_me@postgres:5432/brewlite_a2?schema=public',
   );
   dbUrl.pathname = `/${ISOLATED_DATABASE_NAME}`;
 

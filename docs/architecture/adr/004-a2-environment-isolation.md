@@ -51,7 +51,7 @@ Isolation is necessary to make A2 deployment, migration and testing evidence att
 ## References
 
 - [Architecture Overview](../architecture.md#10-deployment-view)
-- [Deployment View](../deployment.md#11-local--ci--production-là-các-phạm-vi-riêng)
+- [Deployment View](../../deployment.md#11-local--ci--production-là-các-phạm-vi-riêng)
 - [`docker-compose.yml`](../../../docker-compose.yml)
 - [`compose.env.example`](../../../compose.env.example)
 - `A1-final:docker-compose.yml` and `A1-final:compose.env.example` (Git read-only comparison)

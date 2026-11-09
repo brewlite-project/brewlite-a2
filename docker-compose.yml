@@ -1,4 +1,4 @@
-name: brewlite_compose
+name: brewlite_a2
 
 services:
   postgres:
@@ -7,12 +7,12 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-brewlite}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in compose.env}
-      POSTGRES_DB: ${POSTGRES_DB:-brewlite_compose}
+      POSTGRES_DB: ${POSTGRES_DB:-brewlite_a2}
     ports:
-      - "127.0.0.1:${POSTGRES_HOST_PORT:-15432}:5432"
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-15492}:5432"
     volumes:
       # PostgreSQL 18+ stores PGDATA below this mount point.
-      - brewlite_pgdata:/var/lib/postgresql
+      - brewlite_a2_pgdata:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
@@ -20,11 +20,11 @@ services:
       retries: 20
       start_period: 5s
     networks:
-      - brewlite_net
+      - brewlite_a2_net
 
   migrate:
     build:
-      context: ./backend
+      context: ./apps/api
       target: migrate
     restart: "no"
     command: ["npm", "run", "db:migrate"]
@@ -35,11 +35,11 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - brewlite_net
+      - brewlite_a2_net
 
   backend:
     build:
-      context: ./backend
+      context: ./apps/api
       target: runtime
     restart: unless-stopped
     environment:
@@ -63,7 +63,7 @@ services:
       PAYMENT_RECONCILIATION_COOLDOWN_MS: ${PAYMENT_RECONCILIATION_COOLDOWN_MS:-600000}
       PAYMENT_RECONCILIATION_IP_ADDR: ${PAYMENT_RECONCILIATION_IP_ADDR:-127.0.0.1}
     ports:
-      - "127.0.0.1:${BACKEND_HOST_PORT:-3001}:3001"
+      - "127.0.0.1:${BACKEND_HOST_PORT:-13001}:3001"
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -75,16 +75,16 @@ services:
       retries: 10
       start_period: 10s
     networks:
-      - brewlite_net
+      - brewlite_a2_net
 
   frontend:
     build:
-      context: ./frontend
+      context: ./apps/web
     restart: unless-stopped
     environment:
       BACKEND_INTERNAL_URL: http://backend:3001
     ports:
-      - "${FRONTEND_HOST_PORT:-3000}:3000"
+      - "${FRONTEND_HOST_PORT:-13000}:3000"
     depends_on:
       backend:
         condition: service_healthy
@@ -95,10 +95,10 @@ services:
       retries: 10
       start_period: 10s
     networks:
-      - brewlite_net
+      - brewlite_a2_net
 
 networks:
-  brewlite_net:
+  brewlite_a2_net:
 
 volumes:
-  brewlite_pgdata:
+  brewlite_a2_pgdata:

@@ -6,7 +6,7 @@
 
 ## Context
 
-BrewLite has one Next.js frontend and one NestJS backend. The backend imports `ProductsModule`, `AuthModule`, `OrdersModule`, `PaymentsModule`, and `CouponsModule` into one `AppModule` ([`backend/src/app.module.ts:4-14`](../../../backend/src/app.module.ts#L4-L14)). Prisma is the shared persistence boundary for PostgreSQL ([`backend/src/prisma/prisma.service.ts:6-33`](../../../backend/src/prisma/prisma.service.ts#L6-L33)). Order, inventory, coupon, loyalty and payment-finalization work require coordinated database transactions.
+BrewLite has one Next.js frontend and one NestJS backend. The backend imports `ProductsModule`, `AuthModule`, `OrdersModule`, `PaymentsModule`, and `CouponsModule` into one `AppModule` ([`apps/api/src/app.module.ts:4-14`](../../../apps/api/src/app.module.ts#L4-L14)). Prisma is the shared persistence boundary for PostgreSQL ([`apps/api/src/prisma/prisma.service.ts:6-33`](../../../apps/api/src/prisma/prisma.service.ts#L6-L33)). Order, inventory, coupon, loyalty and payment-finalization work require coordinated database transactions.
 
 ## Decision
 
@@ -39,5 +39,5 @@ The modular monolith matches the existing implementation and preserves a single 
 ## References
 
 - [Architecture Overview](../architecture.md#4-backend-modular-monolith-architecture)
-- [`backend/src/app.module.ts`](../../../backend/src/app.module.ts)
-- [`backend/src/payments/payments.module.ts`](../../../backend/src/payments/payments.module.ts)
+- [`apps/api/src/app.module.ts`](../../../apps/api/src/app.module.ts)
+- [`apps/api/src/payments/payments.module.ts`](../../../apps/api/src/payments/payments.module.ts)
