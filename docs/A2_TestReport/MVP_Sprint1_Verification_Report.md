@@ -1,6 +1,6 @@
 # Báo cáo Kiểm chứng MVP Sprint 1 — Menu & Mobile-first UI (`SCRUM-112` / `A2-T4.3`)
 
-- **Mã công việc:** `SCRUM-112` / `A2-T4.3` (PR #15 — Cập nhật phản hồi Review vòng 1)
+- **Mã công việc:** `SCRUM-112` / `A2-T4.3` (PR #15 — Cập nhật phản hồi Review vòng 1 & Hoàn thiện trọn bộ minh chứng)
 - **Tên công việc:** Kiểm chứng MVP Sprint 1 — Menu & Mobile-first UI
 - **Branch kiểm chứng:** `SCRUM-112-a-2-t-4-3-kiem-chung-mvp-sprint-1-menu-mobile-first-ui`
 - **Commit SHA của source code được kiểm chứng:** `34cbbc088117d7a4908d07a66cfbd03b0c905dea` (`origin/dev`)
@@ -18,14 +18,15 @@
 
 | Phân loại | Phương pháp & Công cụ thực thi | Phạm vi áp dụng | Kết quả tổng quan |
 | :--- | :--- | :--- | :---: |
-| **Static Verification (Kiểm chứng tĩnh)** | - Đọc & đối chiếu mã nguồn (`apps/api`, `apps/web`, `scripts/`, `README.md`, `docker-compose.yml`, `.github/workflows/ci.yml`) với API Contract v2.1/v4.0 & SRS.<br>- Chạy trình kiểm tra kiểu & cú pháp: `eslint` (`apps/web`, `apps/api`), `tsc` / `next build`, `prisma validate`. | - Cấu trúc DTO, Controller, Service, Prisma schema.<br>- Các hằng số nghiệp vụ (`MAX_TOPPINGS_PER_ITEM = 3`, `MIN_ORDER_QUANTITY = 1`, `MAX_ORDER_QUANTITY = 10`).<br>- Đường dẫn sau monorepo migration (`apps/api`, `apps/web`). | **PASS** (Phát hiện sớm các lệch công thức/đường dẫn/CSS tiềm ẩn) |
-| **Runtime Verification — Automated Tests (Kiểm chứng thực thi qua bộ test có sẵn)** | - Backend Unit & HTTP Tests (`vitest`): 34 files / 325 tests.<br>- Backend E2E Tests (`supertest` + NestJS HTTP pipeline): `test/products.e2e-spec.ts` (11 tests).<br>- Frontend Unit Tests (`node:test` + `jsdom`): 6 files / 37 suites / 166 tests. | - Luồng thực thi thật của `GET /products` và `GET /products/:id` qua HTTP pipeline.<br>- Luồng Cart, Checkout, Order, Payment, Order History. | **PASS** (**502/502** bài test tự động hiện có đều PASS) |
-| **Runtime Verification — Deep Probe & Browser UI (Kiểm chứng thực thi chuyên sâu cho Sprint 1)** | - Thực thi kịch bản Runtime Probe (`node --import ./tests/register-loader.mjs` + `ReactDOMServer` + `JSDOM` + `React.act`) kiểm tra trực tiếp hàm tính giá, API client (`getProducts`, `fetchProductDetailById`) và tương tác DOM trên `ProductCard`, `ProductDetailModal`, `ProductSkeletonGrid`, `ProductEmptyState`, `ProductErrorState`.<br>- Khởi chạy Next.js (`http://localhost:3000`) kết nối API server (`http://127.0.0.1:3001`) và dùng **Browser Automation** đo đạc thực tế `getBoundingClientRect()`, `scrollWidth`, `clientWidth`, computed styles tại 3 viewport: **`320x640`**, **`375x812`**, **`768x1024`**. | - Kiểm chứng thực nghiệm các mục **MVP-R01**, **MVP-R02**, **MVP-R03**, **MVP-R04**, **MVP-R05** và ghi nhận bằng chứng demo MVP. | **Hoàn tất 100%** (Có bảng số liệu đo đạc thực tế & log runtime chi tiết bên dưới) |
+| **Static Verification (Kiểm chứng tĩnh)** | - Đọc & đối chiếu mã nguồn (`apps/api`, `apps/web`, `scripts/`, `README.md`, `docker-compose.yml`, `.github/workflows/ci.yml`) với API Contract v2.1/v4.0 & SRS.<br>- Chạy trình kiểm tra kiểu & cú pháp: `eslint` (`apps/web`, `apps/api`), `tsc` / `next build`, `prisma validate` (`db:validate`). | - Cấu trúc DTO, Controller, Service, Prisma schema.<br>- Các hằng số nghiệp vụ (`MAX_TOPPINGS_PER_ITEM = 3`, `MIN_ORDER_QUANTITY = 1`, `MAX_ORDER_QUANTITY = 10`).<br>- Đường dẫn sau monorepo migration (`apps/api`, `apps/web`). | **PASS** (Phát hiện sớm các lệch công thức/đường dẫn/CSS tiềm ẩn) |
+| **Runtime Verification — Automated Tests (Kiểm chứng thực thi qua bộ test có sẵn)** | - Backend Unit & HTTP Tests (`vitest`): 34 files / 325 tests.<br>- Backend E2E Tests (`supertest` + NestJS HTTP pipeline): `test/products.e2e-spec.ts` (11 tests).<br>- Frontend Unit Tests (`node:test` + `jsdom`): 6 files / 37 suites / 166 tests (chạy qua `npm run test:unit`). | - Luồng thực thi thật của `GET /products` và `GET /products/:id` qua HTTP pipeline.<br>- Luồng Cart, Checkout, Order, Payment, Order History. | **PASS** (**502/502** bài test tự động hiện có đều PASS) |
+| **Runtime Verification — Deep Probe & Browser UI (Kiểm chứng thực thi chuyên sâu cho Sprint 1)** | - Thực thi kịch bản Runtime Probe (`node --import ./tests/register-loader.mjs` + `ReactDOMServer` + `JSDOM` + `React.act`) kiểm tra trực tiếp hàm tính giá, API client (`getProducts`, `fetchProductDetailById`) và tương tác DOM trên `ProductCard`, `ProductDetailModal`, `ProductSkeletonGrid`, `ProductEmptyState`, `ProductErrorState`.<br>- Khởi chạy Next.js (`http://localhost:3000`) kết nối API server (`http://127.0.0.1:3001`) và dùng **Browser Automation** đo đạc thực tế `getBoundingClientRect()`, `scrollWidth`, `clientWidth`, computed styles tại 3 viewport: **`320x640`**, **`375x812`**, **`768x1024`**.<br>- Chụp và lưu ảnh minh chứng thực tế vào thư mục `docs/A2_TestReport/evidence/`. | - Kiểm chứng thực nghiệm các mục **MVP-R01**, **MVP-R02**, **MVP-R03**, **MVP-R04**, **MVP-R05** và ghi nhận bằng chứng demo MVP. | **Hoàn tất 100%** (Đầy đủ bằng chứng hình ảnh & bảng số liệu đo đạc thực tế) |
 
-### Bảng tổng hợp kết quả lệnh Build & Test chuẩn trên SHA `34cbbc088117d7a4908d07a66cfbd03b0c905dea`
+### Bảng tổng hợp kết quả lệnh Build, Lint & Test chuẩn trên SHA `34cbbc088117d7a4908d07a66cfbd03b0c905dea`
 
 | Khu vực | Lệnh thực thi | Loại kiểm chứng | Kết quả | Chi tiết thực tế |
 | :--- | :--- | :---: | :---: | :--- |
+| **Backend (`apps/api`)** | `npm run db:validate` | Static | **PASS** | `prisma validate --config prisma7.config.ts` báo schema hợp lệ 🚀 |
 | **Backend (`apps/api`)** | `npm run lint` | Static | **PASS** | 0 errors, 1 warning (`vnpay-querydr.client.spec.ts`) |
 | **Backend (`apps/api`)** | `npm run test:unit` | Runtime | **PASS** | **34** test files, **325/325** tests passed (`products.service.spec.ts` [17], `products.http.spec.ts` [6], `products.controller.spec.ts` [2]) |
 | **Backend (`apps/api`)** | `npm run test:e2e -- test/products.e2e-spec.ts` | Runtime | **PASS** | **11/11** E2E tests cho `GET /products` & `GET /products/:id` passed |
@@ -116,7 +117,7 @@
 | Giá lẻ (phần dư `.2`) | `33333` | `L (140%)` | `46666.2` | `46666` | `46666` | `0 VND` | Khớp (dưới `.5`) |
 | Giá lẻ (phần dư `.8`) | `29999` | `M (120%)` | `35998.8` | `35998` | `35999` | **`+1 VND`** | **LỆCH (FE thiếu 1 đ)** |
 | Giá lẻ (phần dư `.6`) | `29999` | `L (140%)` | `41998.6` | `41998` | `41999` | **`+1 VND`** | **LỆCH (FE thiếu 1 đ)** |
-| Giá lẻ biên `.5` (với `125%`) | `35001` | `150%` (giả lập biên `.5`) | `52501.5` | `52501` | `52502` | **`+1 VND`** | **LỆCH tại biên `.5`** |
+| Giá lẻ biên `.5` (với `150%`) | `35001` | `150%` (giả lập biên `.5`) | `52501.5` | `52501` | `52502` | **`+1 VND`** | **LỆCH tại biên `.5`** |
 
 - **Kết luận & Khuyến nghị sửa chữa cho `MVP-R01`:**
   - Tại `apps/web/services/api.service.ts` (dòng 74), cần đổi `Math.floor((basePriceVnd * multiplierPercent) / 100)` thành `Math.floor((basePriceVnd * multiplierPercent + 50) / 100)`.
@@ -311,15 +312,49 @@ Thực thi trực tiếp trên mã nguồn tại commit `34cbbc088117d7a4908d07a
 === [SCRUM-112] RUNTIME VERIFICATION PROBE COMPLETED SUCCESSFULLY ===
 ```
 
-### 4.2. Tổng hợp Trạng thái Kiểm chứng theo Yêu cầu Task `SCRUM-112`
+### 4.2. Danh mục Bằng chứng Hình ảnh Trực quan (Visual Evidence Screenshots)
+Toàn bộ ảnh chụp màn hình kiểm chứng trực tiếp trên trình duyệt đã được lưu vào thư mục `docs/A2_TestReport/evidence/`:
 
-| Mã mục | Hạng mục kiểm chứng | Trạng thái hiện tại trên SHA `34cbbc0` | Ghi chú kết quả & Hành động tiếp theo |
-| :---: | :--- | :---: | :--- |
-| **AC-01** | Menu (`GET /products`) & Product Detail (`GET /products/:id`) hoạt động chính xác | **PASS (Có lưu ý nhỏ ở Modal Badge)** | API trả đúng dữ liệu, đúng thứ tự `name ASC, id ASC`, phân biệt đúng `STANDARD` vs `ONE_SIZE`, chặn đúng 3 toppings và `quantity` 1..10. Cần sửa điều kiện hiển thị badge `isBestseller`/`isNew` trong `ProductDetailModal.tsx`. |
-| **AC-02** | API trả dữ liệu hợp lệ và xử lý lỗi (`400`, `404`, `500`) phù hợp | **PASS (36/36 tests)** | Đã xác minh qua cả unit test, HTTP test, E2E test (`products.e2e-spec.ts`) và UI thực tế (`/products/invalid-uuid` -> 400, `/products/<missing>` -> 404). |
-| **AC-03** | Loading, Empty, Error states được kiểm chứng | **PASS** | Đã xác minh cả bằng JSDOM/SSR và trình duyệt thực tế tại `/?state=loading`, `/?state=empty`, `/?state=error`, `/products/[id]`. |
-| **MVP-R01** | Đồng bộ công thức giá `Math.floor` vs `round_half_up` | **CONFIRMED ISSUE (Cần sửa ở task fix code)** | Đã chứng minh bằng thực nghiệm: khớp 100% với giá chẵn nghìn, nhưng lệch `-1 VND` trên Frontend khi gặp giá lẻ có phần thập phân `>= 0.5` (`35004`, `33333`, `29999`). |
-| **MVP-R02** | Unit test cho Product Listing, Product Detail & States trên Frontend | **CONFIRMED GAP (Đã có kịch bản test mẫu)** | Backend đã có 36 tests PASS; Frontend hiện mới có test cho Sprint 2/3, cần bổ sung file `apps/web/tests/menu-product-detail.test.ts` khi mở quyền sửa code. |
-| **MVP-R03** | Responsive / Mobile-first trên `320px`, `375px`, `768px` | **CONFIRMED ISSUE tại `320px` & `375px`** | Đo đạc trình duyệt xác nhận `scrollWidth = 349.59px` trên viewport `320px` (tràn `29.59px`) do cụm filter `#sort-select` (`285.59px`) thiếu `flex-wrap` và container dùng `px-margin` (`48px` mỗi bên). Ở `768px` hiển thị tốt (`scrollWidth = 768px`). |
-| **MVP-R04** | Tương thích sau khi chuyển sang `apps/web` và `apps/api` | **CONFIRMED 4 FILES CÒN ĐƯỜNG DẪN CŨ** | Cấu trúc chính (`docker-compose`, CI, Dockerfiles, `scrum92`) đều PASS. Còn 3 file trong `scripts/scrum80/` và dòng 205 của `README.md` trỏ tới `backend/`. |
-| **MVP-R05** | Vai trò của `mock-data/products.mock.ts` | **VERIFIED** | Không dùng để fake API response, nhưng đang dùng cho background blur và tra cứu `MOCK_PRODUCT_DETAILS[apiData.id]`. Cần giữ song song ID `a3000000-...` và `a1000000-...` khi đồng bộ. |
+1. **Giao diện Menu tại các kích thước màn hình:**
+   - [menu_320x640.png](evidence/menu_320x640.png) — Kiểm chứng hiển thị Menu và ghi nhận tràn bố cục `349.59px` tại viewport `320px`.
+   - [menu_375x812.png](evidence/menu_375x812.png) — Kiểm chứng Menu trên iPhone/Android phổ thông `375px`.
+   - [menu_768x1024.png](evidence/menu_768x1024.png) — Kiểm chứng Menu trên Tablet `768px` (thanh Header Nav hiển thị đầy đủ).
+2. **Giao diện Product Detail Modal tại `320x640`:**
+   - [modal_320x640_top.png](evidence/modal_320x640_top.png) — Khung ảnh sản phẩm, hồ sơ hương vị và các nhãn phía trên (rộng `304px`, lề `8px`).
+   - [modal_320x640_bottom.png](evidence/modal_320x640_bottom.png) — Chọn Size, danh sách Topping, ghi chú và hàng nút dưới cùng (`#btn-add-cart`).
+3. **Giao diện các trạng thái đặc biệt (`loading`, `empty`, `error`) tại `320x640`:**
+   - [state_loading_320x640.png](evidence/state_loading_320x640.png) — Trạng thái Shimmer Loading (`8` thẻ skeleton).
+   - [state_empty_320x640.png](evidence/state_empty_320x640.png) — Trạng thái Thực đơn rỗng (`items: []`).
+   - [state_error_320x640.png](evidence/state_error_320x640.png) — Trạng thái Lỗi kết nối máy chủ HTTP 500 (`ProductErrorState`).
+4. **Giao diện xử lý lỗi trên đường dẫn Product Detail `/products/:id` tại `320x640`:**
+   - [error_400_320x640.png](evidence/error_400_320x640.png) — Lỗi `400 Bad Request` khi UUID không hợp lệ (`/products/invalid-uuid`).
+   - [error_404_320x640.png](evidence/error_404_320x640.png) — Lỗi `404 Not Found` khi sản phẩm không tồn tại (`/products/a3000000-...0999`).
+
+---
+
+## 5. Bảng Đối chiếu Đầy đủ Toàn diện Tiêu chí Chấp nhận (Acceptance Criteria Traceability Matrix)
+
+| Tiêu chí của Task (Acceptance Criteria) | Hạng mục kiểm chứng tương ứng | Phương pháp kiểm chứng | Kết quả | Chi tiết minh chứng |
+| :--- | :--- | :---: | :---: | :--- |
+| **1. Menu và Product Detail hoạt động chính xác** | - Product Listing (`/`) hiển thị danh sách 9 món, sắp xếp chuẩn, lọc & tìm kiếm.<br>- Product Detail (`/products/:id`) hiển thị Modal đúng chuẩn `STANDARD` (S/M/L) và `ONE_SIZE`, chặn tối đa 3 topping, số lượng 1..10. | Static + Runtime Probe + Browser UI | **ĐẠT (PASS)** *(Lưu ý: phát hiện lỗi hiển thị badge trong Modal do kiểm tra `product.badge` thay vì `isBestseller`)* | - 36 tests backend PASS.<br>- 11/11 E2E tests `GET /products` & `GET /products/:id` PASS.<br>- Runtime probe tương tác DOM PASS.<br>- Ảnh minh chứng: `menu_320x640.png`, `modal_320x640_top.png`, `modal_320x640_bottom.png`. |
+| **2. API trả dữ liệu hợp lệ và xử lý lỗi phù hợp** | - `GET /products` trả `200 OK` `{ items: [...] }`.<br>- `GET /products/:id` chặn `400 Bad Request` khi UUID sai.<br>- Trả `404 Not Found` khi không có món.<br>- Trả `500 Internal Server Error` an toàn khi DB lỗi. | Static + Runtime Unit/E2E + Browser UI | **ĐẠT (PASS)** | - Controller `ParseUUIDPipe` hoạt động đúng.<br>- `products.service.spec.ts` & `products.http.spec.ts` PASS.<br>- Ảnh minh chứng: `error_400_320x640.png` (HTTP 400), `error_404_320x640.png` (HTTP 404). |
+| **3. Giao diện mobile không tràn bố cục hoặc mất chức năng quan trọng** | - Kiểm tra trên màn hình tiêu biểu: `320px`, `375px`, `768px`.<br>- Không mất chức năng cốt lõi (xem món, xem chi tiết, chọn size, thêm giỏ). | Browser UI Automation | **CẦN SỬA (CONFIRMED ISSUE)** *(Chức năng bảo toàn nhưng bị tràn ngang bố cục tại 320px & 375px)* | - Số liệu đo đạc thực tế: `scrollWidth = 349.59px` tại màn `320px` (tràn `29.59px`).<br>- Nguyên nhân: cụm lọc `#sort-select` thiếu `flex-wrap` (`width: 285.59px`) và container dùng `px-margin` (`48px` mỗi bên).<br>- Không mất chức năng quan trọng (modal và giỏ hàng vẫn hoạt động). |
+| **4. Loading, empty, error states được kiểm chứng** | - Menu Shimmer loading (8 cards).<br>- Empty state khi `items: []`.<br>- Error state khi server lỗi.<br>- Product detail loading & error modal. | Static + Runtime Probe + Browser UI | **ĐẠT (PASS)** | - `ProductSkeletonGrid`: 8 cards với `aria-busy="true"`.<br>- `ProductEmptyState`: `role="status"` + CTA tải lại.<br>- `ProductErrorState`: `role="alert"` + badge HTTP 500.<br>- Ảnh minh chứng: `state_loading_320x640.png`, `state_empty_320x640.png`, `state_error_320x640.png`. |
+| **5. Không phát sinh regression sau migration** | - Kiểm tra cấu trúc `apps/api` và `apps/web`.<br>- Kiểm tra CI, Docker, seed, migration scripts và tài liệu. | Static + Script Verification | **CẦN SỬA (CONFIRMED 4 FILES)** | - CI, Docker Compose, Dockerfiles, `scrum92` đều tương thích tốt.<br>- Còn sót 3 script trong `scripts/scrum80/` và dòng 205 `README.md` trỏ tới `backend/`. |
+| **6. Bổ sung hoặc cập nhật các unit test cần thiết** | - Bộ test cho Sprint 1 trên Frontend (`apps/web/tests/`). | Static Verification | **CẦN BỔ SUNG (CONFIRMED GAP)** | - Backend đã có đầy đủ 36 tests.<br>- Frontend mới chỉ có test cho Sprint 2/3 (166 tests). Đã hoàn thiện kịch bản probe mẫu, sẵn sàng đưa vào `apps/web/tests/menu-product-detail.test.ts`. |
+| **7. Ghi nhận bằng chứng demo MVP** | - Bằng chứng số liệu đo đạc DOM, log test runtime, ảnh chụp giao diện thực tế. | Browser Automation & Runtime Execution | **ĐẠT (PASS)** | - Log runtime probe ghi nhận chi tiết tại Mục 4.1.<br>- Đầy đủ 10 file ảnh chụp màn hình lưu tại `docs/A2_TestReport/evidence/`. |
+
+---
+
+## 6. Tổng hợp Kế hoạch Hành động Khắc phục (Action Plan cho Task Sửa Code tiếp theo)
+
+Theo quy định nghiêm ngặt của `AGENTS.md` và chỉ đạo của User, task `SCRUM-112` này **chỉ thực hiện kiểm chứng và báo cáo, tuyệt đối không chỉnh sửa code của dự án**. Toàn bộ các vấn đề phát hiện đã được chứng minh bằng thực nghiệm và sẵn sàng để thực hiện ở task/PR sửa code tiếp theo:
+
+1. **Sửa công thức giá (`MVP-R01`):** Sửa dòng 74 của `apps/web/services/api.service.ts` sang `Math.floor((basePriceVnd * multiplierPercent + 50) / 100)` và bổ sung regression test cho giá lẻ.
+2. **Sửa tràn ngang & CSS responsive mobile-first (`MVP-R03`):**
+   - Thêm `flex-wrap w-full lg:w-auto` cho cụm `#sort-select` trong `apps/web/components/CategoryFilterBar.tsx`.
+   - Đổi `px-margin` thành `px-4 sm:px-6 lg:px-margin` trên `app/page.tsx`, `HeroBanner.tsx`, `CategoryFilterBar.tsx`, `Footer.tsx`, `app/products/[id]/page.tsx`.
+   - Sửa logic kiểm tra badge trong `ProductDetailModal.tsx` (dòng 339) để hỗ trợ `product.isBestseller` / `product.isNew`.
+3. **Bổ sung Unit Test Frontend (`MVP-R02`):** Tạo file `apps/web/tests/menu-product-detail.test.ts` từ kịch bản probe đã kiểm chứng và đăng ký vào script `test:unit` trong `package.json`.
+4. **Cập nhật đường dẫn Monorepo (`MVP-R04`):** Đổi `'backend'` thành `path.join(root, 'apps', 'api')` trong 3 file `scripts/scrum80/` và sửa `cd backend` thành `cd apps/api` trong `README.md`.
+5. **Đồng bộ Mock Data an toàn (`MVP-R05`):** Đồng bộ `MOCK_CATALOG_PRODUCTS` sang 9 sản phẩm của `seed.ts` đồng thời giữ song song cả UUID cũ `a1000000-...` và UUID mới `a3000000-...` trong `MOCK_PRODUCT_DETAILS`.
