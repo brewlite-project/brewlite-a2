@@ -41,18 +41,29 @@ async function proxyRequest(
 
     const responseHeaders = new Headers(backendResponse.headers);
 
+    for (const header of [
+      "connection",
+      "keep-alive",
+      "transfer-encoding",
+      "content-length",
+      "content-encoding",
+    ]) {
+      responseHeaders.delete(header);
+    }
+
     return new NextResponse(backendResponse.body, {
       status: backendResponse.status,
       statusText: backendResponse.statusText,
       headers: responseHeaders,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error("Backend proxy request failed:", error);
+
     return NextResponse.json(
       {
         statusCode: 502,
         error: "Bad Gateway",
-        message: `Frontend container cannot connect to backend at ${backendBaseUrl}: ${message}`,
+        message: "Backend service is temporarily unavailable",
       },
       { status: 502 }
     );
