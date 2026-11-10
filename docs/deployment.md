@@ -1,5 +1,39 @@
 # BrewLite - Deployment Diagram: Vercel & Render
 
+> **Cập nhật SCRUM-117, 11/11/2026:** §§1–10 giữ provenance thiết kế SCRUM-108;
+> không dùng snapshot `b542ee4` bên dưới như source hiện hành. Đối chiếu remote
+> `dev` và HEAD của branch SCRUM-117 hiện tại: `5021743e99d73c2ce795df72ee5aaa90b04bb0da`;
+> CI hiện đã có `.github/workflows/ci.yml`, chưa có CD trong tree; các mô tả
+> “chưa có workflow” bên dưới chỉ đúng snapshot thiết kế cũ. ADR-005 vẫn Proposed.
+> [Readiness và evidence SCRUM-117](delivery/SCRUM-117-delivery.md) ghi các gate
+> runtime còn thiếu. Runbook hiện hành bổ sung ở §11; không deployment/rollback
+> production trong lượt chuẩn bị hồ sơ.
+>
+> **Sau review SCRUM-117:** 8 AC đã được người dùng cung cấp tại
+> [delivery §2](delivery/SCRUM-117-delivery.md#2-readiness-theo-acceptance-criteria).
+> Các checklist thiết kế lịch sử bên dưới không tự thêm gate vào AC này.
+> Payment-status/QueryDR cần đối chiếu scope release theo
+> [bảng nguồn và tác động](delivery/SCRUM-117-delivery.md#phạm-vi-release-gap-và-quyết-định-cần-xác-nhận);
+> rehearsal chưa có căn cứ bắt buộc. Runbook theo candidate provider không
+> chứng minh đã thực thi được trên môi trường thật chưa có ID/tier.
+>
+> **Nguồn đề đã bổ sung:** [Assignment 2 v1.0](https://drive.google.com/file/d/1CYVsexpTXZ6Uyg2FHMRE8lnJHSPkYQmi/view),
+> §7.3 yêu cầu image tag theo SHA/semantic version, push registry khi nền tảng
+> yêu cầu, safe migration và health/smoke sau deploy. §7.2 chỉ nêu GET /health
+> làm ví dụ; source hiện có GET /, không cần tự đặt endpoint mới. §7.4/9.1 yêu
+> cầu rollback guide, không nêu rehearsal. Các câu “nếu rubric yêu cầu” trong
+> snapshot thiết kế cũ được hiểu theo nguồn mới này; không tự thêm registry
+> độc lập hoặc coi host-build chưa có image version evidence là đã đáp ứng.
+>
+> **Source hiện tại tại HEAD 5021743:** PR #16 của SCRUM-116
+> chỉ nâng Next.js 16.4.6 và sửa web proxy. Response proxy bỏ connection,
+> keep-alive, transfer-encoding, content-length, content-encoding; 502 public
+> dùng message chung, error được log phía server. Không suy đã rà sạch log hoặc
+> đã sửa nguyên nhân 502 lịch sử. Biến proxy, URL resolution, health, Docker/
+> Compose, migration/seed và workflow không đổi; hướng dẫn ở §11 vẫn có điều
+> kiện theo candidate provider/tier. [Evidence/new baseline](delivery/SCRUM-117-delivery.md#12-đối-chiếu-dev-mới-5021743-chưa-tích-hợp)
+> phân biệt CI của PR #16 với deploy/smoke còn follow-up.
+
 | Thuộc tính | Giá trị |
 | --- | --- |
 | Task | A2-T3.2 / SCRUM-108 |
@@ -388,3 +422,81 @@ python docs/diagrams/render_deployment.py --check
 
 Kết quả: `5.1.0`, `OK: brewlite-deployment.svg`,
 `OK: brewlite-deployment.pdf`. Không đóng DEP-04 từ các kiểm tra artifact này.
+
+## 11. Runbook SCRUM-117 — migration, seed và rollback
+
+**Ngày đối chiếu: 10/11/2026, source 7dfc7ca; quy trình nháp, chưa diễn tập.** Không có URL production, provider project ID, region/tier, deploy SHA hoặc người vận hành đã được xác nhận. Bảng runtime §8 vẫn mở. [Delivery](delivery/SCRUM-117-delivery.md) là sổ evidence và release mapping chuẩn; không tạo danh sách URL song song.
+
+### 11.1. Giới hạn hosting đối chiếu lại
+
+Chỉ áp dụng sau khi nhóm xác nhận đúng provider/tier; không khẳng định nhóm đang dùng các plan này. Tài liệu chính thức được mở lại ngày 10/11/2026:
+
+| Provider/tier dự kiến | Giới hạn và ảnh hưởng cần xử lý |
+|---|---|
+| Render Web Free | Idle 15 phút → ngủ; wake khoảng 1 phút; 750 giờ/workspace/tháng. Không shell/one-off job; filesystem tạm. Sleep dừng scheduler NestJS, chậm IPN/demo; cần kiểm tra quota trước demo. |
+| Render Postgres Free | 1 GB, hết hạn sau 30 ngày; grace 14 ngày để nâng cấp rồi bị xóa; không backup managed. Phải ghi ngày tạo/hết hạn và phương án export/restore được duyệt. |
+
+Nguồn: [Render Free](https://render.com/docs/free). Render khuyến nghị Free cho thử nghiệm, không production thực; môi trường online phục vụ bài tập vẫn phải ghi đúng tier và giới hạn.
+
+- [Render deploys](https://render.com/docs/deploys): pre-deploy command chỉ có ở paid web/private services và workers. Không giả định Free có pre-deploy hoặc shell để chạy Prisma. Rollback nền tảng không khôi phục schema/data.
+- [Vercel Hobby](https://vercel.com/docs/plans/hobby): personal/non-commercial; 100 GB Fast Data Transfer, 1 triệu Function Invocations, 100 deployments/ngày theo trang hiện hành. Vượt usage có thể phải chờ reset; xác minh quota/project eligibility và quyền nhóm. Serverless request/proxy có cold start/giới hạn duration; không dùng Vercel request lifecycle làm scheduler NestJS. Không suy hạn sleep của Render cho Vercel.
+- [Render Postgres connectivity](https://render.com/docs/postgresql-creating-connecting): kiểm tra cùng region/workspace, internal connection và **external access policy riêng**. Evidence dashboard Networking phải che connection strings; dùng internal URL không đủ chứng minh DB không public. Chưa kiểm tra cấu hình thực.
+
+### 11.2. Migration và seed
+
+**Source thực tế:** 9 migration directories ở `apps/api/prisma/migrations/`; `db:migrate` = `prisma migrate deploy --config prisma7.config.ts`. `Dockerfile` target `migrate` giữ Prisma CLI/schema/config; target `runtime` chỉ có package/runtime dependencies/dist, đã loại CLI. Không chạy `npm run db:migrate` trong runtime rồi giả định thành công.
+
+**Local A2:** xem [README setup](../README.md#local-setup-bằng-host-powershell); Compose dùng service `migrate`, chờ PostgreSQL healthy, rồi backend chờ migrate exit 0. Không chạy A1 scripts/bootstrap/reset cho deployed DB.
+
+**Production — điều kiện trước khi executor được phép chạy:**
+
+1. SCRUM-115/116 xác nhận runner có Prisma CLI/schema/config/migrations của đúng release SHA, ở network truy cập DB private, cùng region/workspace, có quyền tối thiểu. Ghi runner ID, target/build context và người thực hiện; hiện **chưa có runner thật được xác minh**.
+2. Xác nhận identity DB qua kết nối được phép, migration status, diff SQL, backup/restore point có thể dùng và compatibility app cũ/mới. SQL lịch sử có thay constraint và enum; không coi mọi migration đều đảo được.
+3. Cấp DATABASE_URL bằng secret store của runner; không in env hoặc connection string vào command/log. Không dùng DB production trong GitHub-hosted CI unit tests, không mở external access tạm để lách thiết kế chưa duyệt.
+4. Trong backend checkout context của runner đã duyệt, cài/generate bằng lockfile nếu runner chưa build sẵn; chạy status → deploy → status. Các lệnh dưới là **quy trình chờ được phép**, chưa chạy ở lượt này:
+
+```bash
+# Working directory: apps/api (hoặc /app của Docker target migrate)
+npx --no-install prisma migrate status --config prisma7.config.ts
+npm run db:migrate
+npx --no-install prisma migrate status --config prisma7.config.ts
+```
+
+Status báo pending/failed phải được đọc và phân loại trước khi tiếp tục. Deploy lỗi thì dừng rollout; ghi migration failed và chuyển người phụ trách DB. Không tự chạy `migrate resolve`, reset, `migrate dev`, sửa migration đã áp dụng hoặc lặp mù lệnh deploy. Nếu plan không hỗ trợ runner cần thiết, SCRUM-116/Leader phải chốt giải pháp hợp lệ trước release; tài liệu này không thay CD.
+
+**Seed:** `db:seed` gọi `tsx prisma/seed.ts`, chỉ cho DB `brewlite_seed_*` hoặc DB Compose chính xác `brewlite_a2` tại `postgres:5432` với `ALLOW_COMPOSE_DEMO_SEED=true`. Upsert 9 demo products, category/topping/relations; cập nhật metadata/giá, giữ stock hiện có; từ chối sản phẩm ngoài catalog, không xóa order. Không đổi tên DB/guard để chạy trên production. Production catalog provisioning chưa có quy trình được duyệt; chuyển SCRUM-115/Leader xác nhận.
+
+User seed riêng tạo tối đa 2 account demo, Argon2id, bỏ qua xung đột, yêu cầu local DB và xác nhận tương tác; coupon helpers insert demo coupons/skip duplicates, có guard riêng. Không nằm trong catalog seed, không tự chạy như bước production. Hướng dẫn chi tiết: [user seed](../apps/api/prisma/seed_user_README.md), [promotion seed](../apps/api/prisma/README-promotion-seed.md). Đọc đường dẫn hiện hành `apps/api`, không dùng absolute path A1 kế thừa trong helper README.
+
+### 11.3. Rollback ứng dụng và phục hồi DB
+
+| Nội dung bắt buộc | Quy trình nháp / điều kiện |
+|---|---|
+| Kích hoạt | Deploy health fail, 5xx/proxy lỗi kéo dài, menu không đọc DB, smoke không đạt contract, hoặc sai version. Nếu nghi sai lệch tài chính, dừng release và escalates cho Leader; không lặp payment để thử |
+| Người quyết định/thực hiện | Leader phê duyệt, executor FE/BE và DB owner được nhóm xác nhận tại delivery §6. **Hiện chưa có tên đã xác nhận** |
+| Version khôi phục | Ghi FE deployment ID/SHA và BE deployment ID/image/SHA gần nhất đã kiểm tra tương thích schema, env và payment behavior; **hiện TBD**, không mặc định A1-final |
+| Frontend | Khi được phép, chọn deployment/artifact trước đã kiểm tra trên provider; phục hồi env tương ứng nếu cần, kiểm tra public build-time config và proxy target. Không chỉ revert Git rồi gọi đó là rollback thành công |
+| Backend | Khi được phép, chọn deploy/image trước theo khả năng provider/tier; xác nhận migrations hiện tại vẫn tương thích, scheduler/config startup hợp lệ. Không khôi phục app cũ nếu không đọc/ghi được schema hiện tại |
+| Database | Không tự down migration. Ưu tiên app tương thích schema; nếu cần restore, DB owner chốt backup ID/time, đích restore cô lập và khoảng mất dữ liệu được chấp nhận, kiểm tra restore rồi mới chuyển kết nối khi có approval. Đối chiếu order/payment với gateway để tránh double-finalization |
+| Sau rollback | Ghi UTC, executor, target IDs/SHA, migration status, FE HTTPS, GET /, direct/proxy GET /products, schema/data consistency, scheduler logs; QA chạy smoke ghi rõ phạm vi được phép. Chỉ ghi thành công sau actual results |
+| Dừng/escalate | Không có version tương thích, backup không usable, chưa rõ trạng thái tiền hoặc không đủ quyền: giữ release gate đóng; Leader quyết định recovery. Không reset/delete DB để làm health xanh |
+
+**RPO/RTO, nơi backup, thời hạn lưu và lần restore gần nhất: chưa được nhóm xác nhận.** Không hứa SLA/zero-data-loss. Rehearsal chưa thực hiện; **khuyến nghị** diễn tập trên staging/disposable DB được phép. AC SCRUM-117 yêu cầu hướng dẫn rollback, không yêu cầu rehearsal. SRS AC-OPS-07 đề cập thực hiện/ghi kết quả rollback nhưng SRS còn DRAFT; chưa thấy đề, quy trình nhóm được duyệt hoặc nguồn SCRUM-116 làm rehearsal bắt buộc. Không tự dùng mục này chặn AC4; nếu nhóm xác nhận gate khác, bổ sung quyết định áp dụng. Không thử rollback production trong lượt này.
+
+#### Thao tác theo provider và điều kiện thực thi
+
+Đây là hướng dẫn **có điều kiện cho candidate Vercel/Render**, không phải xác nhận provider/tier thực tế. Trước dùng, SCRUM-116 điền project/service, region/tier, executor, deployment hiện tại và target ID/SHA vào delivery §4/6; kiểm tra target tồn tại và schema/API tương thích. Nếu hosting khác, cần cập nhật hướng dẫn theo provider thật trước đánh giá tính thực thi.
+
+**Frontend Vercel:** Project → Production Deployment → Instant Rollback; đối chiếu domain/target SHA rồi Confirm Rollback khi được phép. Hobby chỉ chọn deployment production liền trước; Preview chưa từng gắn production domain không đủ điều kiện. Build/env cũ được dùng lại, không lấy env vừa sửa trong project để cập nhật artifact cũ; cần kiểm tra proxy/API compatibility. Sau rollback, tự gán production domain bị tắt; executor phải chốt cách phục hồi deployment flow sau remediation. Nguồn: [Vercel Instant Rollback](https://vercel.com/docs/instant-rollback), đọc 10/11/2026. Chưa có target/deployment thật nên chưa xác minh thao tác UI/quyền.
+
+**Backend Render:** Service → Deploys → chọn deploy thành công còn artifact → Rollback → Rollback to this deploy khi được phép. Free chỉ giữ khả năng rollback tới hai deploy trước gần nhất; plan khác tùy retention. Dashboard rollback tắt auto-deploy; API rollback không tắt, cần phối hợp CD tránh rollout mới ghi đè. Dùng target artifact và kiểm tra env/env groups hiện tại; không suy tất cả cấu hình/DB được quay lại. Nguồn: [Render Rollbacks](https://render.com/docs/rollbacks), [Render Free](https://render.com/docs/free), đọc 10/11/2026. Chưa có service/tier/target nên chưa xác minh thực thi.
+
+**DB recovery:** không có nút app rollback nào đảo PostgreSQL schema/data. Chưa có backup/restore target được xác nhận; Render PostgreSQL Free không có managed backup. Chỉ DB owner được phép xác nhận bản export/restore dùng được, đích phục hồi, phạm vi mất dữ liệu và đối soát financial state trước chuyển kết nối; không cung cấp lệnh restore phá dữ liệu khi chưa biết topology/backup thật. Đây là phương án cần binding theo môi trường, không phải recovery đã diễn tập.
+
+Source đối chiếu thêm: `apps/api/Dockerfile` giữ CLI ở target `migrate`, không ở `runtime`; `apps/api/package.json` có script `deploy = nest deploy`, **không phải** evidence pipeline CD hoặc lệnh migration/rollback đã cấu hình cho Render.
+
+### 11.4. Kiểm tra production read-only chờ URL
+
+Sau khi có origins sạch đã xác nhận, chỉ GET frontend `/`, backend `/`, backend `/products` và frontend `/api/backend/products`; ghi UTC, HTTPS/certificate, status/body shape, latency, source SHA/deployment ID lấy từ dashboard (không tự thêm version endpoint). Không đi theo signed URL/callback hay gọi internal API để “smoke”. Browser riêng kiểm tra asset, mixed content, proxy request và dữ liệu menu; GET liveness không đủ DB readiness. Case DB outage chỉ thử môi trường riêng được cho phép, không ngắt production để test.
+
+Chưa có URL nên không gửi request production trong SCRUM-117. Auth/order/payment write smoke và VNPay E2E cần QA executor được cấp quyền riêng; không lấy public GET thành full checkout PASS.

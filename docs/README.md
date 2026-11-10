@@ -2,6 +2,24 @@
 
 Trung tâm điều hướng tài liệu và tạo phẩm của đồ án **BrewLite Assignment 2**. Các đường dẫn trong file này được viết tương đối từ thư mục `docs/`.
 
+**Cập nhật SCRUM-117 ngày 11/11/2026:** thư mục chính `D:/CNPM_PJ/brewlite-a2`, branch
+`SCRUM-117-production-release-delivery`, HEAD/origin/dev `5021743e99d73c2ce795df72ee5aaa90b04bb0da`.
+Hồ sơ đang chờ review, chưa release/nghiệm thu. [Readiness, evidence, demo và checklist nộp](delivery/SCRUM-117-delivery.md),
+[release notes + PR draft](delivery/release-notes-A2.md),
+[runbook migration/seed/rollback](deployment.md#11-runbook-scrum-117--migration-seed-và-rollback).
+
+Readiness dùng **8 AC SCRUM-117 do người dùng đã cung cấp** và bản đề
+[A2 v1.0](https://drive.google.com/file/d/1CYVsexpTXZ6Uyg2FHMRE8lnJHSPkYQmi/view)
+đã đọc qua Drive; checklist §9.1 được ánh xạ ở delivery §7. Rehearsal rollback là khuyến nghị hiện tại;
+scope payment-status/QueryDR cần quyết định A2 cụ thể, không tự chặn mọi AC.
+Report chọn **pdfLaTeX** theo preamble và log template SGU lịch sử; chưa tìm được
+engine local khả dụng để build PDF mới. [Hướng dẫn local/Overleaf và bộ nguồn](report/README.md)
+ghi các bước người dùng thực hiện; chưa upload tài liệu.
+
+**Source hiện tại:** PR #16 đã được tích hợp tại HEAD `5021743`; phần thay đổi là proxy và
+package/lockfile web, không thêm CD hoặc deployment evidence. Snapshot `7dfc7ca` và các SHA
+test cũ giữ vai trò lịch sử. [Readiness, source mapping và trạng thái draft PR](delivery/SCRUM-117-delivery.md#12-đối-chiếu-dev-mới-5021743-chưa-tích-hợp).
+
 ## 1. Bản đồ tài liệu
 
 | Khu vực | Nội dung | Điểm vào |
@@ -15,9 +33,12 @@ Trung tâm điều hướng tài liệu và tạo phẩm của đồ án **BrewL
 | Architecture | Tổng quan kiến trúc và ADR 001–005 | [`architecture/architecture.md`](architecture/architecture.md), [`architecture/adr/`](architecture/adr/) |
 | Deployment | Mô tả triển khai Vercel/Render của [SCRUM-108](https://nguyenkhang03012006.atlassian.net/browse/SCRUM-108) | [`deployment.md`](deployment.md) |
 | CI | Hướng dẫn và thông tin quality gates | [`ci/README.md`](ci/README.md) |
-| Report sources | Các fragment LaTeX theo section, asset PDF và file kiểm tra domain class | [`report/sections/`](report/sections/), [`report/assets/`](report/assets/), [`report/domain-class-check.tex`](report/domain-class-check.tex) |
+| Report sources | Entrypoint tổng hợp nháp, section fragments, asset PDF và domain fixture | [`report/main.tex`](report/main.tex), [`report/README.md`](report/README.md), [`report/sections/`](report/sections/), [`report/assets/`](report/assets/), [`report/domain-class-check.tex`](report/domain-class-check.tex) |
+| Delivery / release | Readiness, mapping release/deploy/run/smoke, demo/Scrum agenda và checklist tạm | [`delivery/SCRUM-117-delivery.md`](delivery/SCRUM-117-delivery.md), [`delivery/release-notes-A2.md`](delivery/release-notes-A2.md) |
+| MVP evidence | Báo cáo local Sprint 1 kế thừa, không production smoke | [`A2_TestReport/MVP_Sprint1_Verification_Report.md`](A2_TestReport/MVP_Sprint1_Verification_Report.md) |
 | A1 archive | Snapshot tài liệu kế thừa từ Assignment 1; xem provenance để biết nguồn gốc | [`a1-archive/PROVENANCE.md`](a1-archive/PROVENANCE.md) |
-| Traceability | Ma trận nối Planning, Task 1–4.1, Jira, PR, commit và nguồn nghiệp vụ | [`TRACEABILITY.md`](TRACEABILITY.md) |
+| Traceability | Ma trận Planning/Task 1–4 và snapshot delivery Task 5.4, Jira, PR, commit, nguồn và evidence | [`TRACEABILITY.md`](TRACEABILITY.md) |
+| Requirement traceability | 48 FR + 49 NFR từ SRS → US/UC → design → code/API → test inventory, theo đề §8.1 | [`traceability-matrix.md`](traceability-matrix.md) |
 
 ## 2. Vị trí artifact sau [SCRUM-110](https://nguyenkhang03012006.atlassian.net/browse/SCRUM-110)
 
@@ -37,7 +58,11 @@ Tree được kiểm tra có các fragment sau:
 - Report support: `report/domain-class-check.tex`.
 - Diagram fragments: `diagrams/deployment-figure.tex` và `diagrams/domain-class-figure.tex`.
 
-**Không có `docs/report/main.tex` trong tree được kiểm tra.** Vì vậy, không mô tả `main.tex` là entrypoint hiện hữu và không tự suy ra một file build entrypoint khác. Khi bổ sung entrypoint LaTeX, cần thêm file nguồn cùng lệnh build/hướng dẫn tương ứng rồi cập nhật mục này.
+**SCRUM-117 đã bổ sung `report/main.tex` làm entrypoint nháp**, tái sử dụng các
+fragments trên cùng `report/sections/deployment-release-delivery.tex`. Chạy build
+từ repository root theo [`report/README.md`](report/README.md). Chưa compile PDF,
+chưa visual QA và chưa đủ đầu vào để khẳng định báo cáo/bộ nộp hoàn chỉnh theo đề.
+PDF domain fixture và assets hiện có không phải PDF report tổng hợp.
 
 ## 4. Quy tắc quản lý tài liệu
 

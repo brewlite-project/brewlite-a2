@@ -1,0 +1,90 @@
+% !TeX program = pdflatex
+% SCRUM-117: draft integration entrypoint. Compile from repository root.
+% Layout adapted from SGU Assignment_report.tex; see docs/report/README.md.
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage{vntex}
+\usepackage[margin=22mm,headheight=30pt]{geometry}
+\usepackage{amsmath,amssymb,array,longtable,booktabs,tabularx}
+\usepackage{graphicx,pdflscape,fancyhdr,lastpage}
+\usepackage[unicode,hidelinks]{hyperref}
+\hypersetup{pdftitle={BrewLite Assignment 2 - Draft},pdfauthor={BrewLite team}}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Trường Đại học Sài Gòn -- Khoa Công nghệ Thông tin}
+\fancyfoot[L]{\small BrewLite Assignment 2 -- DRAFT}
+\fancyfoot[R]{\small Trang \thepage/\pageref{LastPage}}
+\setcounter{tocdepth}{2}
+\newcommand{\BrewLiteDiagramDir}{docs/diagrams}
+\newcommand{\BrewLiteSeqDiagramDir}{docs/report/assets}
+\begin{document}
+\begin{titlepage}
+\begin{center}
+TRƯỜNG ĐẠI HỌC SÀI GÒN\\
+KHOA CÔNG NGHỆ THÔNG TIN
+\vspace{25mm}
+
+{\Large CÔNG NGHỆ PHẦN MỀM\par}
+\vspace{12mm}
+{\Huge\bfseries BrewLite\par}
+\vspace{8mm}
+{\Large Assignment 2\par}
+{\large Hồ sơ tổng hợp và bàn giao -- bản nháp\par}
+\vspace{20mm}
+
+\begin{tabular}{ll}
+GVHD, lớp: & Chờ Leader xác nhận\\
+Học kỳ: & I -- Năm học 2026--2027 (đề A2 v1.0)\\
+Thành viên và MSSV: & Chờ danh sách chính thức\\
+Ngày cập nhật hồ sơ: & 11/11/2026\\
+Source branch hiện tại: & \texttt{SCRUM-117 / 5021743}\\
+Snapshot lịch sử 7dfc7ca; HEAD hiện tại: & \texttt{5021743}\\
+Task tài liệu: & SCRUM-117 / A2-T5.4
+\end{tabular}
+\end{center}
+\vfill
+\noindent\textbf{DRAFT -- chưa phải báo cáo đã nghiệm thu.}
+Đã đối chiếu đề A2 v1.0 và checklist §9.1; production evidence,
+release/tag, PDF build và review cuối còn thiếu. Các section kế thừa giữ trạng
+thái nguồn, không được hiểu là đã nghiệm thu các task khác.
+\end{titlepage}
+\tableofcontents
+\clearpage
+\section*{Nguồn và giới hạn tổng hợp}
+\addcontentsline{toc}{section}{Nguồn và giới hạn tổng hợp}
+Snapshot lịch sử: \texttt{7dfc7ca996c2eb6190a5ec3e7812f70d441a61cb},
+baseline kiểm tra ngày 10/11/2026. Source checkout hiện tại là
+\texttt{5021743e99d73c2ce795df72ee5aaa90b04bb0da} (PR \#16), HEAD hiện tại.
+branch \texttt{SCRUM-117-production-release-delivery}. Chỉ web Next/proxy/lockfile đổi; các SHA evidence cũ giữ nguyên.
+Bố cục A4, bìa, header/footer và mục lục
+tái sử dụng cấu trúc template SGU; bỏ dữ liệu minh họa cũ và không tự điền
+GVHD/MSSV. Nguồn đề:
+\href{https://drive.google.com/file/d/1CYVsexpTXZ6Uyg2FHMRE8lnJHSPkYQmi/view}{Assignment 2 v1.0}
+(đọc qua Drive ngày 10/11/2026). Tài liệu Markdown là nguồn vận hành chuẩn:
+\href{https://github.com/brewlite-project/brewlite-a2/blob/7dfc7ca996c2eb6190a5ec3e7812f70d441a61cb/docs/architecture/architecture.md}{Architecture tại source snapshot};
+các mục SCRUM-117 dùng file \path{docs/deployment.md},
+\path{docs/delivery/SCRUM-117-delivery.md} và
+\path{docs/delivery/release-notes-A2.md} của branch tài liệu đang review,
+chưa có permalink commit. Release source sẽ được cập nhật sau approval.
+
+\input{docs/report/sections/context-and-scope.tex}
+\clearpage
+\input{docs/report/sections/requirements-summary.tex}
+\clearpage
+\input{docs/report/sections/checkout-use-case.tex}
+\clearpage
+\input{docs/report/sections/activity-diagram.tex}
+\clearpage
+\input{docs/report/sections/sequence-diagram.tex}
+\clearpage
+\section{Domain và kiến trúc triển khai}
+Domain figures kế thừa SCRUM-105; sơ đồ deployment kế thừa SCRUM-108 là
+\textbf{target design}. Kiến trúc chuẩn ở \path{docs/architecture/architecture.md}
+và ADR 001--005; ADR-005 hosting vẫn Proposed. Các hình dưới không chứng minh
+production đang chạy hoặc DB external access đã tắt.
+\input{docs/diagrams/domain-class-figure.tex}
+\input{docs/diagrams/deployment-figure.tex}
+\clearpage
+\input{docs/report/sections/deployment-release-delivery.tex}
+\end{document}
