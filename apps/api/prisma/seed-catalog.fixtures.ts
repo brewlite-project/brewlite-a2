@@ -2,7 +2,7 @@ export const categories = [
   { code: "traditional", name: "Cà phê truyền thống" },
   { code: "espresso_coldbrew", name: "Espresso & Cold Brew" },
   { code: "tea_macchiato", name: "Trà & Macchiato" },
-  { code: "bakery", name: "Bánh ngọt" },
+  { code: "bakery", name: "Bánh & Ăn nhẹ" },
 ] as const;
 
 // Prices and stocks are example values; confirm before release.
