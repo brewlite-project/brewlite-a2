@@ -114,15 +114,42 @@ export type RenderDemoSeedDiagnosticCode =
   | "APPLY_COMMITTED_CLEANUP_FAILED"
   | "SEED_RUNTIME_ERROR";
 
+export type CatalogDriftEntity = "CATEGORY" | "TOPPING" | "PRODUCT";
+export type CatalogDriftType =
+  | "UNEXPECTED_RECORD"
+  | "ID_MISMATCH"
+  | "NAME_MISMATCH"
+  | "INACTIVE"
+  | "UNAVAILABLE"
+  | "CATEGORY_MISMATCH"
+  | "PRICE_MISMATCH"
+  | "IMAGE_MISMATCH"
+  | "SIZE_POLICY_MISMATCH"
+  | "NEW_FLAG_MISMATCH"
+  | "BESTSELLER_FLAG_MISMATCH"
+  | "RELATION_MISMATCH";
+
+export type CatalogDriftDiagnostic = {
+  entity: CatalogDriftEntity;
+  key: string;
+  type: CatalogDriftType;
+};
+
 export class RenderDemoSeedDiagnosticError extends Error {
-  constructor(readonly diagnosticCode: RenderDemoSeedDiagnosticCode) {
+  constructor(
+    readonly diagnosticCode: RenderDemoSeedDiagnosticCode,
+    readonly catalogDrift?: CatalogDriftDiagnostic,
+  ) {
     super(diagnosticCode);
     this.name = "RenderDemoSeedDiagnosticError";
   }
 }
 
-function diagnostic(code: RenderDemoSeedDiagnosticCode): RenderDemoSeedDiagnosticError {
-  return new RenderDemoSeedDiagnosticError(code);
+function diagnostic(
+  code: RenderDemoSeedDiagnosticCode,
+  catalogDrift?: CatalogDriftDiagnostic,
+): RenderDemoSeedDiagnosticError {
+  return new RenderDemoSeedDiagnosticError(code, catalogDrift);
 }
 
 function isConnectionError(error: unknown): boolean {
@@ -138,11 +165,21 @@ export function renderDemoSeedDiagnosticCode(error: unknown): RenderDemoSeedDiag
   return "SEED_RUNTIME_ERROR";
 }
 
+function asDiagnosticError(error: unknown): RenderDemoSeedDiagnosticError {
+  return error instanceof RenderDemoSeedDiagnosticError
+    ? error
+    : diagnostic(renderDemoSeedDiagnosticCode(error));
+}
+
 /** Safe for cloud logs: it never includes a URL, credential, message, or stack. */
 export function renderDemoSeedDiagnosticMessage(error: unknown): string {
   const code = renderDemoSeedDiagnosticCode(error);
   if (code === "APPLY_COMMITTED_CLEANUP_FAILED") {
     return "Render demo seed apply may have committed; do not retry automatically: APPLY_COMMITTED_CLEANUP_FAILED";
+  }
+  if (code === "CATALOG_DRIFT" && error instanceof RenderDemoSeedDiagnosticError && error.catalogDrift) {
+    const { entity, key, type } = error.catalogDrift;
+    return `Render demo seed failed: CATALOG_DRIFT entity=${entity} key=${safeCatalogKey(entity, key, type)} type=${type}`;
   }
   return `Render demo seed failed: ${code}`;
 }
@@ -165,8 +202,29 @@ function sameCodes(left: readonly string[], right: readonly string[]): boolean {
   return left.length === right.length && left.every((code) => right.includes(code));
 }
 
-function failDrift(scope: "catalog" | "coupon", _key: string): never {
-  throw diagnostic(scope === "coupon" ? "COUPON_DRIFT" : "CATALOG_DRIFT");
+function safeCatalogKey(
+  entity: CatalogDriftEntity,
+  key: string,
+  type: CatalogDriftType,
+): string {
+  if (type === "UNEXPECTED_RECORD") return "redacted";
+  const isApprovedFixtureKey =
+    (entity === "CATEGORY" && categories.some((fixture) => fixture.code === key)) ||
+    (entity === "TOPPING" && toppings.some((fixture) => fixture.code === key)) ||
+    (entity === "PRODUCT" && products.some((fixture) => fixture.id === key));
+  return isApprovedFixtureKey ? key : "redacted";
+}
+
+function failCatalogDrift(
+  entity: CatalogDriftEntity,
+  key: string,
+  type: CatalogDriftType,
+): never {
+  throw diagnostic("CATALOG_DRIFT", { entity, key: safeCatalogKey(entity, key, type), type });
+}
+
+function failCouponDrift(): never {
+  throw diagnostic("COUPON_DRIFT");
 }
 
 function inspectCatalog(catalog: RenderDemoCatalog): RenderDemoSeedCounts {
@@ -177,17 +235,17 @@ function inspectCatalog(catalog: RenderDemoCatalog): RenderDemoSeedCounts {
 
   for (const category of catalog.categories) {
     if (!categories.some((fixture) => fixture.code === category.code)) {
-      failDrift("catalog", category.code);
+      failCatalogDrift("CATEGORY", category.code, "UNEXPECTED_RECORD");
     }
   }
   for (const topping of catalog.toppings) {
     if (!toppings.some((fixture) => fixture.code === topping.code)) {
-      failDrift("catalog", topping.code);
+      failCatalogDrift("TOPPING", topping.code, "UNEXPECTED_RECORD");
     }
   }
   for (const product of catalog.products) {
     if (!products.some((fixture) => fixture.id === product.id)) {
-      failDrift("catalog", product.id);
+      failCatalogDrift("PRODUCT", product.id, "UNEXPECTED_RECORD");
     }
   }
 
@@ -197,7 +255,8 @@ function inspectCatalog(catalog: RenderDemoCatalog): RenderDemoSeedCounts {
       counts.categories += 1;
       continue;
     }
-    if (existing.name !== fixture.name || !existing.isActive) failDrift("catalog", fixture.code);
+    if (existing.name !== fixture.name) failCatalogDrift("CATEGORY", fixture.code, "NAME_MISMATCH");
+    if (!existing.isActive) failCatalogDrift("CATEGORY", fixture.code, "INACTIVE");
   }
   for (const fixture of toppings) {
     const existing = toppingByCode.get(fixture.code);
@@ -205,14 +264,10 @@ function inspectCatalog(catalog: RenderDemoCatalog): RenderDemoSeedCounts {
       counts.toppings += 1;
       continue;
     }
-    if (
-      existing.id !== fixture.id ||
-      existing.name !== fixture.name ||
-      existing.price !== BigInt(fixture.price) ||
-      !existing.isAvailable
-    ) {
-      failDrift("catalog", fixture.code);
-    }
+    if (existing.id !== fixture.id) failCatalogDrift("TOPPING", fixture.code, "ID_MISMATCH");
+    if (existing.name !== fixture.name) failCatalogDrift("TOPPING", fixture.code, "NAME_MISMATCH");
+    if (existing.price !== BigInt(fixture.price)) failCatalogDrift("TOPPING", fixture.code, "PRICE_MISMATCH");
+    if (!existing.isAvailable) failCatalogDrift("TOPPING", fixture.code, "UNAVAILABLE");
   }
   for (const fixture of products) {
     const existing = productById.get(fixture.id);
@@ -221,18 +276,14 @@ function inspectCatalog(catalog: RenderDemoCatalog): RenderDemoSeedCounts {
       counts.productToppings += fixture.toppingCodes.length;
       continue;
     }
-    if (
-      existing.categoryCode !== fixture.categoryCode ||
-      existing.name !== fixture.name ||
-      existing.price !== BigInt(fixture.price) ||
-      existing.image !== fixture.image ||
-      existing.sizePolicy !== fixture.sizePolicy ||
-      existing.isNew !== fixture.isNew ||
-      existing.isBestseller !== fixture.isBestseller ||
-      !sameCodes(existing.toppingCodes, fixture.toppingCodes)
-    ) {
-      failDrift("catalog", fixture.id);
-    }
+    if (existing.categoryCode !== fixture.categoryCode) failCatalogDrift("PRODUCT", fixture.id, "CATEGORY_MISMATCH");
+    if (existing.name !== fixture.name) failCatalogDrift("PRODUCT", fixture.id, "NAME_MISMATCH");
+    if (existing.price !== BigInt(fixture.price)) failCatalogDrift("PRODUCT", fixture.id, "PRICE_MISMATCH");
+    if (existing.image !== fixture.image) failCatalogDrift("PRODUCT", fixture.id, "IMAGE_MISMATCH");
+    if (existing.sizePolicy !== fixture.sizePolicy) failCatalogDrift("PRODUCT", fixture.id, "SIZE_POLICY_MISMATCH");
+    if (existing.isNew !== fixture.isNew) failCatalogDrift("PRODUCT", fixture.id, "NEW_FLAG_MISMATCH");
+    if (existing.isBestseller !== fixture.isBestseller) failCatalogDrift("PRODUCT", fixture.id, "BESTSELLER_FLAG_MISMATCH");
+    if (!sameCodes(existing.toppingCodes, fixture.toppingCodes)) failCatalogDrift("PRODUCT", fixture.id, "RELATION_MISMATCH");
   }
   return counts;
 }
@@ -247,7 +298,7 @@ function inspectCoupons(coupons: ExistingCoupon[], now: Date): number {
       continue;
     }
     if (describePromotionDrift(existing, fixture, now).length > 0) {
-      failDrift("coupon", fixture.code);
+      failCouponDrift();
     }
   }
   return missing;
@@ -363,7 +414,7 @@ export async function runRenderDemoSeedWithPolicy<Env extends Record<string, str
       };
     }
   } catch (error) {
-    executionFailure = diagnostic(renderDemoSeedDiagnosticCode(error));
+    executionFailure = asDiagnosticError(error);
   }
   try {
     await database.disconnect();
