@@ -31,7 +31,7 @@ describe("catalog seed fixtures", () => {
       { code: "traditional", name: "Cà phê truyền thống" },
       { code: "espresso_coldbrew", name: "Espresso & Cold Brew" },
       { code: "tea_macchiato", name: "Trà & Macchiato" },
-      { code: "bakery", name: "Bánh ngọt" },
+      { code: "bakery", name: "Bánh & Ăn nhẹ" },
     ]);
     expect(products.map((product) => product.id)).toEqual([
       "a3000000-0000-4000-8000-000000000001",
