@@ -241,6 +241,132 @@ describe("Render demo seed execution", () => {
     expect(database.writes()).toBe(0);
   });
 
+  it.each([
+    {
+      name: "unexpected category",
+      catalog: { categories: [{ id: "extra", code: "unexpected", name: "Unexpected", isActive: true }], toppings: [], products: [] },
+      detail: { entity: "CATEGORY", key: "redacted", type: "UNEXPECTED_RECORD" },
+    },
+    {
+      name: "category name mismatch",
+      catalog: { categories: [{ id: "category", ...categories[0]!, name: "Changed", isActive: true }], toppings: [], products: [] },
+      detail: { entity: "CATEGORY", key: categories[0]!.code, type: "NAME_MISMATCH" },
+    },
+    {
+      name: "inactive category",
+      catalog: { categories: [{ id: "category", ...categories[0]!, isActive: false }], toppings: [], products: [] },
+      detail: { entity: "CATEGORY", key: categories[0]!.code, type: "INACTIVE" },
+    },
+    {
+      name: "unexpected topping",
+      catalog: { categories: [], toppings: [{ id: "extra", code: "UNEXPECTED", name: "Unexpected", price: 1n, isAvailable: true }], products: [] },
+      detail: { entity: "TOPPING", key: "redacted", type: "UNEXPECTED_RECORD" },
+    },
+    {
+      name: "topping ID mismatch",
+      catalog: { categories: [], toppings: [{ ...toppings[0]!, id: "different-id", price: BigInt(toppings[0]!.price), isAvailable: true }], products: [] },
+      detail: { entity: "TOPPING", key: toppings[0]!.code, type: "ID_MISMATCH" },
+    },
+    {
+      name: "topping name mismatch",
+      catalog: { categories: [], toppings: [{ ...toppings[0]!, name: "Changed", price: BigInt(toppings[0]!.price), isAvailable: true }], products: [] },
+      detail: { entity: "TOPPING", key: toppings[0]!.code, type: "NAME_MISMATCH" },
+    },
+    {
+      name: "topping price mismatch",
+      catalog: { categories: [], toppings: [{ ...toppings[0]!, price: BigInt(toppings[0]!.price + 1), isAvailable: true }], products: [] },
+      detail: { entity: "TOPPING", key: toppings[0]!.code, type: "PRICE_MISMATCH" },
+    },
+    {
+      name: "unavailable topping",
+      catalog: { categories: [], toppings: [{ ...toppings[0]!, price: BigInt(toppings[0]!.price), isAvailable: false }], products: [] },
+      detail: { entity: "TOPPING", key: toppings[0]!.code, type: "UNAVAILABLE" },
+    },
+    {
+      name: "unexpected product",
+      catalog: { categories: [], toppings: [], products: [{ id: "unexpected-product", categoryCode: "traditional", name: "Unexpected", price: 1n, image: "unexpected", sizePolicy: "STANDARD" as const, isNew: false, isBestseller: false, toppingCodes: [] }] },
+      detail: { entity: "PRODUCT", key: "redacted", type: "UNEXPECTED_RECORD" },
+    },
+    {
+      name: "product category mismatch",
+      catalog: { categories: [], toppings: [], products: [{ id: products[0]!.id, categoryCode: "bakery", name: products[0]!.name, price: BigInt(products[0]!.price), image: products[0]!.image, sizePolicy: products[0]!.sizePolicy, isNew: products[0]!.isNew, isBestseller: products[0]!.isBestseller, toppingCodes: [...products[0]!.toppingCodes] }] },
+      detail: { entity: "PRODUCT", key: products[0]!.id, type: "CATEGORY_MISMATCH" },
+    },
+    {
+      name: "product name mismatch",
+      catalog: { categories: [], toppings: [], products: [{ id: products[0]!.id, categoryCode: products[0]!.categoryCode, name: "Changed", price: BigInt(products[0]!.price), image: products[0]!.image, sizePolicy: products[0]!.sizePolicy, isNew: products[0]!.isNew, isBestseller: products[0]!.isBestseller, toppingCodes: [...products[0]!.toppingCodes] }] },
+      detail: { entity: "PRODUCT", key: products[0]!.id, type: "NAME_MISMATCH" },
+    },
+    {
+      name: "product price mismatch",
+      catalog: { categories: [], toppings: [], products: [{ id: products[0]!.id, categoryCode: products[0]!.categoryCode, name: products[0]!.name, price: BigInt(products[0]!.price + 1), image: products[0]!.image, sizePolicy: products[0]!.sizePolicy, isNew: products[0]!.isNew, isBestseller: products[0]!.isBestseller, toppingCodes: [...products[0]!.toppingCodes] }] },
+      detail: { entity: "PRODUCT", key: products[0]!.id, type: "PRICE_MISMATCH" },
+    },
+    {
+      name: "product image mismatch",
+      catalog: { categories: [], toppings: [], products: [{ id: products[0]!.id, categoryCode: products[0]!.categoryCode, name: products[0]!.name, price: BigInt(products[0]!.price), image: "changed-image", sizePolicy: products[0]!.sizePolicy, isNew: products[0]!.isNew, isBestseller: products[0]!.isBestseller, toppingCodes: [...products[0]!.toppingCodes] }] },
+      detail: { entity: "PRODUCT", key: products[0]!.id, type: "IMAGE_MISMATCH" },
+    },
+    {
+      name: "product size policy mismatch",
+      catalog: { categories: [], toppings: [], products: [{ id: products[0]!.id, categoryCode: products[0]!.categoryCode, name: products[0]!.name, price: BigInt(products[0]!.price), image: products[0]!.image, sizePolicy: "ONE_SIZE" as const, isNew: products[0]!.isNew, isBestseller: products[0]!.isBestseller, toppingCodes: [...products[0]!.toppingCodes] }] },
+      detail: { entity: "PRODUCT", key: products[0]!.id, type: "SIZE_POLICY_MISMATCH" },
+    },
+    {
+      name: "product new flag mismatch",
+      catalog: { categories: [], toppings: [], products: [{ id: products[0]!.id, categoryCode: products[0]!.categoryCode, name: products[0]!.name, price: BigInt(products[0]!.price), image: products[0]!.image, sizePolicy: products[0]!.sizePolicy, isNew: !products[0]!.isNew, isBestseller: products[0]!.isBestseller, toppingCodes: [...products[0]!.toppingCodes] }] },
+      detail: { entity: "PRODUCT", key: products[0]!.id, type: "NEW_FLAG_MISMATCH" },
+    },
+    {
+      name: "product bestseller flag mismatch",
+      catalog: { categories: [], toppings: [], products: [{ id: products[0]!.id, categoryCode: products[0]!.categoryCode, name: products[0]!.name, price: BigInt(products[0]!.price), image: products[0]!.image, sizePolicy: products[0]!.sizePolicy, isNew: products[0]!.isNew, isBestseller: !products[0]!.isBestseller, toppingCodes: [...products[0]!.toppingCodes] }] },
+      detail: { entity: "PRODUCT", key: products[0]!.id, type: "BESTSELLER_FLAG_MISMATCH" },
+    },
+    {
+      name: "product topping relation mismatch",
+      catalog: { categories: [], toppings: [], products: [{ id: products[0]!.id, categoryCode: products[0]!.categoryCode, name: products[0]!.name, price: BigInt(products[0]!.price), image: products[0]!.image, sizePolicy: products[0]!.sizePolicy, isNew: products[0]!.isNew, isBestseller: products[0]!.isBestseller, toppingCodes: [] }] },
+      detail: { entity: "PRODUCT", key: products[0]!.id, type: "RELATION_MISMATCH" },
+    },
+  ])("reports safe catalog drift detail for $name", async ({ catalog, detail }) => {
+    const database = new FakeDatabase(undefined, { catalog, coupons: [] });
+    await expect(runRenderDemoSeed(validEnv, () => database, now)).rejects.toMatchObject({
+      diagnosticCode: "CATALOG_DRIFT",
+      catalogDrift: detail,
+    });
+    expect(database.writes()).toBe(0);
+  });
+
+  it.each([
+    "PRIVATE_TOKEN_2026",
+    "postgresql://seed_user:secret_password@internal-host/brewlite_a2",
+  ])("redacts every unexpected catalog key from diagnostic output", async (unexpectedCode) => {
+    const database = new FakeDatabase(undefined, {
+      catalog: { categories: [{ id: "extra", code: unexpectedCode, name: "Unexpected", isActive: true }], toppings: [], products: [] },
+      coupons: [],
+    });
+    let received: unknown;
+    try {
+      await runRenderDemoSeed(validEnv, () => database, now);
+    } catch (error) {
+      received = error;
+    }
+    const message = renderDemoSeedDiagnosticMessage(received);
+    expect(message).toBe("Render demo seed failed: CATALOG_DRIFT entity=CATEGORY key=redacted type=UNEXPECTED_RECORD");
+    expect(message).not.toContain(unexpectedCode);
+    expect(database.writes()).toBe(0);
+  });
+
+  it("redacts an unapproved catalog key from diagnostic output", () => {
+    const secret = "postgresql://seed_user:secret_password@internal-host/brewlite_a2";
+    const message = renderDemoSeedDiagnosticMessage(new RenderDemoSeedDiagnosticError("CATALOG_DRIFT", {
+      entity: "CATEGORY",
+      key: secret,
+      type: "UNEXPECTED_RECORD",
+    }));
+    expect(message).toBe("Render demo seed failed: CATALOG_DRIFT entity=CATEGORY key=redacted type=UNEXPECTED_RECORD");
+    expect(message).not.toContain("secret_password");
+  });
+
   it("is idempotent and preserves existing coupon quota and redemption count", async () => {
     const fixture = promotionFixtures[0]!;
     const database = new FakeDatabase(undefined, {
