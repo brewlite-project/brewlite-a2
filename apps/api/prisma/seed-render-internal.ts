@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import {
   createInternalRenderDemoDatabase,
+  renderDemoSeedDiagnosticMessage,
   runRenderDemoSeedWithPolicy,
 } from "./seed-render-demo.js";
 import { validateRenderInternalSeedPolicy } from "./seed-render-internal.policy.js";
@@ -18,5 +19,8 @@ if (isMainModule()) {
     createInternalRenderDemoDatabase,
   )
     .then((result) => console.log(`Render Internal demo seed ${result.status}: ${JSON.stringify(result.created)}`))
-    .catch(() => { console.error("Render Internal demo seed failed."); process.exitCode = 1; });
+    .catch((error: unknown) => {
+      console.error(renderDemoSeedDiagnosticMessage(error));
+      process.exitCode = 1;
+    });
 }

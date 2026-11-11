@@ -7,12 +7,15 @@ import {
 } from "./seed-render-demo.policy.js";
 import {
   RENDER_DEMO_TRANSACTION_OPTIONS,
+  RenderDemoSeedDiagnosticError,
   createProductionRenderDemoDatabase,
   type ExistingCoupon,
   type RenderDemoCatalog,
   type RenderDemoDatabase,
   type RenderDemoSession,
   renderDemoPoolConfig,
+  renderDemoSeedDiagnosticCode,
+  renderDemoSeedDiagnosticMessage,
   renderInternalDemoPoolConfig,
   runRenderDemoSeed,
   runRenderDemoSeedWithPolicy,
@@ -177,7 +180,7 @@ describe("Render demo seed execution", () => {
       () => ({ databaseName: "brewlite_a2", executionMode: "dry-run", expectedUser: "internal_user" }),
       () => database,
       now,
-    )).rejects.toThrow("identity");
+    )).rejects.toMatchObject({ diagnosticCode: "DATABASE_IDENTITY_MISMATCH" });
     expect(database.writes()).toBe(0);
   });
 
@@ -218,7 +221,9 @@ describe("Render demo seed execution", () => {
       identity: { databaseName: "other_database", currentUser: "seed_user", serverAddress: "10.0.0.1" },
       locked: false, writes: 0, failProductCreate: false,
     });
-    await expect(runRenderDemoSeed(validEnv, () => database, now)).rejects.toThrow("identity");
+    await expect(runRenderDemoSeed(validEnv, () => database, now)).rejects.toMatchObject({
+      diagnosticCode: "DATABASE_IDENTITY_MISMATCH",
+    });
     expect(database.writes()).toBe(0);
   });
 
@@ -230,7 +235,9 @@ describe("Render demo seed execution", () => {
       }] },
       coupons: [],
     });
-    await expect(runRenderDemoSeed(validEnv, () => database, now)).rejects.toThrow("drift");
+    await expect(runRenderDemoSeed(validEnv, () => database, now)).rejects.toMatchObject({
+      diagnosticCode: "CATALOG_DRIFT",
+    });
     expect(database.writes()).toBe(0);
   });
 
@@ -254,7 +261,9 @@ describe("Render demo seed execution", () => {
       identity: { databaseName: "brewlite_a2", currentUser: "seed_user", serverAddress: null },
       locked: false, writes: 0, failProductCreate: true,
     });
-    await expect(runRenderDemoSeed(applyEnv(), () => database, now)).rejects.toThrow("simulated");
+    await expect(runRenderDemoSeed(applyEnv(), () => database, now)).rejects.toMatchObject({
+      diagnosticCode: "SEED_RUNTIME_ERROR",
+    });
     expect(database.catalog().categories).toHaveLength(0);
     expect(database.catalog().products).toHaveLength(0);
     expect(database.coupons()).toHaveLength(0);
@@ -270,5 +279,100 @@ describe("Render demo seed execution", () => {
     expect(outcomes.filter((outcome) => outcome.status === "rejected")).toHaveLength(1);
     expect(database.catalog().products).toHaveLength(9);
     expect(database.coupons()).toHaveLength(5);
+  });
+
+  it("classifies an identity SQL error as runtime, not a connection failure", async () => {
+    const database = new FakeDatabase();
+    database.identity = async () => {
+      const error = Object.assign(new Error("permission denied"), { code: "42501" });
+      throw error;
+    };
+    await expect(runRenderDemoSeed(validEnv, () => database, now)).rejects.toMatchObject({
+      diagnosticCode: "SEED_RUNTIME_ERROR",
+    });
+  });
+
+  it("classifies an identity ECONNRESET as a database connection failure", async () => {
+    const database = new FakeDatabase();
+    database.identity = async () => {
+      const error = Object.assign(new Error("connection reset"), { code: "ECONNRESET" });
+      throw error;
+    };
+    await expect(runRenderDemoSeed(validEnv, () => database, now)).rejects.toMatchObject({
+      diagnosticCode: "DATABASE_CONNECTION_FAILED",
+    });
+  });
+
+  it("reports a successful apply with failed cleanup as possibly committed and does not roll it back", async () => {
+    const database = new FakeDatabase();
+    database.disconnect = async () => { throw new Error("cleanup failure"); };
+    await expect(runRenderDemoSeed(applyEnv(), () => database, now)).rejects.toMatchObject({
+      diagnosticCode: "APPLY_COMMITTED_CLEANUP_FAILED",
+    });
+    expect(database.catalog().products).toHaveLength(9);
+    expect(renderDemoSeedDiagnosticMessage(
+      new RenderDemoSeedDiagnosticError("APPLY_COMMITTED_CLEANUP_FAILED"),
+    )).toContain("do not retry automatically");
+  });
+
+  it("preserves an execution failure when cleanup fails too", async () => {
+    const database = new FakeDatabase({
+      identity: { databaseName: "brewlite_a2", currentUser: "seed_user", serverAddress: null },
+      locked: false, writes: 0, failProductCreate: true,
+    });
+    database.disconnect = async () => { throw new Error("cleanup failure"); };
+    await expect(runRenderDemoSeed(applyEnv(), () => database, now)).rejects.toMatchObject({
+      diagnosticCode: "SEED_RUNTIME_ERROR",
+    });
+    expect(database.catalog().products).toHaveLength(0);
+  });
+
+  it("classifies policy, connection, and coupon failures without exposing secrets", async () => {
+    await expect(runRenderDemoSeedWithPolicy(
+      validEnv,
+      () => { throw new Error("postgresql://seed_user:secret_password@unsafe-host"); },
+      () => new FakeDatabase(),
+      now,
+    )).rejects.toMatchObject({ diagnosticCode: "POLICY_REJECTED" });
+
+    const unavailable = new FakeDatabase();
+    unavailable.identity = async () => {
+      const error = Object.assign(new Error("password=secret_password"), { code: "ECONNRESET" });
+      throw error;
+    };
+    await expect(runRenderDemoSeed(validEnv, () => unavailable, now)).rejects.toMatchObject({
+      diagnosticCode: "DATABASE_CONNECTION_FAILED",
+    });
+
+    const fixture = promotionFixtures[0]!;
+    const couponDrift = new FakeDatabase(undefined, {
+      catalog: { categories: [], toppings: [], products: [] },
+      coupons: [{ ...fixture, value: fixture.value + 1, startsAt: new Date("2026-11-01"), expiresAt: new Date("2026-12-01"), activeUsageCount: 0 }],
+    });
+    await expect(runRenderDemoSeed(validEnv, () => couponDrift, now)).rejects.toMatchObject({
+      diagnosticCode: "COUPON_DRIFT",
+    });
+
+    const secret = "postgresql://seed_user:secret_password@internal-host/brewlite_a2";
+    const sensitiveError = new Error(secret);
+    sensitiveError.stack = `stack trace ${secret}`;
+    expect(renderDemoSeedDiagnosticMessage(sensitiveError)).toBe(
+      "Render demo seed failed: SEED_RUNTIME_ERROR",
+    );
+    for (const code of [
+      "POLICY_REJECTED",
+      "DATABASE_CONNECTION_FAILED",
+      "DATABASE_IDENTITY_MISMATCH",
+      "CATALOG_DRIFT",
+      "COUPON_DRIFT",
+      "SEED_RUNTIME_ERROR",
+    ] as const) {
+      const error = new RenderDemoSeedDiagnosticError(code);
+      expect(renderDemoSeedDiagnosticCode(error)).toBe(code);
+      expect(renderDemoSeedDiagnosticMessage(error)).toBe(`Render demo seed failed: ${code}`);
+      expect(renderDemoSeedDiagnosticMessage(error)).not.toContain("secret_password");
+    }
+    expect(renderDemoSeedDiagnosticMessage(sensitiveError)).not.toContain(secret);
+    expect(renderDemoSeedDiagnosticMessage(sensitiveError)).not.toContain("stack trace");
   });
 });
