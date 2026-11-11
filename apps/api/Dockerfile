@@ -11,13 +11,13 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY prisma ./prisma
-COPY prisma7.config.ts tsconfig.json tsconfig.build.json nest-cli.json ./
+COPY prisma7.config.ts tsconfig.json tsconfig.build.json tsconfig.seed.json nest-cli.json ./
 # The .dockerignore excludes any client generated on the Windows host.
 COPY src ./src
 
 # Prisma config requires a URL to parse; generate is offline and does not connect.
 RUN DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build_placeholder?schema=public" npm run db:generate
-RUN npm run build
+RUN npm run build && npm run build:render-seed && npm run verify:render-seed-artifact
 
 # This target intentionally retains Prisma CLI, config, schema, and migrations
 # for the one-shot Docker Compose migration service.
@@ -30,7 +30,7 @@ FROM build AS production-deps
 # npm keeps Prisma CLI as @prisma/client's optional peer, so remove it explicitly.
 RUN npm prune --omit=dev --omit=peer \
     && rm -rf node_modules/prisma \
-    && find dist -type f \( -name '*.d.ts' -o -name '*.js.map' -o -name '*.tsbuildinfo' \) -delete
+    && find dist dist-seed -type f \( -name '*.d.ts' -o -name '*.js.map' -o -name '*.tsbuildinfo' \) -delete
 
 FROM node:26-bookworm-slim AS runtime
 
@@ -45,6 +45,7 @@ RUN apt-get update \
 COPY --from=production-deps --chown=node:node /app/package.json ./package.json
 COPY --from=production-deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=production-deps --chown=node:node /app/dist ./dist
+COPY --from=production-deps --chown=node:node /app/dist-seed ./dist-seed
 
 USER node
 EXPOSE 3001
