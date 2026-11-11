@@ -105,6 +105,48 @@ export type RenderDemoExecutionPolicy = {
   expectedUser?: string;
 };
 
+export type RenderDemoSeedDiagnosticCode =
+  | "POLICY_REJECTED"
+  | "DATABASE_CONNECTION_FAILED"
+  | "DATABASE_IDENTITY_MISMATCH"
+  | "CATALOG_DRIFT"
+  | "COUPON_DRIFT"
+  | "APPLY_COMMITTED_CLEANUP_FAILED"
+  | "SEED_RUNTIME_ERROR";
+
+export class RenderDemoSeedDiagnosticError extends Error {
+  constructor(readonly diagnosticCode: RenderDemoSeedDiagnosticCode) {
+    super(diagnosticCode);
+    this.name = "RenderDemoSeedDiagnosticError";
+  }
+}
+
+function diagnostic(code: RenderDemoSeedDiagnosticCode): RenderDemoSeedDiagnosticError {
+  return new RenderDemoSeedDiagnosticError(code);
+}
+
+function isConnectionError(error: unknown): boolean {
+  if (!error || typeof error !== "object" || !("code" in error)) return false;
+  return ["P1000", "P1001", "P1017", "28000", "28P01", "ECONNREFUSED", "ECONNRESET", "ENOTFOUND", "ETIMEDOUT"].includes(
+    String(error.code),
+  );
+}
+
+export function renderDemoSeedDiagnosticCode(error: unknown): RenderDemoSeedDiagnosticCode {
+  if (error instanceof RenderDemoSeedDiagnosticError) return error.diagnosticCode;
+  if (isConnectionError(error)) return "DATABASE_CONNECTION_FAILED";
+  return "SEED_RUNTIME_ERROR";
+}
+
+/** Safe for cloud logs: it never includes a URL, credential, message, or stack. */
+export function renderDemoSeedDiagnosticMessage(error: unknown): string {
+  const code = renderDemoSeedDiagnosticCode(error);
+  if (code === "APPLY_COMMITTED_CLEANUP_FAILED") {
+    return "Render demo seed apply may have committed; do not retry automatically: APPLY_COMMITTED_CLEANUP_FAILED";
+  }
+  return `Render demo seed failed: ${code}`;
+}
+
 export const RENDER_DEMO_TRANSACTION_OPTIONS = {
   isolationLevel: "Serializable" as const,
   maxWait: 10_000,
@@ -123,8 +165,8 @@ function sameCodes(left: readonly string[], right: readonly string[]): boolean {
   return left.length === right.length && left.every((code) => right.includes(code));
 }
 
-function failDrift(scope: string, key: string): never {
-  throw new Error(`Seed blocked: ${scope} drift for ${key}`);
+function failDrift(scope: "catalog" | "coupon", _key: string): never {
+  throw diagnostic(scope === "coupon" ? "COUPON_DRIFT" : "CATALOG_DRIFT");
 }
 
 function inspectCatalog(catalog: RenderDemoCatalog): RenderDemoSeedCounts {
@@ -135,17 +177,17 @@ function inspectCatalog(catalog: RenderDemoCatalog): RenderDemoSeedCounts {
 
   for (const category of catalog.categories) {
     if (!categories.some((fixture) => fixture.code === category.code)) {
-      failDrift("category", category.code);
+      failDrift("catalog", category.code);
     }
   }
   for (const topping of catalog.toppings) {
     if (!toppings.some((fixture) => fixture.code === topping.code)) {
-      failDrift("topping", topping.code);
+      failDrift("catalog", topping.code);
     }
   }
   for (const product of catalog.products) {
     if (!products.some((fixture) => fixture.id === product.id)) {
-      failDrift("product", product.id);
+      failDrift("catalog", product.id);
     }
   }
 
@@ -155,7 +197,7 @@ function inspectCatalog(catalog: RenderDemoCatalog): RenderDemoSeedCounts {
       counts.categories += 1;
       continue;
     }
-    if (existing.name !== fixture.name || !existing.isActive) failDrift("category", fixture.code);
+    if (existing.name !== fixture.name || !existing.isActive) failDrift("catalog", fixture.code);
   }
   for (const fixture of toppings) {
     const existing = toppingByCode.get(fixture.code);
@@ -169,7 +211,7 @@ function inspectCatalog(catalog: RenderDemoCatalog): RenderDemoSeedCounts {
       existing.price !== BigInt(fixture.price) ||
       !existing.isAvailable
     ) {
-      failDrift("topping", fixture.code);
+      failDrift("catalog", fixture.code);
     }
   }
   for (const fixture of products) {
@@ -189,7 +231,7 @@ function inspectCatalog(catalog: RenderDemoCatalog): RenderDemoSeedCounts {
       existing.isBestseller !== fixture.isBestseller ||
       !sameCodes(existing.toppingCodes, fixture.toppingCodes)
     ) {
-      failDrift("product", fixture.id);
+      failDrift("catalog", fixture.id);
     }
   }
   return counts;
@@ -220,7 +262,7 @@ function assertIdentity(
     !identity.currentUser ||
     (policy.expectedUser !== undefined && identity.currentUser !== policy.expectedUser)
   ) {
-    throw new Error("Seed blocked: connected database identity differs from approved target");
+    throw diagnostic("DATABASE_IDENTITY_MISMATCH");
   }
   // serverAddress is diagnostic only: a Render hostname can legitimately resolve to
   // different IPs, so it must never be treated as the sole security identifier.
@@ -231,7 +273,13 @@ async function inspect(
   now: Date,
   policy: RenderDemoExecutionPolicy,
 ): Promise<RenderDemoSeedCounts> {
-  assertIdentity(await session.identity(), policy);
+  let identity: RenderDemoIdentity;
+  try {
+    identity = await session.identity();
+  } catch (error) {
+    throw diagnostic(renderDemoSeedDiagnosticCode(error));
+  }
+  assertIdentity(identity, policy);
   const counts = inspectCatalog(await session.readCatalog());
   counts.coupons = inspectCoupons(await session.readCoupons(), now);
   return counts;
@@ -288,22 +336,45 @@ export async function runRenderDemoSeedWithPolicy<Env extends Record<string, str
   createDatabase: RenderDemoDatabaseFactory,
   now = new Date(),
 ): Promise<RenderDemoSeedResult> {
-  const policy = validatePolicy(env);
+  let policy: RenderDemoExecutionPolicy;
+  try {
+    policy = validatePolicy(env);
+  } catch {
+    throw diagnostic("POLICY_REJECTED");
+  }
   const connectionString = env.DATABASE_URL;
-  if (!connectionString) throw new Error("Seed blocked: DATABASE_URL is missing");
-  const database = createDatabase(connectionString);
+  if (!connectionString) throw diagnostic("POLICY_REJECTED");
+  let database: RenderDemoDatabase;
+  try {
+    database = createDatabase(connectionString);
+  } catch (error) {
+    throw diagnostic(isConnectionError(error) ? "DATABASE_CONNECTION_FAILED" : "SEED_RUNTIME_ERROR");
+  }
+  let result: RenderDemoSeedResult | undefined;
+  let executionFailure: RenderDemoSeedDiagnosticError | undefined;
   try {
     if (policy.executionMode === "dry-run") {
-      return { mode: "dry-run", status: "dry-run", created: await inspect(database, now, policy) };
+      result = { mode: "dry-run", status: "dry-run", created: await inspect(database, now, policy) };
+    } else {
+      result = {
+        mode: "apply",
+        status: "applied",
+        created: await database.transaction((transaction) => apply(transaction, now, policy)),
+      };
     }
-    return {
-      mode: "apply",
-      status: "applied",
-      created: await database.transaction((transaction) => apply(transaction, now, policy)),
-    };
-  } finally {
-    await database.disconnect();
+  } catch (error) {
+    executionFailure = diagnostic(renderDemoSeedDiagnosticCode(error));
   }
+  try {
+    await database.disconnect();
+  } catch {
+    if (executionFailure) throw executionFailure;
+    if (result?.mode === "apply") throw diagnostic("APPLY_COMMITTED_CLEANUP_FAILED");
+    throw diagnostic("SEED_RUNTIME_ERROR");
+  }
+  if (executionFailure) throw executionFailure;
+  if (!result) throw diagnostic("SEED_RUNTIME_ERROR");
+  return result;
 }
 
 export function runRenderDemoSeed(
