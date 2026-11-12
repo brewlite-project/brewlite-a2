@@ -145,11 +145,18 @@ Chỉ ghi **tên biến và placeholder**, không điền giá trị thật vào
 source, screenshot hoặc PR. `${FRONTEND_ORIGIN}` và `${BACKEND_ORIGIN}` bên dưới
 là ký hiệu tài liệu, không phải biến được ứng dụng tự đọc.
 
+> **Phân biệt snapshot và vận hành hiện tại:** các bảng target-design và evidence
+> lịch sử trong tài liệu này không tự chứng minh cấu hình live. Render PostgreSQL
+> và Render Internal Demo Seed hiện là hạ tầng đã triển khai theo SCRUM-116; trạng
+> thái migration/seed thực tế chỉ được xác nhận bằng runbook và evidence vận hành
+> được che secrets, không suy ra từ snapshot này.
+
 | Nơi quản lý | Biến / cấu hình | Yêu cầu |
 | --- | --- | --- |
 | Vercel project environment | `NEXT_PUBLIC_API_URL` | Public backend HTTPS origin; không phải secret; Next.js đưa `NEXT_PUBLIC_*` vào browser bundle ở build time |
 | Vercel server environment | `BACKEND_INTERNAL_URL` | Backend **public HTTPS** origin dù tên có `INTERNAL`; server-side proxy, không chứa DB credential |
 | Render Web Service environment | `DATABASE_URL` | **Secret**: Internal Database URL từ DB cùng region/workspace; không in URL đầy đủ |
+| Render Internal Prisma TLS | `PRISMA_RENDER_INTERNAL_MODE=render-a2-internal`, `PRISMA_RENDER_INTERNAL_TARGET=brewlite-a2-postgres-internal`, `PRISMA_RENDER_INTERNAL_EXPECTED_HOST`, `PRISMA_RENDER_INTERNAL_EXPECTED_PORT=5432`, `PRISMA_RENDER_INTERNAL_EXPECTED_DATABASE=brewlite_a2`, `PRISMA_RENDER_INTERNAL_EXPECTED_USER` | Chỉ bật adapter Pool TLS Internal sau khi target profile explicit và toàn bộ giá trị exact khớp `DATABASE_URL`; các expected values không phải secret. Profile/host là authorization do operator kiểm soát, không phải cryptographic proof của peer self-signed. Lấy exact values từ Render Dashboard của PostgreSQL đã deploy; không dùng marker này cho local/external DB. |
 | Render Web Service environment | `JWT_SECRET`, `INTERNAL_SECRET`, `VNPAY_HASH_SECRET` | **Secrets riêng biệt**; chỉ backend; không đưa signing/internal keys vào Vercel, browser hoặc CI test logs |
 | Render Web Service environment | `VNPAY_TMN_CODE` | Merchant identifier/config; quản lý server-side, không lưu giá trị merchant thật trong tài liệu |
 | Render Web Service environment | `VNPAY_PAYMENT_URL`, `VNPAY_RETURN_URL`, `VNPAY_QUERYDR_URL`, `VNPAY_QUERYDR_TIMEOUT_MS` | Sandbox HTTPS endpoints; Return trỏ frontend `/payment`; timeout hợp lệ theo config hiện tại |
