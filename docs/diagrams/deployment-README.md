@@ -3,7 +3,7 @@
 Sơ đồ của **A2-T3.2 / SCRUM-108**, thể hiện kiến trúc đã chọn để triển khai thử.
 Trạng thái hiện tại: **TARGET DESIGN, chưa đối chiếu môi trường deploy thực tế**.
 Chi tiết source, đường đi và checklist nghiệm thu:
-[deployment.md](../architecture/deployment.md).
+[deployment.md](../deployment.md).
 
 Đây là hướng dẫn riêng của Deployment Diagram. Dùng tên
 `deployment-README.md` để không cùng thêm/sửa `docs/diagrams/README.md` với
@@ -30,7 +30,7 @@ python docs/diagrams/render_deployment.py --check
 
 `--check` so sánh cả SVG và PDF với bản sinh lại mà không ghi đè. PDF dùng
 metadata cố định để có thể kiểm tra byte-for-byte trong cùng phiên bản ReportLab.
-Script không đọc `.env`, không cần backend/DB, không gọi VNPay và không deploy.
+Script không đọc `.env`, không cần API/DB, không gọi VNPay và không deploy.
 
 Kiểm tra hình từ PDF bằng PyMuPDF (tùy chọn):
 
@@ -83,7 +83,7 @@ Compile bằng toolchain hỗ trợ tiếng Việt đang dùng của báo cáo. 
 - **CI:** GitHub Actions build/test với DB cô lập. CD dự kiến dùng Vercel CLI
   `build` rồi `deploy --prebuilt`; backend chỉ được trigger sau checks.
 - **Production target:** Vercel nhận frontend artifact; Render lấy Git commit,
-  build `backend/Dockerfile` thành runtime image rồi chạy NestJS; PostgreSQL là
+  build `apps/api/Dockerfile` thành runtime image rồi chạy NestJS; PostgreSQL là
   dịch vụ managed riêng trên private network của Render.
 - **Registry:** không chọn registry độc lập để publish image BrewLite. Artifact
   frontend do Vercel quản lý; backend image nằm trong registry private do Render
@@ -92,7 +92,7 @@ Compile bằng toolchain hỗ trợ tiếng Việt đang dùng của báo cáo. 
 
 Chi tiết mapping yêu cầu A2, bằng chứng image/release/rollback còn cần ở Task 5
 và giới hạn của lựa chọn này nằm ở §1.1 và §7.1 của
-[deployment.md](../architecture/deployment.md).
+[deployment.md](../deployment.md).
 
 ## Quy tắc cập nhật và kiểm tra
 

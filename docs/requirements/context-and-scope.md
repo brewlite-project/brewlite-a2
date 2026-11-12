@@ -149,7 +149,7 @@ Thay đổi cần được đưa lên nhánh riêng từ dev có mã SCRUM-99, t
 
 Phiên bản nguồn [S1]–[S4] được cố định tại commit 8b4224a907091529ca954c8b0792406cb8a0d9f2 của repository brewlite-project/brewlite-a2, đọc ngày 08/11/2026. Đây là commit nguồn tài liệu A2; baseline nghiệp vụ A1-final vẫn là 1951dc124c83359556f04adb6ba3f0ee9f22fce4.
 
-[S1] BrewLite Requirements Specification v3.1, cập nhật 30/10/2026. Nguồn tham chiếu chính: docs/BrewLite_Requirements_Specification_v3.1.docx. Bản trong docs/docs_Phase2/ có cùng nội dung tại commit nguồn được chốt bên dưới.
+[S1] BrewLite Requirements Specification v3.1, cập nhật 30/10/2026. Nguồn tham chiếu chính: docs/a1-archive/BrewLite_Requirements_Specification_v3.1.docx. Bản trong docs/a1-archive/docs_Phase2/ có cùng nội dung tại commit nguồn được chốt bên dưới.
 
 [S2] docs/planning/A2_Gap_Analysis.md — DRAFT, 08/11/2026.
 
