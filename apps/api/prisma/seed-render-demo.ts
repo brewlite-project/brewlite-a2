@@ -78,6 +78,8 @@ export interface RenderDemoSession {
   readCatalog(): Promise<RenderDemoCatalog>;
   readCoupons(): Promise<ExistingCoupon[]>;
   tryAcquireSeedLock(): Promise<boolean>;
+  hasCompletedSeed(seedKey: string): Promise<boolean>;
+  markSeedCompleted(seedKey: string): Promise<void>;
   createCategory(category: (typeof categories)[number]): Promise<{ id: string }>;
   createTopping(topping: (typeof toppings)[number]): Promise<{ id: string }>;
   createProduct(
@@ -189,6 +191,8 @@ export const RENDER_DEMO_TRANSACTION_OPTIONS = {
   maxWait: 10_000,
   timeout: 60_000,
 };
+
+const RENDER_DEMO_SEED_KEY = "render-demo-v1";
 
 const emptyCounts = (): RenderDemoSeedCounts => ({
   categories: 0,
@@ -345,6 +349,12 @@ async function apply(
     throw new Error("Seed blocked: another Render demo seed apply is in progress");
   }
   const planned = await inspect(transaction, now, policy);
+  if (await transaction.hasCompletedSeed(RENDER_DEMO_SEED_KEY)) {
+    if (Object.values(planned).some((count) => count !== 0)) {
+      throw new Error("Seed blocked: completion marker is present but expected data is missing");
+    }
+    return planned;
+  }
   const catalog = await transaction.readCatalog();
   const categoryIds = new Map(catalog.categories.map((category) => [category.code, category.id]));
   const toppingIds = new Map(catalog.toppings.map((topping) => [topping.code, topping.id]));
@@ -378,6 +388,7 @@ async function apply(
       await transaction.createCoupon(fixture, now, expiresAt);
     }
   }
+  await transaction.markSeedCompleted(RENDER_DEMO_SEED_KEY);
   return planned;
 }
 
@@ -491,6 +502,22 @@ class PrismaRenderDemoSession implements RenderDemoSession {
     return rows[0]?.acquired === true;
   }
 
+  async hasCompletedSeed(seedKey: string): Promise<boolean> {
+    const rows = await this.prisma.$queryRaw<
+      Array<{ seed_key: string }>
+    >`SELECT seed_key FROM seed_executions WHERE seed_key = ${seedKey}`;
+
+    return rows.length > 0;
+  }
+
+  async markSeedCompleted(seedKey: string): Promise<void> {
+    await this.prisma.$queryRaw`
+      INSERT INTO seed_executions (seed_key)
+      VALUES (${seedKey})
+      RETURNING seed_key
+    `;
+  }
+
   async createCategory(fixture: (typeof categories)[number]): Promise<{ id: string }> {
     return (await this.prisma.category.create({ data: { ...fixture, isActive: true }, select: { id: true } })) as { id: string };
   }
@@ -537,6 +564,8 @@ export function createProductionRenderDemoDatabase(
     readCatalog: () => session.readCatalog(),
     readCoupons: () => session.readCoupons(),
     tryAcquireSeedLock: () => session.tryAcquireSeedLock(),
+    hasCompletedSeed: (seedKey) => session.hasCompletedSeed(seedKey),
+    markSeedCompleted: (seedKey) => session.markSeedCompleted(seedKey),
     createCategory: (fixture) => session.createCategory(fixture),
     createTopping: (fixture) => session.createTopping(fixture),
     createProduct: (fixture, categoryId) => session.createProduct(fixture, categoryId),
@@ -579,6 +608,8 @@ export function createInternalRenderDemoDatabase(
     readCatalog: () => session.readCatalog(),
     readCoupons: () => session.readCoupons(),
     tryAcquireSeedLock: () => session.tryAcquireSeedLock(),
+    hasCompletedSeed: (seedKey) => session.hasCompletedSeed(seedKey),
+    markSeedCompleted: (seedKey) => session.markSeedCompleted(seedKey),
     createCategory: (fixture) => session.createCategory(fixture),
     createTopping: (fixture) => session.createTopping(fixture),
     createProduct: (fixture, categoryId) => session.createProduct(fixture, categoryId),
