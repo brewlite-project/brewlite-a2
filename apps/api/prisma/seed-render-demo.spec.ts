@@ -33,12 +33,19 @@ type Shared = {
   locked: boolean;
   writes: number;
   failProductCreate: boolean;
+  failMarkSeedCompleted?: boolean;
+};
+
+type FakeState = {
+  catalog: RenderDemoCatalog;
+  coupons: ExistingCoupon[];
+  completedSeedKeys: Set<string>;
 };
 
 class FakeSession implements RenderDemoSession {
   constructor(
     protected readonly shared: Shared,
-    public state: { catalog: RenderDemoCatalog; coupons: ExistingCoupon[] },
+    public state: FakeState,
   ) {}
 
   async identity() { return this.shared.identity; }
@@ -48,6 +55,19 @@ class FakeSession implements RenderDemoSession {
     if (this.shared.locked) return false;
     this.shared.locked = true;
     return true;
+  }
+  async hasCompletedSeed(seedKey: string) {
+    return this.state.completedSeedKeys.has(seedKey);
+  }
+  async markSeedCompleted(seedKey: string) {
+    if (this.state.completedSeedKeys.has(seedKey)) {
+      throw new Error("simulated duplicate seed key");
+    }
+    this.shared.writes += 1;
+    this.state.completedSeedKeys.add(seedKey);
+    if (this.shared.failMarkSeedCompleted) {
+      throw new Error("simulated seed marker failure");
+    }
   }
   async createCategory(fixture: (typeof categories)[number]) {
     this.shared.writes += 1;
@@ -101,12 +121,12 @@ class FakeDatabase extends FakeSession implements RenderDemoDatabase {
       writes: 0,
       failProductCreate: false,
     },
-    state: { catalog: RenderDemoCatalog; coupons: ExistingCoupon[] } = {
+    state: Omit<FakeState, "completedSeedKeys"> & { completedSeedKeys?: Set<string> } = {
       catalog: { categories: [], toppings: [], products: [] },
       coupons: [],
     },
   ) {
-    super(shared, state);
+    super(shared, { ...state, completedSeedKeys: state.completedSeedKeys ?? new Set() });
   }
 
   async transaction<T>(work: (transaction: RenderDemoSession) => Promise<T>): Promise<T> {
@@ -123,6 +143,7 @@ class FakeDatabase extends FakeSession implements RenderDemoDatabase {
   async disconnect() { this.disconnected = true; }
   catalog() { return structuredClone(this.state.catalog); }
   coupons() { return structuredClone(this.state.coupons); }
+  completedSeedKeys() { return new Set(this.state.completedSeedKeys); }
   writes() { return this.shared.writes; }
 }
 
@@ -135,6 +156,14 @@ function applyEnv() {
 }
 
 describe("Render demo seed execution", () => {
+  it("FakeDatabase rejects a duplicate completion marker like the PostgreSQL primary key", async () => {
+    const database = new FakeDatabase();
+    await database.markSeedCompleted("render-demo-v1");
+    await expect(database.markSeedCompleted("render-demo-v1")).rejects.toThrow("duplicate seed key");
+    expect(database.completedSeedKeys()).toEqual(new Set(["render-demo-v1"]));
+    expect(database.writes()).toBe(1);
+  });
+
   it("creates Pool from the validated URL with one explicit verify-full TLS configuration", () => {
     let capturedConfig: ReturnType<typeof renderDemoPoolConfig> | undefined;
     createProductionRenderDemoDatabase(validEnv.DATABASE_URL, (config) => {
@@ -204,6 +233,7 @@ describe("Render demo seed execution", () => {
     });
     expect(database.writes()).toBe(0);
     expect(database.transactions).toBe(0);
+    expect(database.completedSeedKeys()).toHaveLength(0);
     expect(database.disconnected).toBe(true);
   });
 
@@ -367,7 +397,7 @@ describe("Render demo seed execution", () => {
     expect(message).not.toContain("secret_password");
   });
 
-  it("is idempotent and preserves existing coupon quota and redemption count", async () => {
+  it("creates one completion marker, is idempotent, and preserves existing coupon quota and redemption count", async () => {
     const fixture = promotionFixtures[0]!;
     const database = new FakeDatabase(undefined, {
       catalog: { categories: [], toppings: [], products: [] },
@@ -375,14 +405,16 @@ describe("Render demo seed execution", () => {
     });
     await runRenderDemoSeed(applyEnv(), () => database, now);
     const writesAfterFirstApply = database.writes();
+    expect(database.completedSeedKeys()).toEqual(new Set(["render-demo-v1"]));
     await runRenderDemoSeed(applyEnv(), () => database, now);
     expect(database.writes()).toBe(writesAfterFirstApply);
+    expect(database.completedSeedKeys()).toEqual(new Set(["render-demo-v1"]));
     expect(database.catalog().products).toHaveLength(9);
     expect(database.coupons()).toHaveLength(5);
     expect(database.coupons().find((coupon) => coupon.code === fixture.code)?.activeUsageCount).toBe(73);
   });
 
-  it("rolls back all staged writes when an apply step fails", async () => {
+  it("rolls back all staged data and the completion marker when an apply step fails", async () => {
     const database = new FakeDatabase({
       identity: { databaseName: "brewlite_a2", currentUser: "seed_user", serverAddress: null },
       locked: false, writes: 0, failProductCreate: true,
@@ -393,6 +425,20 @@ describe("Render demo seed execution", () => {
     expect(database.catalog().categories).toHaveLength(0);
     expect(database.catalog().products).toHaveLength(0);
     expect(database.coupons()).toHaveLength(0);
+    expect(database.completedSeedKeys()).toHaveLength(0);
+  });
+
+  it("rolls back the staged completion marker when marker creation fails", async () => {
+    const database = new FakeDatabase({
+      identity: { databaseName: "brewlite_a2", currentUser: "seed_user", serverAddress: null },
+      locked: false, writes: 0, failProductCreate: false, failMarkSeedCompleted: true,
+    });
+    await expect(runRenderDemoSeed(applyEnv(), () => database, now)).rejects.toMatchObject({
+      diagnosticCode: "SEED_RUNTIME_ERROR",
+    });
+    expect(database.catalog()).toEqual({ categories: [], toppings: [], products: [] });
+    expect(database.coupons()).toHaveLength(0);
+    expect(database.completedSeedKeys()).toHaveLength(0);
   });
 
   it("prevents concurrent apply from double-inserting", async () => {
@@ -405,6 +451,49 @@ describe("Render demo seed execution", () => {
     expect(outcomes.filter((outcome) => outcome.status === "rejected")).toHaveLength(1);
     expect(database.catalog().products).toHaveLength(9);
     expect(database.coupons()).toHaveLength(5);
+    expect(database.completedSeedKeys()).toEqual(new Set(["render-demo-v1"]));
+  });
+
+  it.each([
+    {
+      name: "catalog record missing",
+      remove: (database: FakeDatabase) => { database.state.catalog.products.pop(); },
+    },
+    {
+      name: "coupon missing",
+      remove: (database: FakeDatabase) => { database.state.coupons.pop(); },
+    },
+  ])("fails closed when the completion marker exists but $name", async ({ remove }) => {
+    const database = new FakeDatabase();
+    await runRenderDemoSeed(applyEnv(), () => database, now);
+    remove(database);
+    const writesBeforeRetry = database.writes();
+    await expect(runRenderDemoSeed(applyEnv(), () => database, now)).rejects.toMatchObject({
+      diagnosticCode: "SEED_RUNTIME_ERROR",
+    });
+    expect(database.writes()).toBe(writesBeforeRetry);
+    expect(database.completedSeedKeys()).toEqual(new Set(["render-demo-v1"]));
+  });
+
+  it.each([
+    {
+      name: "catalog drift",
+      mutate: (database: FakeDatabase) => { database.state.catalog.products[0]!.name = "Changed"; },
+      diagnosticCode: "CATALOG_DRIFT",
+    },
+    {
+      name: "coupon drift",
+      mutate: (database: FakeDatabase) => { database.state.coupons[0]!.value += 1; },
+      diagnosticCode: "COUPON_DRIFT",
+    },
+  ])("fails closed when the completion marker exists but $name", async ({ mutate, diagnosticCode }) => {
+    const database = new FakeDatabase();
+    await runRenderDemoSeed(applyEnv(), () => database, now);
+    mutate(database);
+    const writesBeforeRetry = database.writes();
+    await expect(runRenderDemoSeed(applyEnv(), () => database, now)).rejects.toMatchObject({ diagnosticCode });
+    expect(database.writes()).toBe(writesBeforeRetry);
+    expect(database.completedSeedKeys()).toEqual(new Set(["render-demo-v1"]));
   });
 
   it("classifies an identity SQL error as runtime, not a connection failure", async () => {
@@ -436,6 +525,7 @@ describe("Render demo seed execution", () => {
       diagnosticCode: "APPLY_COMMITTED_CLEANUP_FAILED",
     });
     expect(database.catalog().products).toHaveLength(9);
+    expect(database.completedSeedKeys()).toEqual(new Set(["render-demo-v1"]));
     expect(renderDemoSeedDiagnosticMessage(
       new RenderDemoSeedDiagnosticError("APPLY_COMMITTED_CLEANUP_FAILED"),
     )).toContain("do not retry automatically");
