@@ -10,6 +10,102 @@ export type QueryDrAttempt = Readonly<{
 }>;
 export type QueryDrTransport = (url: string, body: Record<string, string>, timeoutMs: number) => Promise<unknown>;
 
+export type QueryDrFailureCategory =
+  | 'DNS_FAILURE'
+  | 'NETWORK_FAILURE'
+  | 'TLS_FAILURE'
+  | 'TIMEOUT'
+  | 'HTTP_FAILURE'
+  | 'INVALID_GATEWAY_RESPONSE'
+  | 'UNVERIFIED_GATEWAY_RESPONSE'
+  | 'UNKNOWN_FAILURE';
+
+export type QueryDrFailureDiagnostic = Readonly<{
+  category: QueryDrFailureCategory;
+  errorName: string;
+  errorCode?: string;
+  durationMs: number;
+  httpStatus?: number;
+}>;
+
+const allowedCodes = new Set([
+  'ABORT_ERR', 'ENOTFOUND', 'EAI_AGAIN', 'ECONNREFUSED', 'ECONNRESET',
+  'ETIMEDOUT', 'EHOSTUNREACH', 'ENETUNREACH', 'UND_ERR_CONNECT_TIMEOUT',
+  'UND_ERR_SOCKET', 'DEPTH_ZERO_SELF_SIGNED_CERT', 'SELF_SIGNED_CERT_IN_CHAIN',
+  'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'CERT_HAS_EXPIRED', 'ERR_TLS_CERT_ALTNAME_INVALID',
+]);
+const allowedNames = new Set([
+  'AbortError', 'Error', 'QueryDrHttpResponseError', 'TimeoutError', 'TypeError',
+]);
+
+export class QueryDrHttpResponseError extends Error {
+  constructor(readonly status: number) {
+    super('VNPay QueryDR HTTP failure');
+    this.name = 'QueryDrHttpResponseError';
+  }
+}
+
+export class QueryDrDiagnosticError extends Error {
+  constructor(readonly diagnostic: QueryDrFailureDiagnostic) {
+    super('VNPay QueryDR request failed');
+    this.name = 'QueryDrDiagnosticError';
+  }
+}
+
+function errorCode(error: unknown): string | undefined {
+  let candidate = error;
+  for (let depth = 0; depth < 3 && candidate && typeof candidate === 'object'; depth += 1) {
+    const code = 'code' in candidate ? String(candidate.code) : undefined;
+    if (code && allowedCodes.has(code)) return code;
+    candidate = 'cause' in candidate ? candidate.cause : undefined;
+  }
+  return undefined;
+}
+
+function safeErrorName(error: unknown): string {
+  const name = error instanceof Error ? error.name : 'Error';
+  return allowedNames.has(name) ? name : 'Error';
+}
+
+function responseFailureCategory(error: unknown): QueryDrFailureCategory | null {
+  if (!(error instanceof Error)) return null;
+  if (/signature|correlation/.test(error.message)) return 'UNVERIFIED_GATEWAY_RESPONSE';
+  if (/^(Invalid|Malformed|Incomplete|VNPay QueryDR request rejected)/.test(error.message))
+    return 'INVALID_GATEWAY_RESPONSE';
+  return null;
+}
+
+/** Returns only allowlisted diagnostic metadata; it never returns an error message. */
+export function queryDrFailureDiagnostic(
+  error: unknown,
+  durationMs = 0,
+): QueryDrFailureDiagnostic {
+  if (error instanceof QueryDrDiagnosticError) return error.diagnostic;
+  const duration = Math.max(0, Math.round(durationMs));
+  if (error instanceof QueryDrHttpResponseError) {
+    return {
+      category: 'HTTP_FAILURE', errorName: error.name, durationMs: duration,
+      httpStatus: error.status,
+    };
+  }
+  const code = errorCode(error);
+  const category =
+    error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')
+      ? 'TIMEOUT'
+      : code === 'ABORT_ERR' || code === 'ETIMEDOUT' || code === 'UND_ERR_CONNECT_TIMEOUT' ? 'TIMEOUT'
+      : code === 'ENOTFOUND' || code === 'EAI_AGAIN' ? 'DNS_FAILURE'
+      : code !== undefined && ['DEPTH_ZERO_SELF_SIGNED_CERT', 'SELF_SIGNED_CERT_IN_CHAIN', 'UNABLE_TO_VERIFY_LEAF_SIGNATURE', 'CERT_HAS_EXPIRED', 'ERR_TLS_CERT_ALTNAME_INVALID'].includes(code)
+        ? 'TLS_FAILURE'
+        : code !== undefined ? 'NETWORK_FAILURE'
+          : responseFailureCategory(error) ?? 'UNKNOWN_FAILURE';
+  return {
+    category,
+    errorName: safeErrorName(error),
+    ...(code ? { errorCode: code } : {}),
+    durationMs: duration,
+  };
+}
+
 const stringField = (record: Record<string, unknown>, name: string, required = true): string | null => {
   const value = record[name];
   if ((value === undefined || value === null) && !required) return '';
@@ -40,11 +136,13 @@ export class VnpayQueryDrClient {
 
   static async fetchTransport(this: void, url: string, body: Record<string, string>, timeoutMs: number): Promise<unknown> {
     const response = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(timeoutMs) });
-    if (!response.ok) throw new Error('VNPay QueryDR HTTP failure');
+    if (!response.ok) throw new QueryDrHttpResponseError(response.status);
     return response.json();
   }
 
   async query(attempt: QueryDrAttempt, requestId: string, ipAddr: string, now: Date): Promise<VerifiedGatewayOutcome> {
+    const startedAt = performance.now();
+    try {
     if (!/^[A-Za-z0-9]{1,32}$/.test(requestId) || !/^[A-Za-z0-9:.]{7,45}$/.test(ipAddr)) throw new Error('Invalid QueryDR request identity');
     if (attempt.vnpTmnCode !== this.config.tmnCode || !/^[A-Za-z0-9_-]{1,100}$/.test(attempt.vnpTxnRef) || !/^\d{14}$/.test(attempt.vnpCreateDate)) throw new Error('Invalid immutable QueryDR correlation');
     const snapshot = attempt.initiationSnapshot as { requestParameters?: Record<string, unknown> } | null;
@@ -57,7 +155,10 @@ export class VnpayQueryDrClient {
       vnp_TxnRef: attempt.vnpTxnRef, vnp_TransactionDate: attempt.vnpCreateDate, vnp_CreateDate: createDate, vnp_IpAddr: ipAddr,
       vnp_OrderInfo: orderInfo, vnp_SecureHash: queryDrSign(signValues, this.config.hashSecret),
     };
-    return this.parseResponse(await this.transport(this.config.queryDrUrl, body, this.config.timeoutMs), attempt, requestId, now);
+      return this.parseResponse(await this.transport(this.config.queryDrUrl, body, this.config.timeoutMs), attempt, requestId, now);
+    } catch (error) {
+      throw new QueryDrDiagnosticError(queryDrFailureDiagnostic(error, performance.now() - startedAt));
+    }
   }
 
   parseResponse(raw: unknown, attempt: QueryDrAttempt, requestId: string, receivedAt: Date): VerifiedGatewayOutcome {
