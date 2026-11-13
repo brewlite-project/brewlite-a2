@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client.js';
+import { createPrismaRuntimeAdapter } from './prisma.connection.js';
 
 @Injectable()
 export class PrismaService
@@ -9,18 +9,9 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
-    const connectionString = process.env.DATABASE_URL;
-
-    if (!connectionString) {
-      throw new Error(
-        'DATABASE_URL is not configured. Set it in apps/api/.env.',
-      );
-    }
-
-    // Prisma's pg adapter serializes DateTime values as UTC without an offset.
-    // Each PostgreSQL connection must interpret/return those values in UTC.
+    const { adapter } = createPrismaRuntimeAdapter(process.env);
     super({
-      adapter: new PrismaPg({ connectionString, options: '-c timezone=UTC' }),
+      adapter,
     });
   }
 
@@ -29,6 +20,8 @@ export class PrismaService
   }
 
   async onModuleDestroy() {
+    // The Render Internal adapter passes disposeExternalPool=true, so this
+    // releases its pg.Pool exactly through Prisma's normal shutdown path.
     await this.$disconnect();
   }
 }

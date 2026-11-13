@@ -8,6 +8,8 @@
   "type": "module",
   "scripts": {
     "build": "nest build",
+    "build:render-seed": "tsc --project tsconfig.seed.json",
+    "verify:render-seed-artifact": "node -e \"const fs=require('node:fs'); if (!fs.existsSync('dist-seed/prisma/seed-render-internal.js')) process.exit(1)\"",
     "deploy": "nest deploy",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -27,6 +29,7 @@
     "db:validate": "prisma validate --config prisma7.config.ts",
     "db:migrate": "prisma migrate deploy --config prisma7.config.ts",
     "db:seed": "prisma db seed --config prisma7.config.ts",
+    "seed:render-internal": "node dist-seed/prisma/seed-render-internal.js",
     "db:seed:promotion": "node --import tsx prisma/run-compose-coupons-host.mjs",
     "db:seed:promotion:manual": "tsx prisma/seed-compose-coupons.ts"
   },
