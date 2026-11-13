@@ -1,5 +1,10 @@
 import { createHmac } from 'node:crypto';
-import { VnpayQueryDrClient } from './vnpay-querydr.client.js';
+import {
+  QueryDrDiagnosticError,
+  QueryDrHttpResponseError,
+  queryDrFailureDiagnostic,
+  VnpayQueryDrClient,
+} from './vnpay-querydr.client.js';
 
 const secret = 'test-only-hmac-secret';
 const config = { tmnCode: 'TMN', hashSecret: secret, queryDrUrl: 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction', timeoutMs: 1000 };
@@ -92,5 +97,83 @@ describe('VnpayQueryDrClient', () => {
       vnp_BankCode: null, vnp_TransactionNo: null, vnp_TransactionType: null,
       vnp_OrderInfo: null,
     }), attempt, 'REQUEST1', new Date())).toThrow('Incomplete QueryDR final outcome');
+  });
+
+  it('wraps AbortSignal timeout with safe duration metadata', async () => {
+    const timeout = new DOMException('The operation was aborted due to timeout', 'TimeoutError');
+    const client = new VnpayQueryDrClient(config, async () => { throw timeout; });
+    await expect(client.query(attempt, 'REQUEST1', '127.0.0.1', new Date())).rejects.toMatchObject({
+      name: 'QueryDrDiagnosticError',
+      diagnostic: { category: 'TIMEOUT', errorName: 'TimeoutError' },
+    });
+  });
+
+  it.each([
+    ['DNS', 'ENOTFOUND', 'DNS_FAILURE'],
+    ['network', 'ECONNREFUSED', 'NETWORK_FAILURE'],
+    ['TLS', 'DEPTH_ZERO_SELF_SIGNED_CERT', 'TLS_FAILURE'],
+  ])('classifies %s transport failures without raw messages', (_name, code, category) => {
+    const cause = Object.assign(new Error('postgresql://user:password@private-host'), { code });
+    const error = Object.assign(new TypeError('fetch failed'), { cause });
+    expect(queryDrFailureDiagnostic(error, 123)).toEqual({
+      category, errorName: 'TypeError', errorCode: code, durationMs: 123,
+    });
+  });
+
+  it.each(['ETIMEDOUT', 'UND_ERR_CONNECT_TIMEOUT'])(
+    'classifies direct network timeout code %s as TIMEOUT while preserving its code',
+    (code) => {
+      const error = Object.assign(new Error('transport timeout'), { code });
+      expect(queryDrFailureDiagnostic(error, 99)).toEqual({
+        category: 'TIMEOUT', errorName: 'Error', errorCode: code, durationMs: 99,
+      });
+    },
+  );
+
+  it.each(['ETIMEDOUT', 'UND_ERR_CONNECT_TIMEOUT'])(
+    'classifies nested network timeout code %s as TIMEOUT while preserving its code',
+    (code) => {
+      const error = Object.assign(new TypeError('fetch failed'), {
+        cause: Object.assign(new Error('transport timeout'), { code }),
+      });
+      expect(queryDrFailureDiagnostic(error, 101)).toEqual({
+        category: 'TIMEOUT', errorName: 'TypeError', errorCode: code, durationMs: 101,
+      });
+    },
+  );
+
+  it('classifies HTTP failures with status only', () => {
+    expect(queryDrFailureDiagnostic(new QueryDrHttpResponseError(503), 44)).toEqual({
+      category: 'HTTP_FAILURE', errorName: 'QueryDrHttpResponseError', durationMs: 44, httpStatus: 503,
+    });
+  });
+
+  it('captures a fetch HTTP status without reading a response body', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 504 });
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      await expect(VnpayQueryDrClient.fetchTransport('https://example.invalid', {}, 1000)).rejects.toMatchObject({
+        name: 'QueryDrHttpResponseError', status: 504,
+      });
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('classifies invalid and unverified gateway responses', async () => {
+    const invalid = new VnpayQueryDrClient(config, async () => ({}));
+    await expect(invalid.query(attempt, 'REQUEST1', '127.0.0.1', new Date())).rejects.toMatchObject({
+      diagnostic: { category: 'INVALID_GATEWAY_RESPONSE' },
+    });
+    expect(queryDrFailureDiagnostic(new Error('Invalid QueryDR signature'), 5)).toMatchObject({
+      category: 'UNVERIFIED_GATEWAY_RESPONSE', durationMs: 5,
+    });
+  });
+
+  it('never serializes sensitive exception text into diagnostics', () => {
+    const sensitive = 'https://sandbox.vnpayment.vn/?vnp_SecureHash=secret&password=database-secret';
+    const diagnostic = queryDrFailureDiagnostic(new Error(sensitive), 7);
+    expect(JSON.stringify(diagnostic)).not.toContain('secret');
+    expect(JSON.stringify(diagnostic)).not.toContain('sandbox.vnpayment.vn');
   });
 });

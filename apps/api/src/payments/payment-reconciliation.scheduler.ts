@@ -4,6 +4,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { VnpayQueryDrService } from './vnpay-querydr.service.js';
+import { queryDrFailureDiagnostic } from './vnpay-querydr.client.js';
 import {
   PAYMENT_RECONCILIATION_OPTIONS,
   type PaymentReconciliationOptions,
@@ -105,6 +106,7 @@ export class PaymentReconciliationScheduler
     );
     if (!claim) return; // Another worker, stale scan or expired horizon.
     let errorCode: string | null = null;
+    const startedAt = performance.now();
     try {
       await this.querydr.reconcileClaimed(
         paymentId, claim.requestId, claim.claimToken, this.options.ipAddr,
@@ -114,14 +116,10 @@ export class PaymentReconciliationScheduler
       // never proof that the customer payment FAILED.
       errorCode = 'QUERYDR_UNVERIFIED_OR_TEMPORARY_FAILURE';
 
-      const message =
-        error instanceof Error
-          ? error.message
-          : 'Unknown QueryDR error';
-
-      this.logger.warn(
-        `QueryDR attempt inconclusive; retain PENDING and cooldown: ${message}`,
-      );
+      this.logger.warn(JSON.stringify({
+        event: 'QUERYDR_ATTEMPT_INCONCLUSIVE',
+        ...queryDrFailureDiagnostic(error, performance.now() - startedAt),
+      }));
     } finally {
       try {
         await this.querydr.releaseClaim(paymentId, claim.claimToken, errorCode);
