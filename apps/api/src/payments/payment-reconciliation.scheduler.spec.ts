@@ -2,6 +2,7 @@ import { Logger } from '@nestjs/common';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import type { VnpayQueryDrService } from './vnpay-querydr.service.js';
+import { QueryDrDiagnosticError } from './vnpay-querydr.client.js';
 import { PaymentReconciliationScheduler } from './payment-reconciliation.scheduler.js';
 import type { PaymentReconciliationOptions } from './payment-reconciliation.config.js';
 
@@ -24,12 +25,13 @@ describe('Payment reconciliation scheduler', () => {
   const querydr = { claim, reconcileClaimed, releaseClaim, markExhausted } as unknown as VnpayQueryDrService;
   let scheduler: PaymentReconciliationScheduler;
   let errorSpy: ReturnType<typeof vi.spyOn>;
+  let warnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.resetAllMocks();
     vi.useFakeTimers();
     errorSpy = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => {});
-    vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => {});
+    warnSpy = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => {});
     query.mockResolvedValueOnce([{ cutoff }]).mockResolvedValue([]);
     claim.mockResolvedValue({ claimToken: 'token', requestId: 'request' });
     reconcileClaimed.mockResolvedValue({ disposition: 'OBSERVED' });
@@ -91,10 +93,32 @@ describe('Payment reconciliation scheduler', () => {
   it('retains PENDING, records sanitized error and schedules cooldown after a timeout', async () => {
     query.mockReset().mockResolvedValueOnce([{ cutoff }])
       .mockResolvedValueOnce([{ id: a, horizonReached: false }]);
-    reconcileClaimed.mockRejectedValue(new Error('raw gateway secret must not be logged'));
+    reconcileClaimed.mockRejectedValue(new QueryDrDiagnosticError({
+      category: 'TIMEOUT', errorName: 'TimeoutError', errorCode: 'ABORT_ERR', durationMs: 10_000,
+    }));
     await scheduler.runOnce();
     expect(releaseClaim).toHaveBeenCalledWith(a, 'token', 'QUERYDR_UNVERIFIED_OR_TEMPORARY_FAILURE');
-    expect(JSON.stringify(errorSpy.mock.calls)).not.toContain('secret');
+    expect(warnSpy).toHaveBeenCalledWith(JSON.stringify({
+      event: 'QUERYDR_ATTEMPT_INCONCLUSIVE',
+      category: 'TIMEOUT', errorName: 'TimeoutError', errorCode: 'ABORT_ERR', durationMs: 10_000,
+    }));
+    expect(JSON.stringify(warnSpy.mock.calls)).not.toContain('secret');
+  });
+  it('never logs a raw QueryDR exception containing signed or credential material', async () => {
+    query.mockReset().mockResolvedValueOnce([{ cutoff }])
+      .mockResolvedValueOnce([{ id: a, horizonReached: false }]);
+    const signedUrl = 'https://sandbox.vnpayment.vn/query?vnp_SecureHash=signed-value';
+    const credential = 'db-password=credential-value';
+    reconcileClaimed.mockRejectedValue(new Error(`${signedUrl}&${credential}`));
+    await scheduler.runOnce();
+    const output = JSON.stringify(warnSpy.mock.calls);
+    expect(output).not.toContain(signedUrl);
+    expect(output).not.toContain('signed-value');
+    expect(output).not.toContain(credential);
+    expect(output).not.toContain('credential-value');
+    expect(JSON.parse(warnSpy.mock.calls[0]?.[0] as string)).toMatchObject({
+      event: 'QUERYDR_ATTEMPT_INCONCLUSIVE', category: 'UNKNOWN_FAILURE', errorName: 'Error',
+    });
   });
   it('does not abort a sweep after an individual payment fails', async () => {
     query.mockReset().mockResolvedValueOnce([{ cutoff }])
