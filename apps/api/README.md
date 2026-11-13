@@ -122,3 +122,36 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## CI/CD Deployment Verification — Assignment 2
+
+BrewLite A2 uses GitHub Actions for continuous integration and
+Render for backend deployment.
+
+### Continuous Integration
+
+The GitHub Actions workflow `.github/workflows/ci.yml`
+runs on pull requests and pushes targeting `dev` and `main`.
+
+Backend quality gates:
+
+- Install dependencies with `npm ci`.
+- Generate the Prisma Client.
+- Run lint checks.
+- Run unit tests.
+- Build the NestJS application.
+
+### Continuous Deployment
+
+The production backend is hosted on Render with:
+
+- Production branch: `main`
+- Root directory: `apps/api`
+- Dockerfile: `apps/api/Dockerfile`
+- Auto-Deploy: `After CI Checks Pass`
+
+A successful GitHub Actions CI run is required before Render
+automatically deploys a new production commit.
+
+Deployment verification evidence will be recorded after
+the automatic deployment has been observed successfully.
