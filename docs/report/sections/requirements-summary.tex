@@ -20,6 +20,7 @@ MUST/SHOULD được lấy từ mức ưu tiên và quy tắc trong nguồn A1. 
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.10\linewidth}>{\raggedright\arraybackslash}p{0.30\linewidth}>{\raggedright\arraybackslash}p{0.16\linewidth}>{\raggedright\arraybackslash}p{0.34\linewidth}}
+\caption{Yêu cầu FR/NFR tiêu biểu}\\
 \hline
 \textbf{ID} & \textbf{Yêu cầu} & \textbf{Ưu tiên / phạm vi} & \textbf{Tiêu chí và đối chiếu} \\ \hline
 \endfirsthead
@@ -29,8 +30,8 @@ FR-01 & Guest đăng ký Customer với email chuẩn hóa, email duy nhất và
 FR-21 & Order chỉ chuyển theo state machine; transition và side effects được xử lý nguyên tử. & MUST; Task 10 & Transition ngoài ma trận bị từ chối; trạng thái terminal không bị ghi đè. V-ORDER/V-PAY; SRS AC-A2-021. \\ \hline
 FR-27 & Các Order đồng thời không được oversell; thiếu stock phải rollback toàn transaction. & MUST; Task 10 & PostgreSQL concurrency test chứng minh không có stock âm hay Order/resource một phần. V-INV; SRS AC-A2-027. \\ \hline
 FR-32 & Idempotency-Key ràng buộc theo user; replay cùng payload không lặp payment attempt hoặc side effect. & MUST; Task 10 & Kiểm thử replay và key đồng thời trên PostgreSQL; payload khác tuân contract. V-PAY; SRS AC-A2-032. \\ \hline
-FR-34 & UI phân biệt pending/unknown, success, failure cuối và kết quả hết hạn; không tin Return URL. & MUST; Phase 2 & API v4 yêu cầu GET payment status nhưng PaymentsController ở A1-final chưa có route tương ứng; đây là gap implementation. V-STATUS; SRS AC-A2-034. \\ \hline
-FR-38 & QueryDR dùng chung finalization; kết quả không rõ không được suy thành FAILED. & MUST; Phase 2 & Automated/synthetic cases kiểm tra state và side effects; QueryDR Sandbox E2E và lost-IPN recovery đang Deferred theo ADR. V-VNP; SRS AC-A2-038. \\ \hline
+FR-34 & UI phân biệt pending/unknown, success, failure cuối và kết quả hết hạn; không tin Return URL. & MUST; Phase 2 & API v4 yêu cầu GET payment status nhưng PaymentsController ở A1-final và source A2 hiện tại chưa có route tương ứng; đây là gap implementation. V-STATUS; SRS AC-A2-034. \\ \hline
+FR-38 & QueryDR dùng chung finalization; kết quả không rõ không được suy thành FAILED. & MUST; Phase 2 & Automated/synthetic cases kiểm tra state và side effects; ADR chỉ hoãn kiểm chứng A1 sang A2; QueryDR Sandbox E2E/lost-IPN A2 còn chưa Verified, không được miễn. V-VNP; SRS AC-A2-038. \\ \hline
 FR-23 & Hủy chủ động bởi Customer được ghi nhận riêng, không đồng nhất với tự hết hạn Order. & SHOULD; Deferred & Auto-expiration và release tài nguyên vẫn thuộc In Scope; không mặc định có Cancel API/UI. V-ORDER; SRS AC-A2-023. \\ \hline
 FR-43 & Coupon preview là yêu cầu riêng với coupon validation lúc tạo Order. & SHOULD; Deferred theo S1/S3/S6 & SCRUM-96 xác nhận implementation decisions cùng request/response/error contract; route/test files có trong A1 nhưng không chứng minh acceptance. Leader cần chốt scope/acceptance A2. V-PROMO; SRS AC-A2-043. \\ \hline
 FR-45 & Loyalty points chỉ cộng đúng một lần khi thanh toán hợp lệ làm Order chuyển PAID. & MUST; Phase 2 & Điều kiện theo provider: VNPay trong grace cần payDate đúng hạn và Order chưa CANCELLED; late/ineligible không hồi sinh/cộng điểm; ZERO\_AMOUNT eligible kết thúc với 0 điểm, không gateway/grace; replay không cộng lặp. SRS AC-A2-045. \\ \hline
@@ -53,15 +54,15 @@ Payment Status là requirement của API v4.0 và frontend có gọi route, như
 NFR-PERF-001 đặt mục tiêu dưới 500 ms cho xử lý nội bộ trên dữ liệu mẫu/Mock. Không suy rộng thành thời gian thanh toán VNPay bất đồng bộ, p95, uptime hoặc cam kết tải. Mỗi NFR quan trọng cần môi trường đo và bằng chứng tương ứng như nêu trong SRS.
 \par
 
-\noindent\textbf{Nguồn được ghim:} [S1] Requirements v3.1; [S3] User Stories/AC Phase 2 v2.3; [S5] Use Case Phase 2 v3.1 PDF; [S6] API Contract v3.0; [S7] API Contract v4.0; [S9] addenda và quyết định liên quan. Tất cả dùng snapshot A1-final commit 1951dc124c83359556f04adb6ba3f0ee9f22fce4; trạng thái và liên kết chi tiết nằm trong SRS. [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/BrewLite_Requirements_Specification_v3.1.docx}{S1}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/docs_Phase2/BrewLite_User_Stories_Acceptance_Criteria_Phase2.docx}{S3}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/docs_Phase2/BrewLite_Use_Case_Specification_v3.1_VNPay_Phase_2\%20.pdf}{S5}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/api/BrewLite_API_Contract_v3.0.md}{S6}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/api/BrewLite_API_Contract_v4.0.md}{S7}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/decisions/ADR-P2-QueryDR-Sandbox-E2E-Deferred.md}{ADR QueryDR}]\par
+\noindent\textbf{Nguồn được ghim:} [S1] Requirements v3.1; [S3] User Stories/AC Phase 2 v2.3; [S5] Use Case Phase 2 v3.1 PDF; [S6] API Contract v3.0; [S7] API Contract v4.0; [S9] addenda và quyết định liên quan. Tất cả dùng snapshot A1-final commit \path{1951dc124c83359556f04adb6ba3f0ee9f22fce4}; trạng thái và liên kết chi tiết nằm trong SRS. [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/BrewLite_Requirements_Specification_v3.1.docx}{S1}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/docs_Phase2/BrewLite_User_Stories_Acceptance_Criteria_Phase2.docx}{S3}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/docs_Phase2/BrewLite_Use_Case_Specification_v3.1_VNPay_Phase_2\%20.pdf}{S5}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/api/BrewLite_API_Contract_v3.0.md}{S6}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/api/BrewLite_API_Contract_v4.0.md}{S7}] [\href{https://github.com/brewlite-project/brewlite-a2/blob/1951dc124c83359556f04adb6ba3f0ee9f22fce4/docs/decisions/ADR-P2-QueryDR-Sandbox-E2E-Deferred.md}{ADR QueryDR}]\par
 
-\noindent Tài liệu đang ở trạng thái DRAFT. Chưa chạy build/test ứng dụng vì thay đổi chỉ gồm tài liệu. Fragment này chưa biên dịch; kiểm chứng bố cục sẽ thực hiện khi tích hợp báo cáo tổng hợp SGU.
+\noindent Tài liệu đang ở trạng thái DRAFT. Chưa chạy build/test ứng dụng vì thay đổi chỉ gồm tài liệu. Ghi chú chưa biên dịch của fragment lúc08/11 là lịch sử; bản tích hợp đã build, kết quả mới tại README báo cáo.
 \par
 
 \subsection{Use Case Diagram tổng quát và kế thừa A1}
 SRS §10 liên kết sơ đồ A1 và bản tổng quát cập nhật gồm 14 UC. Guest, Customer, người vận hành demo và VNPay Sandbox là actor ngoài; Mock, ZERO\_AMOUNT và scheduler là nội bộ. UC-ORD-003 chỉ biểu diễn auto-expiration hỗ trợ, không mở Customer Cancel; UC-PRO-002 giữ trạng thái nguồn và acceptance riêng. Không thêm UI Admin/Barista hoặc nghiệp vụ mới.
 \par
-\noindent\href{../../requirements/diagrams/use-case-overview.svg}{Use Case Diagram (SVG)}; \href{../../requirements/diagrams/use-case-overview.puml}{Nguồn PlantUML}. Đường dẫn cần giữ tương đối với fragment này khi tích hợp hoặc điều chỉnh theo vị trí báo cáo chính.
+\noindent\href{https://github.com/brewlite-project/brewlite-a2/blob/6ee4199acaab709471144295adc98ac34e9f11c3/docs/requirements/diagrams/use-case-overview.svg}{Use Case Diagram (SVG)}; \href{https://github.com/brewlite-project/brewlite-a2/blob/6ee4199acaab709471144295adc98ac34e9f11c3/docs/requirements/diagrams/use-case-overview.puml}{Nguồn PlantUML}. Liên kết dùng snapshot nguồn cố định; các sơ đồ checkout được chèn trực tiếp ở chương tiếp theo.
 \par
 
 \subsection{CI bắt buộc trong A2}
@@ -74,6 +75,7 @@ Các dòng A2-OPS là bảng truy vết bổ sung cho nghĩa vụ bàn giao A2 t
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.17\linewidth}>{\raggedright\arraybackslash}p{0.25\linewidth}>{\raggedright\arraybackslash}p{0.44\linewidth}}
+\caption{Yêu cầu vận hành A2 và tiêu chí}\\
 \hline
 \textbf{ID / ưu tiên} & \textbf{Task / liên kết} & \textbf{Tiêu chí tiêu biểu} \\ \hline
 \endfirsthead
@@ -88,5 +90,21 @@ A2-OPS-06 / MUST: Production smoke test & Task 5 QA/deployment; FR-08/19/22/30/3
 A2-OPS-07 / MUST: Rollback và runbook & Task 3 chiến lược; Task 5 release/rollback; NFR-10/16/32/40/41; S11 Task 5 & AC-OPS-07: Given release lỗi, When thực hiện runbook rollback đã duyệt, Then có thể quay về artifact/version trước tương thích dữ liệu và xác minh lại health/smoke; ghi trigger, người thực hiện, version và kết quả. Migration có giới hạn/chiến lược tương thích rõ, không giả định có thể đảo DB phá hủy tự động. \\ \hline
 \end{longtable}
 \endgroup
-Các dòng trên là yêu cầu/bằng chứng cần thu, chưa PASS. Rate limit NFR-08 giữ SHOULD; threshold và rate-window chưa chốt. Commit b542ee4 trong SRS là nền lịch sử khi bắt đầu soạn, không phải HEAD của PR. LaTeX chưa biên dịch; bố cục kiểm chứng khi tích hợp báo cáo.
+Các dòng trên là yêu cầu/bằng chứng cần thu, chưa PASS. Rate limit NFR-08 giữ SHOULD; threshold và rate-window chưa chốt. Commit b542ee4 trong SRS là nền lịch sử khi bắt đầu soạn, không phải HEAD của PR. Trạng thái build của bản tích hợp được cập nhật tại README báo cáo, không phải trạng thái acceptance các requirement.
 \par
+
+
+\subsection{User stories và tiêu chí kiểm chứng toàn luồng}
+SRS kế thừa14 UC,43 stories Phase1 và49 stories tổng cộng khi có6 US-VNP;
+253 AC của nguồn stories không đồng nhất với97 dòng FR/NFR hoặc8 AC delivery.
+Theo góc nhìn Customer, US-CAT/US-CART nối menu--tùy chọn--giỏ; US-ORD nối tạo
+đơn/lịch sử; US-PAY/US-VNP nối thanh toán/trạng thái; US-PRO nối coupon/điểm.
+Tên/ID chi tiết giữ catalog nguồn, không tạo story mới cho NFR.
+
+Một tiêu chí có thể kiểm chứng phải ghi input, expected outcome và môi trường:
+ví dụ FR-27 cần request cạnh tranh trên PostgreSQL chứng minh không oversell;
+FR-32 cần replay cùng key/payload không lặp side effect; FR-34 cần UI phân
+biệt unknown và terminal outcome theo server. Response thành công một lần
+không thay các case lỗi, ownership hoặc duplicate. Mapping cụ thể US/UC và
+test inventory nằm ở matrix; quyết định Approved và kết quả Verified phải
+đọc riêng theo nguồn evidence.

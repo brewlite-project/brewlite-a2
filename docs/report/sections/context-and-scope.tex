@@ -34,6 +34,7 @@ Bài toán là duy trì thông tin món, cấu hình, giá và kết quả đơn
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.20\linewidth}>{\raggedright\arraybackslash}p{0.43\linewidth}>{\raggedright\arraybackslash}p{0.25\linewidth}}
+\caption{Stakeholder và nhu cầu}\\
 \hline
 \textbf{Stakeholder} & \textbf{Vai trò và nhu cầu} & \textbf{Giới hạn} \\ \hline
 \endfirsthead
@@ -56,6 +57,7 @@ Guest và Customer là actor sử dụng web chính; VNPay Sandbox là actor h�
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.68\linewidth}}
+\caption{Mục tiêu và kết quả mong đợi}\\
 \hline
 \textbf{Mục tiêu} & \textbf{Kết quả mong muốn trong baseline} \\ \hline
 \endfirsthead
@@ -93,6 +95,7 @@ MVP và phần mở rộng dưới đây đều nằm trong baseline A1-final đ
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.20\linewidth}>{\raggedright\arraybackslash}p{0.43\linewidth}>{\raggedright\arraybackslash}p{0.25\linewidth}}
+\caption{Phạm vi MVP kế thừa}\\
 \hline
 \textbf{Nhóm} & \textbf{Nội dung trong phạm vi MVP} & \textbf{Nguồn} \\ \hline
 \endfirsthead
@@ -112,6 +115,7 @@ Kiểm chứng và bàn giao kế thừa & Kiểm thử, Docker Compose, README,
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.20\linewidth}>{\raggedright\arraybackslash}p{0.43\linewidth}>{\raggedright\arraybackslash}p{0.25\linewidth}}
+\caption{Phạm vi mở rộng Phase2}\\
 \hline
 \textbf{Nhóm} & \textbf{Nội dung mở rộng kế thừa} & \textbf{Nguồn} \\ \hline
 \endfirsthead
@@ -133,6 +137,7 @@ Các bảng xác định phạm vi yêu cầu, không xác nhận mức hoàn th
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.68\linewidth}}
+\caption{Nội dung ngoài phạm vi}\\
 \hline
 \textbf{Nội dung} & \textbf{Ranh giới áp dụng} \\ \hline
 \endfirsthead
@@ -151,6 +156,7 @@ ERP/POS và quản lý nguyên liệu đầy đủ & Tồn kho chỉ phục vụ
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.68\linewidth}}
+\caption{Chức năng Deferred}\\
 \hline
 \textbf{Nội dung} & \textbf{Giới hạn} \\ \hline
 \endfirsthead
@@ -175,6 +181,7 @@ A1 từng defer deployment chính thức và CI/CD nâng cao; không được su
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.20\linewidth}>{\raggedright\arraybackslash}p{0.43\linewidth}>{\raggedright\arraybackslash}p{0.25\linewidth}}
+\caption{Giả định và ràng buộc}\\
 \hline
 \textbf{Mã / Loại} & \textbf{Nội dung} & \textbf{Nguồn} \\ \hline
 \endfirsthead
@@ -193,6 +200,7 @@ C-04 -- Ràng buộc bằng chứng & Tài liệu phải phân biệt yêu cầu
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.68\linewidth}}
+\caption{Rủi ro và giới hạn kiểm chứng}\\
 \hline
 \textbf{Rủi ro / giới hạn} & \textbf{Cách thể hiện và xử lý trong Task 1.1} \\ \hline
 \endfirsthead
@@ -226,7 +234,7 @@ Thay đổi cần được đưa lên nhánh riêng từ dev có mã SCRUM-99, t
 
 \subsection{Tài liệu tham chiếu}
 
-Phiên bản nguồn [S1]--[S4] được cố định tại commit 8b4224a907091529ca954c8b0792406cb8a0d9f2 của repository brewlite-project/brewlite-a2, đọc ngày 08/11/2026. Đây là commit nguồn tài liệu A2; baseline nghiệp vụ A1-final vẫn là 1951dc124c83359556f04adb6ba3f0ee9f22fce4.
+Phiên bản nguồn [S1]--[S4] được cố định tại commit \path{8b4224a907091529ca954c8b0792406cb8a0d9f2} của repository \path{brewlite-project/brewlite-a2}, đọc ngày 08/11/2026. Đây là commit nguồn tài liệu A2; baseline nghiệp vụ A1-final vẫn là \path{1951dc124c83359556f04adb6ba3f0ee9f22fce4}.
 \par
 
 [S1] BrewLite Requirements Specification v3.1, cập nhật 30/10/2026. Nguồn tham chiếu chính: docs/BrewLite\_Requirements\_Specification\_v3.1.docx. Bản trong docs/docs\_Phase2/ có cùng nội dung tại commit nguồn được chốt bên dưới.

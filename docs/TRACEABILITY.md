@@ -1,6 +1,10 @@
 # BrewLite A2 — Repository Traceability Matrix
 
-**Task hiện tại:** [SCRUM-111](https://nguyenkhang03012006.atlassian.net/browse/SCRUM-111) / A2-T4.2 — Repository Documentation & Traceability
+> **Trạng thái SCRUM-117 (13/11/2026):** HEAD `91e6f99bfd02353616b2e481fe613b7ea91118af`, origin/dev `0e43bcb80f64d6a5fa558cd80f71a199029535d0`, branch SCRUM-117-production-release-delivery tại workspace chính. App/config trùng dev; chỉ 10 docs là delta task. PR17 open, draft=false, remote head 3543a55; cập nhật local chưa stage/push. §1–7 phía dưới là lịch sử theo SHA/ngày riêng; xem §8 cho hiện trạng.
+
+
+
+**Task của baseline lịch sử:** [SCRUM-111](https://nguyenkhang03012006.atlassian.net/browse/SCRUM-111) / A2-T4.2 — Repository Documentation & Traceability
 
 **Repository:** [`brewlite-a2`](https://github.com/brewlite-project/brewlite-a2)
 
@@ -108,3 +112,89 @@ Các nhãn thuộc những trục khác nhau; không ghép chúng thành một t
 - Commit: dùng full SHA URL `https://github.com/brewlite-project/brewlite-a2/commit/<40-char-sha>`; không chỉ lưu short SHA nếu có thể lấy full SHA.
 - **Merge commit** là commit merge PR (thường có hai parent); **source branch tip** trong bảng là parent thứ hai được ghi trong merge history. Đây là hai đối tượng khác nhau, không thay thế lẫn nhau.
 - Khi PR được cập nhật/merge, cập nhật trạng thái và SHA dựa trên GitHub/Git history mới; không giữ `Pending` hoặc branch HEAD cũ như sự thật hiện tại.
+
+## 6. Delivery snapshot SCRUM-117 / A2-T5.4
+
+Ngày kiểm tra 10/11/2026, môi trường Windows repository + GitHub read-only.
+SHA source `7dfc7ca996c2eb6190a5ec3e7812f70d441a61cb`; branch tài liệu
+`SCRUM-117-production-release-delivery` chưa commit. Bảng §1 là snapshot lịch sử;
+trạng thái thực của #14 đã thay đổi như dưới đây.
+
+| Task / phạm vi | Artifact chuẩn | PR / merge commit | Mức chứng minh |
+|---|---|---|---|
+| SCRUM-111 / T4.2 | [docs README](README.md), ma trận này | [#14](https://github.com/brewlite-project/brewlite-a2/pull/14), `34cbbc088117d7a4908d07a66cfbd03b0c905dea`; source tip `38e3b842e22319cba1c24d716c50adb1056b0019` | **Merged**, xác minh bằng Git parents; không tự đổi trạng thái phê duyệt tài liệu |
+| SCRUM-112 / T4.3 | [MVP report](A2_TestReport/MVP_Sprint1_Verification_Report.md), [ảnh](A2_TestReport/evidence/) | [#15](https://github.com/brewlite-project/brewlite-a2/pull/15), `7dfc7ca996c2eb6190a5ec3e7812f70d441a61cb`; source tip `e942cbe9be479e53ba76f8c3bf99e3e489db93f6` | Merged; test report kế thừa chạy source 34cbbc0, không production và không rerun SCRUM-117 |
+| SCRUM-114/115/116 | Chờ PR, tests/migration/CD/deploy evidence | Không trả kết quả khi search PR theo key tại lần kiểm tra | **NOT VERIFIED**, không suy Jira Done hoặc work ngoài repo; assignee chưa được xác nhận |
+| SCRUM-117 / T5.4 | [README A2](../README.md), [deployment runbook](deployment.md#11-runbook-scrum-117--migration-seed-và-rollback), [readiness/evidence/demo/checklist](delivery/SCRUM-117-delivery.md), [release notes/PR draft](delivery/release-notes-A2.md) | Chưa PR/commit/merge | Hồ sơ nháp chờ review; runtime/release/acceptance còn chặn |
+| SCRUM-117 report | [main.tex](report/main.tex), [delivery section](report/sections/deployment-release-delivery.tex), [build guide](report/README.md) | Chưa PR/commit/merge | Tích hợp fragments nguồn; chưa compile/visual QA, chưa report PDF cuối |
+
+Nguồn từng tiêu chí, evidence commit/environment/time/method/result và đầu vào
+còn thiếu ở [delivery §2–3](delivery/SCRUM-117-delivery.md#2-readiness-theo-acceptance-criteria).
+Release/tag → source SHA → FE → BE → CI/CD → smoke ở
+[delivery §4](delivery/SCRUM-117-delivery.md#4-releasetag--source--deployments--runs--smoke).
+**8 AC SCRUM-117 đã được người dùng cung cấp và xác nhận**, là căn cứ readiness.
+Lượt tiếp tục đã đọc [đề A2 v1.0](https://drive.google.com/file/d/1CYVsexpTXZ6Uyg2FHMRE8lnJHSPkYQmi/view)
+qua Drive; checklist §9.1 đã được ánh xạ trong delivery §7. Nguồn lịch sử nói chưa
+tìm thấy đề chỉ đúng thời điểm đó. [Requirement matrix](traceability-matrix.md)
+mới bổ sung theo path đề §8.1: 48 FR + 49 NFR, giữ SRS IDs và gap/priority;
+chỉ kiểm chứng mapping/file inventory, không runtime PASS hay approval.
+Rollback rehearsal hiện khuyến nghị, chưa thấy nguồn áp dụng bắt buộc. Phạm vi
+payment-status/QueryDR giữ trạng thái cần xác nhận theo bảng nguồn/tác động ở
+delivery §3, không tự miễn A2 hay mặc định chặn toàn bộ release.
+
+Đã thu thêm [push CI 42782530478](https://github.com/brewlite-project/brewlite-a2/actions/runs/42782530478)
+success đúng SHA 7dfc7ca (10/11/2026, 08:25:31Z–08:27:13Z), API CI/Web CI;
+[PR CI 42780158363](https://github.com/brewlite-project/brewlite-a2/actions/runs/42780158363)
+success SHA e942cbe (08:07:17Z–08:08:49Z). CI unit/build khác runtime report
+source 34cbbc0 và không chứng minh CD, production hoặc Sandbox E2E.
+
+Lượt tiếp tục cũng thu [CI failure 42626286395](https://github.com/brewlite-project/brewlite-a2/actions/runs/42626286395)
+ở SHA 779dacd: Web lint failure, unit/build skipped; [CI success 42629605254](https://github.com/brewlite-project/brewlite-a2/actions/runs/42629605254)
+ở SHA 5472f03. Đủ ghi nhận pipeline phát hiện lỗi/phục hồi theo đề §6.4; chưa có
+bằng chứng branch protection chặn merge. Không có PR SCRUM-117 trong kết quả search
+15 PR hiện tại; 9 file đầu vào đang staged ở máy nhưng chưa commit/push, matrix mới
+chưa stage. Staged không đồng nghĩa published trên repository remote.
+
+## 7. Historical audit: đối chiếu remote dev mới 5021743 trước khi cập nhật checkout
+
+Lần fetch ngày 10/11/2026 ghi nhận branch task khi đó ở `7dfc7ca`; evidence §1–6 giữ SHA/môi trường lịch sử. Snapshot checkout ngày 11/11 đã ở baseline `5021743e99d73c2ce795df72ee5aaa90b04bb0da`; hiện trạng 13/11 xem §8.
+Evidence rows below keep their historical SHA, environment and CI result; current checkout is the branch/SHA recorded at the top.
+
+| Nguồn mới | SHA / evidence | Kết luận đúng phạm vi |
+|---|---|---|
+| [PR #16 / SCRUM-116](https://github.com/brewlite-project/brewlite-a2/pull/16) | Head `e8b1498ab0fe70a1bacd0f2b221492c46796643f`, merge `5021743e99d73c2ce795df72ee5aaa90b04bb0da`; review APPROVED 2026-11-10T15:37:54Z | Merged phần Next/proxy, không overall nghiệm thu SCRUM-116; PR ghi CD/Render/Vercel/smoke là follow-up |
+| [PR CI 42845148086](https://github.com/brewlite-project/brewlite-a2/actions/runs/42845148086) | e8b1498, pull_request; 15:31:04Z–15:32:49Z, success | Lint/unit/build, không Sandbox/production |
+| [Push CI 42846397766](https://github.com/brewlite-project/brewlite-a2/actions/runs/42846397766) | 5021743, push/dev; 15:38:07Z–15:39:50Z, success | CI đúng merge source, không CD/deploy |
+
+Chỉ ba file `apps/web/package.json`, `package-lock.json`, proxy Route Handler đổi.
+Không file nào trùng phạm vi 10 docs SCRUM-117; không thay requirement/test/API
+mapping. [Delivery §12](delivery/SCRUM-117-delivery.md#12-đối-chiếu-dev-mới-5021743-chưa-tích-hợp)
+ghi chi tiết gaps, AC và lịch sử worktree sync; PR body dự kiến từ branch SCRUM-117-production-release-delivery vào dev.
+
+## 8. SCRUM-117 hiện hành — audit 13/11/2026
+
+| Task/phạm vi | PR / merge SHA | Trạng thái và giới hạn |
+|---|---|---|
+| SCRUM-116 seed demo Render | [#18](https://github.com/brewlite-project/brewlite-a2/pull/18) 6e004d764ca9027290f100c0f010d7e5c33824ac; [#19](https://github.com/brewlite-project/brewlite-a2/pull/19) 63b9195c64b8f4c58c674bbe0ecad5eb8d8d55d0; [#20](https://github.com/brewlite-project/brewlite-a2/pull/20) f674897d7f9c02c537fcc84828d73f54e3a9bfbe; [#21](https://github.com/brewlite-project/brewlite-a2/pull/21) 3d412b45cf53a282e5594994b343402e14826f55 | Merged, có trong checkout: cloud seed/policy/artifact, diagnostics/catalog fixture; không tự chứng minh runtime |
+| SCRUM-116 one-shot guard/TLS | [#22](https://github.com/brewlite-project/brewlite-a2/pull/22) af31196125e93243b2b89a02b33134a764eeddc9; [#23](https://github.com/brewlite-project/brewlite-a2/pull/23) 95906b56c1a2842eb04cdbd7bf60a267ef98fbf9 | Migration thứ 10/marker, tests và Internal Prisma TLS profile. Không suy DB external policy |
+| Production promotion liên quan 114/115/116, không tự gán nghiệm thu | [#24](https://github.com/brewlite-project/brewlite-a2/pull/24) 1b394f1dae75fd0a11c1b1b3f4390a588dedf18f; [#26](https://github.com/brewlite-project/brewlite-a2/pull/26) 03668e36b85a9958d5a6e1cd2b468295fdb0fb2d | #24 báo 10 migrations/seed/catalog; #26 báo Sandbox payment PAID/SUCCESS/+10 tại 2216b7a, có manual reconciliation còn mở. Không có report riêng SCRUM114/115, IPN/QueryDR chưa chứng minh |
+| QueryDR diagnostics | [#25](https://github.com/brewlite-project/brewlite-a2/pull/25) 2216b7a246b21491cf81cd2f2196f907c0aa7a98 | Diagnostics/tests, body báo 479 PASS và 6 PostgreSQL opt-in skipped; không sửa timeout |
+| CD configuration documentation | [#27](https://github.com/brewlite-project/brewlite-a2/pull/27) 0e43bcb80f64d6a5fa558cd80f71a199029535d0 | Chỉ apps/api/README.md, main/Render/After CI Checks Pass; chưa observed CD event. CI 43392423041 success |
+| main promotion | [#28](https://github.com/brewlite-project/brewlite-a2/pull/28) 02452f228712c3501c8d27f0f1ae737ad206785d | CI 43394783298 và Vercel status success; backend alignment/domain alias chưa bind, chưa A2 release/tag |
+| SCRUM-117 / A2-T5.4 | [#17](https://github.com/brewlite-project/brewlite-a2/pull/17), head remote 3543a55d4fed63cd343f5da59d28500f124490be | Open thường, chưa review/acceptance; local HEAD 91e6f99 đã gồm dev mới. 10 docs; body cập nhật chuẩn bị, chưa push/update PR |
+
+Ngày/giờ gốc và mapping CI/deploy/smoke ở [delivery §4/13](delivery/SCRUM-117-delivery.md#13-audit-hiện-hành-ngày-13112026). Không thay SHA evidence SCRUM112/A1 hoặc nâng implementation thành acceptance. Chỉ phần tài liệu có thể review; 8 AC release còn NOT VERIFIED toàn AC.
+
+## Cập nhật evidence và PDF ngày14/11/2026
+
+**Cập nhật tiếp 14/11/2026:** HEAD91e6f99/dev0e43bcb giữ nguyên, 10 docs unstaged đầu vào được bảo toàn. Backend https://brewlite-a2-api-hntn.onrender.com/ có ảnh Render Auto-Deploy Live02452f2 (fullSHA02452f228712c3501c8d27f0f1ae737ad206785d), deployed field13/11/2026 08:39:19Z. GET mới / và /products200 lúc16:24:59Z ngày13/11, catalog9 items; GET không xuất processSHA. DB Free18/Singapore/1GB/Available, expiry10/12/2026; external3 /32 restricted, chưa private-only. Bỏ Edge/Computer Use theo yêu cầu; Người dùng đính chính ngày 14/11/2026: Leader chưa kiểm tra/nghiệm thu SCRUM-117. Evidence và các giới hạn tại dossier §14.
+
+[PDF báo cáo](report/output/main.pdf), [build/QA](report/README.md#kết-quả-build-và-qa-ngày-14112026), [dossier §14](delivery/SCRUM-117-delivery.md#14-evidence-render-backup-và-pdf--cập-nhật-14112026). AC2 VERIFIED snapshot HTTP/liveness/catalog; AC3 PARTIAL vì external còn3 /32 và Internal app usage chưa xác nhận. Requirement mapping không tự nâng thành acceptance; payment-status/QueryDR và manual reconciliation giữ mở.
+
+
+## Báo cáo toàn đồ án A1 đến A2 — cập nhật14/11
+
+Bản tích hợp mới bổ sung dữ liệu/API/hiện thực, chiến lược test, Scrum theo mốc PR và đánh giá; giữ các section yêu cầu/sơ đồ có sẵn, chuyển8 AC/ảnh production sang phụ lục. [Nội dung đề → report](report/README.md#đối-chiếu-báo-cáo-toàn-đồ-án-với-đề-a2-v10); [baseline/evidence mới](delivery/SCRUM-117-delivery.md#15-tổng-hợp-toàn-đồ-án--baseline-mới-ngày14112026). HEAD/PR17 6ee4199, app dev0e43bcb; CI43543439775 là cho head đã commit, không cho thay đổi mới. Backend14/11 / và/products200; FEproxy timeout20s rồi retry200, không browser smoke. Leader chưa nghiệm thu.
+
+
+Báo cáo/PDF đã tích hợp snapshot kế thừa audit§16 (14/11 10:31 UTC), giữ timeout trước và phân biệt HTTP với browser/DB/SHA verification; không nâng8AC. [PDF metadata và QA mới](report/README.md#pdf-tích-hợp-audit16); [nhật ký tích hợp](delivery/SCRUM-117-delivery.md#17-tích-hợp-audit16-vào-báo-cáo-và-pdf). CI6ee4199 chỉ cho bản đã commit.

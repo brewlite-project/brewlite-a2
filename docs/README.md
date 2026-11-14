@@ -2,6 +2,12 @@
 
 Trung tâm điều hướng tài liệu và tạo phẩm của đồ án **BrewLite Assignment 2**. Các đường dẫn trong file này được viết tương đối từ thư mục `docs/`.
 
+**Baseline mới14/11/2026:** HEAD/PR17 `6ee4199acaab709471144295adc98ac34e9f11c3`, branch SCRUM-117-production-release-delivery, base dev0e43bcb; fetch dev/main không đổi. CI43543439775 API/Web success cho head đã commit; bản tổng hợp mới còn unstaged. PR17 open/draft=false/reviews[], title/body chưa cập nhật sau lỗi403 trước đó. Leader chưa review/nghiệm thu. Các SHA91e6f99/3543a55 và CI/checksum cũ là lịch sử.
+
+[Readiness/evidence/demo/checklist](delivery/SCRUM-117-delivery.md), [release notes và body cập nhật PR17](delivery/release-notes-A2.md), [runbook migration/seed/rollback](deployment.md#11-runbook-scrum-117--migration-seed-và-rollback). Source mới #18–23/#25/#27 đã có trong checkout; CI không thay CD. Browser smoke NOT VERIFIED do công cụ; FE URL đã có và HTTP evidence ghi ở delivery §13.
+
+Report [main.tex](report/main.tex) kế thừa roster/nền tảng A1 có nguồn, bổ sung triển khai/kiểm thử/vận hành A2; compiler **pdfLaTeX + VnTeX**. [Build local/Overleaf](report/README.md); PDF tổng hợp đã build/render, xem README báo cáo, không upload dịch vụ ngoài.
+
 ## 1. Bản đồ tài liệu
 
 | Khu vực | Nội dung | Điểm vào |
@@ -15,9 +21,12 @@ Trung tâm điều hướng tài liệu và tạo phẩm của đồ án **BrewL
 | Architecture | Tổng quan kiến trúc và ADR 001–005 | [`architecture/architecture.md`](architecture/architecture.md), [`architecture/adr/`](architecture/adr/) |
 | Deployment | Mô tả triển khai Vercel/Render của [SCRUM-108](https://nguyenkhang03012006.atlassian.net/browse/SCRUM-108) | [`deployment.md`](deployment.md) |
 | CI | Hướng dẫn và thông tin quality gates | [`ci/README.md`](ci/README.md) |
-| Report sources | Các fragment LaTeX theo section, asset PDF và file kiểm tra domain class | [`report/sections/`](report/sections/), [`report/assets/`](report/assets/), [`report/domain-class-check.tex`](report/domain-class-check.tex) |
+| Report sources | Entrypoint tổng hợp nháp, section fragments, asset PDF và domain fixture | [`report/main.tex`](report/main.tex), [`report/README.md`](report/README.md), [`report/sections/`](report/sections/), [`report/assets/`](report/assets/), [`report/domain-class-check.tex`](report/domain-class-check.tex) |
+| Delivery / release | Readiness, mapping release/deploy/run/smoke, demo/Scrum agenda và checklist tạm | [`delivery/SCRUM-117-delivery.md`](delivery/SCRUM-117-delivery.md), [`delivery/release-notes-A2.md`](delivery/release-notes-A2.md) |
+| MVP evidence | Báo cáo local Sprint 1 kế thừa, không production smoke | [`A2_TestReport/MVP_Sprint1_Verification_Report.md`](A2_TestReport/MVP_Sprint1_Verification_Report.md) |
 | A1 archive | Snapshot tài liệu kế thừa từ Assignment 1; xem provenance để biết nguồn gốc | [`a1-archive/PROVENANCE.md`](a1-archive/PROVENANCE.md) |
-| Traceability | Ma trận nối Planning, Task 1–4.1, Jira, PR, commit và nguồn nghiệp vụ | [`TRACEABILITY.md`](TRACEABILITY.md) |
+| Traceability | Ma trận Planning/Task 1–4 và snapshot delivery Task 5.4, Jira, PR, commit, nguồn và evidence | [`TRACEABILITY.md`](TRACEABILITY.md) |
+| Requirement traceability | 48 FR + 49 NFR từ SRS → US/UC → design → code/API → test inventory, theo đề §8.1 | [`traceability-matrix.md`](traceability-matrix.md) |
 
 ## 2. Vị trí artifact sau [SCRUM-110](https://nguyenkhang03012006.atlassian.net/browse/SCRUM-110)
 
@@ -37,7 +46,11 @@ Tree được kiểm tra có các fragment sau:
 - Report support: `report/domain-class-check.tex`.
 - Diagram fragments: `diagrams/deployment-figure.tex` và `diagrams/domain-class-figure.tex`.
 
-**Không có `docs/report/main.tex` trong tree được kiểm tra.** Vì vậy, không mô tả `main.tex` là entrypoint hiện hữu và không tự suy ra một file build entrypoint khác. Khi bổ sung entrypoint LaTeX, cần thêm file nguồn cùng lệnh build/hướng dẫn tương ứng rồi cập nhật mục này.
+**SCRUM-117 đã bổ sung `report/main.tex` làm entrypoint nháp**, tái sử dụng các
+fragments trên cùng `report/sections/deployment-release-delivery.tex`. Chạy build
+từ repository root theo [`report/README.md`](report/README.md). Chưa compile PDF,
+chưa visual QA và chưa đủ đầu vào để khẳng định báo cáo/bộ nộp hoàn chỉnh theo đề.
+PDF domain fixture và assets hiện có không phải PDF report tổng hợp.
 
 ## 4. Quy tắc quản lý tài liệu
 
@@ -65,3 +78,17 @@ git status --short
 ```
 
 Khi PR có thay đổi đường dẫn, đối chiếu link tương đối với file thực tế trong Git tree. Có thể dùng công cụ Markdown link checker đã được nhóm chấp thuận nếu đã được cấu hình; không giả định một checker chưa có trong repository. Trước khi commit, bảo đảm không stage file môi trường, secret, log chứa thông tin nhạy cảm hoặc file review tạm.
+
+## Cập nhật evidence và PDF ngày14/11/2026
+
+**Cập nhật tiếp 14/11/2026:** HEAD91e6f99/dev0e43bcb giữ nguyên, 10 docs unstaged đầu vào được bảo toàn. Backend https://brewlite-a2-api-hntn.onrender.com/ có ảnh Render Auto-Deploy Live02452f2 (fullSHA02452f228712c3501c8d27f0f1ae737ad206785d), deployed field13/11/2026 08:39:19Z. GET mới / và /products200 lúc16:24:59Z ngày13/11, catalog9 items; GET không xuất processSHA. DB Free18/Singapore/1GB/Available, expiry10/12/2026; external3 /32 restricted, chưa private-only. Bỏ Edge/Computer Use theo yêu cầu; Người dùng đính chính ngày 14/11/2026: Leader chưa kiểm tra/nghiệm thu SCRUM-117. Evidence và các giới hạn tại dossier §14.
+
+[PDF báo cáo](report/output/main.pdf), [build/QA](report/README.md#kết-quả-build-và-qa-ngày-14112026), [dossier §14](delivery/SCRUM-117-delivery.md#14-evidence-render-backup-và-pdf--cập-nhật-14112026). AC2 VERIFIED snapshot HTTP/liveness/catalog; AC3 PARTIAL vì external còn3 /32 và Internal app usage chưa xác nhận. Requirement mapping không tự nâng thành acceptance; payment-status/QueryDR và manual reconciliation giữ mở.
+
+
+## Báo cáo toàn đồ án A1 đến A2 — cập nhật14/11
+
+Bản tích hợp mới bổ sung dữ liệu/API/hiện thực, chiến lược test, Scrum theo mốc PR và đánh giá; giữ các section yêu cầu/sơ đồ có sẵn, chuyển8 AC/ảnh production sang phụ lục. [Nội dung đề → report](report/README.md#đối-chiếu-báo-cáo-toàn-đồ-án-với-đề-a2-v10); [baseline/evidence mới](delivery/SCRUM-117-delivery.md#15-tổng-hợp-toàn-đồ-án--baseline-mới-ngày14112026). HEAD/PR17 6ee4199, app dev0e43bcb; CI43543439775 là cho head đã commit, không cho thay đổi mới. Backend14/11 / và/products200; FEproxy timeout20s rồi retry200, không browser smoke. Leader chưa nghiệm thu.
+
+
+Báo cáo/PDF đã tích hợp snapshot kế thừa audit§16 (14/11 10:31 UTC), giữ timeout trước và phân biệt HTTP với browser/DB/SHA verification; không nâng8AC. [PDF metadata và QA mới](report/README.md#pdf-tích-hợp-audit16); [nhật ký tích hợp](delivery/SCRUM-117-delivery.md#17-tích-hợp-audit16-vào-báo-cáo-và-pdf). CI6ee4199 chỉ cho bản đã commit.

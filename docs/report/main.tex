@@ -1,0 +1,206 @@
+% !TeX program = pdflatex
+% SCRUM-117: draft integration entrypoint. Compile from repository root.
+% Layout adapted from SGU Assignment_report.tex; see docs/report/README.md.
+\pdfminorversion=7
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[utf8]{vntex}
+\usepackage[margin=22mm,headheight=30pt]{geometry}
+\usepackage{amsmath,amssymb,array,longtable,booktabs,tabularx}
+\usepackage{graphicx,pdflscape,fancyhdr,lastpage}
+\usepackage{seqsplit,xurl}
+\usepackage[expansion=false]{microtype}
+\SetProtrusion{encoding=T5,family=cmtt}{}
+\usepackage[unicode,hidelinks]{hyperref}
+\NewCommandCopy{\BrewLiteOriginalTexttt}{\texttt}
+\DeclareRobustCommand{\texttt}[1]{%
+  \ifnum\pdfmatch{^[ -~]*$}{\detokenize{#1}}=1\relax
+    \BrewLiteOriginalTexttt{\seqsplit{#1}}%
+  \else
+    \BrewLiteOriginalTexttt{#1}% Preserve multibyte Vietnamese characters.
+  \fi}
+\pdfstringdefDisableCommands{\def\texttt#1{#1}}
+\setlength{\emergencystretch}{3em}
+\setlength{\tabcolsep}{4pt}
+\hypersetup{pageanchor=false}
+\hypersetup{pdftitle={BrewLite Assignment 2 - Draft},pdfauthor={BrewLite team}}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Trường Đại học Sài Gòn -- Khoa Công nghệ Thông tin}
+\fancyfoot[L]{\small BrewLite Assignment 2 -- DRAFT}
+\fancyfoot[R]{\small Trang \thepage/\pageref{LastPage}}
+\setcounter{tocdepth}{2}
+\newcommand{\BrewLiteDiagramDir}{docs/diagrams}
+\newcommand{\BrewLiteSeqDiagramDir}{docs/report/assets}
+\begin{document}
+\begin{titlepage}
+\begin{center}
+TRƯỜNG ĐẠI HỌC SÀI GÒN\\
+KHOA CÔNG NGHỆ THÔNG TIN
+\par\vspace{10mm}
+\includegraphics[width=3cm]{docs/report/assets/logoITSGU.png}
+\par\vspace{10mm}
+
+{\Large CÔNG NGHỆ PHẦN MỀM\par}
+\vspace{12mm}
+{\Huge\bfseries BrewLite\par}
+\vspace{8mm}
+{\Large Assignment 2\par}
+{\large Hồ sơ tổng hợp và bàn giao -- bản nháp\par}
+\vspace{10mm}
+
+\begin{tabular}{ll}
+GVHD: & Từ Lãng Phiêu\\
+Học phần / Nhóm: & 841047 / 03 (kế thừa báo cáo A1)\\
+Học kỳ: & I -- Năm học 2026--2027\\
+Nguyễn Châu Hoàng Khang & 3124410143\\
+Cao Nguyễn Quốc Khánh & 3124410149\\
+Nguyễn Khải Hoàng & 3124410106\\
+Nguyễn Đăng Thụy & 3124410352\\
+Hoàng Văn Lập & 3124410184\\
+Lâm Chí Khang & 3124410142\\
+Ngày cập nhật: & 14/11/2026\\
+Checkout / app baseline: & \texttt{6ee4199 / dev 0e43bcb}\\
+Task / PR: & SCRUM-117 / A2-T5.4 / PR \#17
+\end{tabular}
+\end{center}
+\vfill
+\noindent\textbf{DRAFT -- chưa phải báo cáo đã nghiệm thu.}
+Đã đối chiếu đề A2 v1.0 và checklist §9.1; production evidence,
+release/tag và review cuối còn thiếu. Kết quả build/QA ở README báo cáo. Các section kế thừa giữ trạng
+thái nguồn, không được hiểu là đã nghiệm thu các task khác.
+\end{titlepage}
+\hypersetup{pageanchor=true}
+\section*{Tóm tắt đồ án}
+BrewLite là ứng dụng đặt đồ uống cho một cửa hàng, hỗ trợ hành trình menu,
+chọn size/topping, giỏ hàng, xác thực, tạo đơn, thanh toán và theo dõi đơn.
+Báo cáo tổng hợp toàn đồ án từ Assignment1 đến Assignment2: bài toán/yêu cầu,
+mô hình hóa, kiến trúc và dữ liệu/API, hiện thực frontend--backend, kiểm thử,
+triển khai, quản lý Scrum và đánh giá. Hệ thống dùng Next.js, NestJS và
+PostgreSQL/Prisma; backend quyết định giá, ownership và kết quả thanh toán.
+
+A1 cung cấp nền tảng nghiệp vụ và provenance; A2 chuẩn hóa tạo phẩm/truy vết,
+monorepo/CI và evidence vận hành. Source không đồng nghĩa acceptance: báo cáo
+phân biệt kết quả local/CI, claim Sandbox kế thừa và HTTP/deployment snapshot.
+Chưa có release/tag, final demo/Review/Retro hoặc Leader nghiệm thu; các gap
+được ghi theo tác động thay vì tự miễn yêu cầu. Nhãn DRAFT áp dụng cho bản này.
+\clearpage
+\tableofcontents
+\clearpage
+\listoffigures
+\clearpage
+\listoftables
+\clearpage
+\section*{Nguồn và giới hạn tổng hợp}
+\addcontentsline{toc}{section}{Nguồn và giới hạn tổng hợp}
+Snapshot lịch sử \texttt{7dfc7ca} ngày 10/11/2026 và source runtime
+\texttt{34cbbc0} của báo cáo SCRUM-112 giữ nguyên provenance. Baseline soạn trước đây: \texttt{91e6f99}. Checkout kiểm tra mới ngày14/11:
+\path{6ee4199acaab709471144295adc98ac34e9f11c3}, branch
+\path{SCRUM-117-production-release-delivery}; app/config trùng origin/dev
+\path{0e43bcb80f64d6a5fa558cd80f71a199029535d0}.
+Snapshot trước cập nhật PR \#17: remote \texttt{3543a55}, open, chưa review.
+PR head kiểm tra mới là \texttt{6ee4199}, CI43543439775 API/Web success.\par
+Bản report đang sửa chưa commit, nên CI đó không đại diện cho thay đổi mới.
+Main remote \texttt{02452f2} là merge promotion, không phải checkout/report release SHA.
+
+Bố cục A4, bìa, header/footer và mục lục thích nghi từ template SGU dùng
+VnTeX/pdfLaTeX; không lấy nội dung minh họa của mẫu. GVHD, mã học phần, nhóm
+và sáu thành viên/MSSV kế thừa bìa báo cáo A1 đã đọc 13/11/2026 \cite{a1report};
+chưa có nguồn lớp hoặc thay đổi roster A2. Vai trò A1 không tự trở thành
+người vận hành/tiếp nhận production A2. Không chuyển kết quả A1 thành test A2.
+
+Nguồn yêu cầu là đề A2 v1.0 \cite{a2brief}, SRS và API Contract theo thứ tự
+ưu tiên của dự án. Các section requirement/modeling bên dưới giữ trạng thái
+nguồn; không đổi DRAFT thành Accepted. Architecture tại \path{docs/architecture/architecture.md},
+runbook tại \path{docs/deployment.md}; readiness/mapping/evidence tại
+\path{docs/delivery/SCRUM-117-delivery.md}; notes/body PR17 tại
+\path{docs/delivery/release-notes-A2.md}. Nguồn SCRUM-117 đã có bản cũ ở commit
+\texttt{3543a55}; bản PDF có logo ở \texttt{6ee4199} là bản trước lần tổng hợp này; bản mới chưa commit.
+
+
+
+\input{docs/report/sections/context-and-scope.tex}
+\clearpage
+\input{docs/report/sections/requirements-summary.tex}
+\clearpage
+\input{docs/report/sections/checkout-use-case.tex}
+\clearpage
+\input{docs/report/sections/activity-diagram.tex}
+\clearpage
+\input{docs/report/sections/sequence-diagram.tex}
+\clearpage
+\section{Domain và kiến trúc triển khai}
+Domain figures kế thừa SCRUM-105; sơ đồ deployment kế thừa SCRUM-108 là
+\textbf{target design}. Kiến trúc chuẩn ở \path{docs/architecture/architecture.md}
+và ADR 001--005; ADR-005 hosting vẫn Proposed. Các hình dưới không chứng minh
+production đang chạy hoặc DB external access đã tắt.
+\subsection{Phân lớp, domain boundaries và quyết định kiến trúc}
+Theo Architecture Overview/SCRUM-107, một Next.js frontend giao tiếp REST/JSON
+với một NestJS modular monolith. Auth, Products, Orders, Payments và Coupons
+là các module trong cùng AppModule; không phải các microservice triển khai
+độc lập. Controller/DTO/Guard là HTTP boundary, Service điều phối nghiệp vụ,
+Prisma là persistence boundary chung. Expiration và reconciliation chạy trong
+NestJS process, vì vậy phụ thuộc availability của backend.
+
+Thiết kế giữ một transaction boundary PostgreSQL cho tạo đơn, inventory,
+coupon, payment finalization và loyalty. Đây là lựa chọn phù hợp quy mô hiện
+tại: giảm chi phí điều phối phân tán nhưng làm backend deployment/process trở
+thành availability boundary chung. Không suy ra khả năng scale nhiều instance
+hoặc scheduler luôn chạy chỉ từ cấu trúc module. Source, runtime và requirement
+acceptance vẫn là các loại bằng chứng khác nhau.
+
+\begin{longtable}{p{0.24\linewidth}p{0.65\linewidth}}
+\caption{Các quyết định kiến trúc ADR001–005}\\
+\toprule
+ADR nguồn & Quyết định và giới hạn kế thừa \\
+\midrule
+001 -- Accepted & Modular monolith/domain modules, cùng process và DB transaction
+boundary. Tách microservices không được chọn cho scope hiện tại. \\
+002 -- Accepted & Prisma mô tả ORM; SQL migrations giữ physical schema và partial
+indexes/CHECK constraints. Approved API Contract giữ vai trò HTTP contract. \\
+003 -- Accepted & Giữ shared payment finalization và tính nhất quán; Return URL
+không tự xác nhận thành công; uncertain outcome không đồng nghĩa FAILED. \\
+004 -- Accepted, implementation pending theo nguồn & A1/A2 phải được cô lập tài
+nguyên và cấu hình; quyết định không tự chứng minh runtime isolation đã kiểm thử. \\
+005 -- Proposed & Vercel/Render là hosting target; evidence production mới được
+ghi riêng trong phần vận hành, không tự sửa trạng thái ADR thành Accepted. \\
+\bottomrule
+\end{longtable}
+Nguồn chuẩn: \path{docs/architecture/architecture.md} và ADR001--005.
+Các hình domain tiếp theo thể hiện thuộc tính/quan hệ/enum; hình deployment
+thể hiện target topology. Internal database field, sơ đồ private network và
+source profile không thay actual network policy/config. Evidence Render mới,
+giới hạn external /32 và expiry được phân tích trong phần production.
+\input{docs/diagrams/domain-class-figure.tex}
+\input{docs/diagrams/deployment-figure.tex}
+\clearpage
+\input{docs/report/sections/data-api-implementation.tex}
+\clearpage
+\input{docs/report/sections/deployment-release-delivery.tex}
+\clearpage
+\input{docs/report/sections/project-evaluation.tex}
+\clearpage
+\appendix
+\input{docs/report/sections/release-readiness.tex}
+\clearpage
+\input{docs/report/sections/production-evidence.tex}
+\clearpage
+\begin{thebibliography}{9}
+\bibitem{a1report} Nhóm 03, \emph{BrewLite Assignment 1 -- Báo cáo giữa kỳ}.
+\href{https://docs.google.com/document/d/1A43E5hJ4HEl6do7-Z0BYhmbKJVVgQsMdBOhCl7INyoY/edit}{Google Docs nguồn A1},
+đọc text ngày 13/11/2026; dùng roster/nền tảng, không evidence nghiệm thu A2.
+\bibitem{a2brief} SGU, \emph{BrewLite Assignment 2 -- Requirements to Deployment}, v1.0.
+\href{https://drive.google.com/file/d/1CYVsexpTXZ6Uyg2FHMRE8lnJHSPkYQmi/view}{Đề A2 nguồn Drive},
+đọc lại ngày 14/11/2026, đặc biệt mục 7.2--7.4, 8.1, 9.1.
+\bibitem{a2repo} BrewLite, \emph{Repository A2},
+\url{https://github.com/brewlite-project/brewlite-a2}.
+Source ứng dụng đối chiếu tại \texttt{dev/0e43bcb}; evidence giữ SHA riêng.
+\bibitem{renderdeploy} Render, \emph{Deploys và Rollbacks},
+\url{https://render.com/docs/deploys},
+\url{https://render.com/docs/rollbacks}; đọc 13/11/2026, chưa xác minh tier/target thực.
+\bibitem{vercelrollback} Vercel, \emph{Instant Rollback},
+\url{https://vercel.com/docs/instant-rollback}; đọc 13/11/2026,
+chưa xác minh quyền/eligible target của project.
+\end{thebibliography}
+\end{document}

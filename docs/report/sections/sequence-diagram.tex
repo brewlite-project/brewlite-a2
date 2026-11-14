@@ -19,6 +19,7 @@ Mục này chuẩn hóa Sơ đồ Tuần tự (Sequence Diagram) cho Use Case tr
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.11\linewidth}>{\raggedright\arraybackslash}p{0.27\linewidth}>{\raggedright\arraybackslash}p{0.54\linewidth}}
+\caption{Sequence: thay đổi so với mô hình A1}\\
 \hline
 \textbf{Mã A1} & \textbf{Tên sơ đồ gốc A1} & \textbf{Cách kế thừa và chuẩn hóa trong Assignment 2 (A2-T2.2)} \\ \hline
 \endfirsthead
@@ -77,7 +78,7 @@ Hình~\ref{fig:seq-phase1a} biểu diễn nửa đầu Pha 1: kiểm tra JWT Cli
       \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 1A nằm tại \texttt{docs/report/assets/sequence-checkout-phase1a-order-init.pdf}.}}%
     }%
   }
-  \caption{Sequence Diagram Pha 1A — Xác thực JWT, khối \texttt{alt} loại trừ \texttt{409} (\texttt{SD-R01}) và vòng đời khóa tư vấn qua 2 pha dọn dẹp (\texttt{SD-R05}).}
+  \caption[Sequence: xác thực và khởi tạo Order]{Sequence Diagram Pha 1A — Xác thực JWT, khối \texttt{alt} loại trừ \texttt{409} (\texttt{SD-R01}) và vòng đời khóa tư vấn qua 2 pha dọn dẹp (\texttt{SD-R05}).}
   \label{fig:seq-phase1a}
 \end{figure}
 
@@ -96,7 +97,7 @@ Hình~\ref{fig:seq-phase1b} biểu diễn nửa sau Pha 1 trong Transaction sạ
       \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 1B nằm tại \texttt{docs/report/assets/sequence-checkout-phase1b-order-create.pdf}.}}%
     }%
   }
-  \caption{Sequence Diagram Pha 1B — Giao dịch tạo đơn hàng nguyên tử: tính giá chuẩn server, khóa kho, giữ coupon và tạo \texttt{Order PENDING}.}
+  \caption[Sequence: transaction tạo Order]{Sequence Diagram Pha 1B — Giao dịch tạo đơn hàng nguyên tử: tính giá chuẩn server, khóa kho, giữ coupon và tạo \texttt{Order PENDING}.}
   \label{fig:seq-phase1b}
 \end{figure}
 
@@ -115,11 +116,11 @@ Hình~\ref{fig:seq-phase2a} mô tả giao thức kiểm soát \texttt{Idempotenc
       \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 2A nằm tại \texttt{docs/report/assets/sequence-checkout-phase2a-idempotency.pdf}.}}%
     }%
   }
-  \caption{Sequence Diagram Pha 2A — Giao thức Idempotency, kiểm tra quyền sở hữu và khóa tư vấn thanh toán (\texttt{pg\_try\_advisory\_xact\_lock}).}
+  \caption[Sequence: payment idempotency]{Sequence Diagram Pha 2A — Giao thức Idempotency, kiểm tra quyền sở hữu và khóa tư vấn thanh toán (\texttt{pg\_try\_advisory\_xact\_lock}).}
   \label{fig:seq-phase2a}
 \end{figure}
 
-\subsection{Pha 2B: Phân nhánh Thực thi Thanh toán (ZERO\_AMOUNT, Mock \& VNPay Initiate)}
+\subsection{Pha 2B: Các nhánh thanh toán (ZERO\_AMOUNT, Mock \& VNPay Initiate)}
 
 Hình~\ref{fig:seq-phase2b} mô tả ba nhánh thực thi thanh toán khi Order và Idempotency-Key hợp lệ:
 \begin{itemize}
@@ -139,7 +140,7 @@ Hình~\ref{fig:seq-phase2b} mô tả ba nhánh thực thi thanh toán khi Order 
       \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 2B nằm tại \texttt{docs/report/assets/sequence-checkout-phase2b-payment-execution.pdf}.}}%
     }%
   }
-  \caption{Sequence Diagram Pha 2B — Phân nhánh thực thi: đơn \texttt{0 VND}, giả lập \texttt{Mock} và khởi tạo thanh toán \texttt{VNPay Sandbox}.}
+  \caption[Sequence: các nhánh payment]{Sequence Diagram Pha 2B — Phân nhánh thực thi: đơn \texttt{0 VND}, giả lập \texttt{Mock} và khởi tạo thanh toán \texttt{VNPay Sandbox}.}
   \label{fig:seq-phase2b}
 \end{figure}
 
@@ -168,7 +169,7 @@ Hình~\ref{fig:seq-phase3a} biểu diễn luồng IPN độc lập ở phía Ser
       \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 3A nằm tại \texttt{docs/report/assets/sequence-checkout-phase3a-vnpay-ipn.pdf}.}}%
     }%
   }
-  \caption{Sequence Diagram Pha 3A — Xử lý Server-to-Server IPN: kiểm tra chữ ký, phân biệt \texttt{gatewayPaidAt <= E} vs \texttt{clock.now < G} (\texttt{SD-R06}) và chốt kết quả \texttt{Shared Finalization}.}
+  \caption[Sequence: VNPay IPN]{Sequence Diagram Pha 3A — Xử lý Server-to-Server IPN: kiểm tra chữ ký, phân biệt \texttt{gatewayPaidAt <= E} vs \texttt{clock.now < G} (\texttt{SD-R06}) và chốt kết quả \texttt{Shared Finalization}.}
   \label{fig:seq-phase3a}
 \end{figure}
 
@@ -196,7 +197,7 @@ Hình~\ref{fig:seq-phase3b} biểu diễn hai luồng độc lập còn lại c�
       \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ Pha 3B nằm tại \texttt{docs/report/assets/sequence-checkout-phase3b-return-scheduler.pdf}.}}%
     }%
   }
-  \caption{Sequence Diagram Pha 3B — Browser Return URL, bounded polling \texttt{GET /orders/me} và chu kỳ đối soát QueryDR / hết hạn của Background Scheduler.}
+  \caption[Sequence: Return và reconciliation scheduler]{Sequence Diagram Pha 3B — Browser Return URL, bounded polling \texttt{GET /orders/me} và chu kỳ đối soát QueryDR / hết hạn của Background Scheduler.}
   \label{fig:seq-phase3b}
 \end{figure}
 
@@ -207,6 +208,7 @@ Bảng dưới đây tổng hợp kết quả rà soát đối chiếu (\texttt{
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.22\linewidth}>{\raggedright\arraybackslash}p{0.38\linewidth}>{\raggedright\arraybackslash}p{0.32\linewidth}}
+\caption{Sequence: đối chiếu implementation lịch sử}\\
 \hline
 \textbf{Hạng mục kỹ thuật} & \textbf{Thực tế trong Codebase \texttt{A1-final}} & \textbf{Ghi chú đối chiếu \& Biểu diễn trên Sơ đồ} \\ \hline
 \endfirsthead
@@ -240,7 +242,7 @@ Mã lỗi khi thanh toán đơn đã quá hạn \texttt{now >= E} (\texttt{SD-R0
       \fbox{\parbox{0.85\linewidth}{\centering Sơ đồ tổng thể nằm tại \texttt{docs/report/assets/sequence-checkout.pdf}.}}%
     }%
   }
-  \caption{Sequence Diagram Tổng thể (End-to-End) — Luồng Checkout \& Payment của BrewLite Assignment 2 (bản vector toàn cảnh đặt trên trang riêng, phục vụ đối chiếu tổng thể kết hợp 6 sơ đồ con độ đọc cao ở Hình~\ref{fig:seq-phase1a}--\ref{fig:seq-phase3b}).}
+  \caption[Sequence Checkout tổng thể]{Sequence Diagram Tổng thể (End-to-End) — Luồng Checkout \& Payment của BrewLite Assignment 2 (bản vector toàn cảnh đặt trên trang riêng, phục vụ đối chiếu tổng thể kết hợp 6 sơ đồ con độ đọc cao ở Hình~\ref{fig:seq-phase1a}--\ref{fig:seq-phase3b}).}
   \label{fig:seq-checkout-overall}
 \end{figure}
 \clearpage

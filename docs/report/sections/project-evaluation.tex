@@ -1,0 +1,118 @@
+\section{Quản lý Scrum và kết quả phát triển qua các giai đoạn}
+\label{sec:scrum}
+\subsection{Phương pháp và kế hoạch so với kết quả có bằng chứng}
+BrewLite được thực hiện theo hướng Agile Scrum: backlog liên kết yêu cầu,
+task được xử lý trên branch/PR, kiểm thử và review trước tích hợp. Báo cáo A1
+là nguồn mô tả tổ chức trước đây; A2 tiếp nối bằng hai Sprint theo đề.
+\path{docs/planning/A2_Implementation_Plan.md} ngày08/11 vẫn ghi PROPOSED/
+NOT APPROVED, các mốc là target. Vì vậy không biến lịch mục tiêu thành ngày
+Sprint thực tế, không suy PR merged là biên bản Sprint Review.
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.22\linewidth}>{\raggedright\arraybackslash}p{0.68\linewidth}}
+\caption{Mốc tạo phẩm có bằng chứng GitHub, không thay biên bản Scrum}\label{tab:milestones}\\
+\toprule Giai đoạn & Kết quả có nguồn và giới hạn \\ \midrule
+\endfirsthead
+\toprule Giai đoạn & Kết quả có nguồn và giới hạn (tiếp) \\ \midrule \endhead
+A1 kế thừa & Tag A1-final1951dc1, báo cáo A1/contract/ADR giữ provenance.
+Vai trò và test A1 không tự trở thành ownership hoặc acceptance A2. \\
+Yêu cầu/thiết kế A2 & PR1--9 ngày08--09/11 tạo planning, context/SRS/use case,
+activity/sequence/class, architecture/ADR và deployment target. PR merged
+chứng minh version history, không phê duyệt mọi gap trong tài liệu. \\
+Sprint1 theo Task4 & PR11--15 ngày09--10/11: monorepo, CI, navigation/traceability
+và MVP verification report. Report chạy source34cbbc0; không phải E2E production. \\
+Hoàn thiện theo Task5 & PR16,18--23,25 ngày10--13/11: proxy/dependency,
+Render seed/migration guard, Internal TLS và QueryDR diagnostics. Payment
+success claim ở PR26 có phạm vi riêng; không tự đóng SCRUM-114/115. \\
+Deployment và delivery & PR24/26/28 promote main; PR27 mô tả CD, ảnh Render
+02452f2 và GET bổ sung runtime evidence. PR17 đang chuẩn bị report/release
+dossier, Leader chưa review/nghiệm thu. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Phối hợp, chất lượng và hoạt động còn phải diễn ra}
+Git lưu dấu vết thay đổi, PR là nơi reviewer đối chiếu scope và source of
+truth; CI chạy install/lint/unit/build để phản hồi sớm. Definition of Done
+không chỉ là code có trong branch: cần requirement/test/evidence phù hợp và
+quyết định nghiệm thu. Đề còn yêu cầu tạo phẩm các task trước để truy vết task
+sau, do đó báo cáo giữ các caveat Approved riêng thay vì tự ghi toàn bộ Done.
+
+Chưa có video end-to-end, biên bản Review/Retro cuối với ngày/người dự/
+feedback/action được xác nhận trong các nguồn đã tra. Không tính velocity,
+burndown hoặc tỷ lệ hoàn thành khi không có dataset Sprint thực. Dossier có
+kịch bản demo và mẫu agenda/biên bản, là Planned. Review cần xem increment,
+so với tám AC và ghi quyết định; Retro cần quan sát thực, nguyên nhân, hành
+động và người nhận việc sau họp. Nhóm tiếp tục quản lý tài nguyên; tên cá nhân
+vận hành chỉ thêm khi được xác nhận.
+
+\section{Đánh giá tổng hợp, hạn chế và hướng phát triển}
+\label{sec:evaluation}
+\subsection{Kết quả so với mục tiêu đồ án}
+Đồ án đã hình thành chuỗi tạo phẩm từ bài toán một cửa hàng đến requirements,
+thiết kế, source monorepo, tests/CI và deployment evidence. Tái sử dụng A1
+giúp giữ kiến trúc và quy tắc nhất quán; A2 bổ sung khả năng truy vết, chạy
+CI, cấu trúc app, migration/seed và tài liệu vận hành. Giá trị của kết quả
+nằm ở liên kết nguồn có kiểm chứng, không nằm ở số trang báo cáo.
+
+Audit kế thừa14/11 lúc10:31 UTC củng cố khả năng truy cập HTTP và đọc catalog
+tại thời điểm đó, không nâng implementation thành nghiệm thu toàn luồng.
+Kết quả cần được đọc cùng lần proxy timeout trước đây ở phần triển khai;
+success về sau chưa chứng minh nguyên nhân timeout đã được xử lý.
+
+Các trạng thái được dùng nhất quán: \textbf{Planned} là dự kiến;
+\textbf{Implemented} có source/tạo phẩm; \textbf{Verified} có kiểm tra cụ thể
+theo SHA/môi trường/thời điểm; \textbf{Approved} có quyết định review đúng phạm
+vi; \textbf{Released} có phiên bản/tag và mapping triển khai đã chốt. Một mục
+có thể Implemented mà chưa Verified/Approved; CI success không tự nâng thành
+Released.
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.66\linewidth}}
+\caption{Đánh giá theo nhóm yêu cầu và lớp bằng chứng}\label{tab:project-assessment}\\
+\toprule Nhóm yêu cầu & Kết quả và phần cần hoàn thiện \\ \midrule
+\endfirsthead
+\toprule Nhóm yêu cầu & Kết quả và phần cần hoàn thiện (tiếp) \\ \midrule \endhead
+Catalog/cart/auth & Có UI/API/context và tests. MVP local có report; rounding
+preview FE/BE chưa khớp ở giá lẻ. PWA installability chưa có evidence. \\
+Order/inventory & Có transaction, state machine, expiry, constraints và test
+inventory. Cần runtime integration/concurrency đúng baseline và full UI journey;
+không lấy file test làm kết quả test đã chạy. \\
+Payment, coupon, loyalty & Có providers/finalizer/idempotency và validation.
+Sandbox PAID/SUCCESS/+10 là claim một scenario; status route, IPN/QueryDR E2E,
+giao dịch cần đối soát và scope coupon preview còn cần quyết định/evidence. \\
+NFR và vận hành & CI lint/unit/build xanh ở head đã commit; HTTP/liveness/catalog
+có snapshot. Performance, security measurement, continuous readiness, actual
+Internal DB usage, backup/restore và CD chain chưa đủ để nghiệm thu toàn bộ. \\
+Delivery/Scrum & Có README/runbook/matrix/report và ảnh đã xử lý; chưa chốt
+release/tag, final demo/Review/Retro hoặc Leader acceptance. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Hạn chế và ưu tiên tiếp theo}
+Ưu tiên trước nghiệm thu là chốt scope và giải quyết mismatch requirement--code
+có tác động người dùng, thu integration/E2E cho luồng tối thiểu và đối soát
+giao dịch còn mở. Về vận hành, cần bind FE production alias/SHA với BE deployment,
+xác nhận migration runner và Internal DB config không lộ credential, chốt policy
+external access và kế hoạch bảo toàn dữ liệu trước10/12/2026. Sau đó mới chọn
+release source/tag và phiên bản rollback đủ điều kiện.
+
+Các cải tiến tương lai như tăng khả dụng scheduler, giảm rủi ro token storage,
+PWA hoặc bổ sung ledger phải có requirement/scope/task được duyệt, không tự
+triển khai trong phần viết báo cáo. Đo hiệu năng và RPO/RTO cần số liệu thật;
+không đặt target tùy ý rồi ghi đã đạt.
+
+Kết quả hiện tại là một \textbf{báo cáo tổng hợp A1 đến A2 có thể review},
+kèm tạo phẩm triển khai và giới hạn minh bạch. Báo cáo DRAFT chưa xác nhận
+toàn đồ án đã Approved hoặc Released. Quyết định nghiệm thu thuộc Leader/
+giảng viên theo đúng nguồn yêu cầu và evidence thực tế.
+
+\subsection{Truy vết và cách đọc phụ lục}
+Ma trận chuẩn \path{docs/traceability-matrix.md} nối48 FR/49 NFR với US/UC,
+thiết kế, code/API và test inventory. Ví dụ FR-27 nối transaction/order/inventory
+với SQL constraints và PostgreSQL concurrency tests; FR-34 nối payment status
+với UI/API-03 còn gap; NFR-38 nối CI workflow với run/checks. Đây là mapping
+coverage, không phải97 requirements đã PASS. Reviewer phải đọc thêm result/
+commit/environment của từng evidence.
+
+Phụ lục giữ ảnh production và bảng readiness tám AC. Nhật ký audit dài, URL/run
+IDs, checklist thao tác, kịch bản demo và mẫu biên bản được giữ tại dossier;
+không lặp nguyên nhật ký vào nội dung chính. Tài liệu tham khảo ghi nguồn A1,
+đề A2, repo và provider; không có tài liệu nguồn nào được upload/chỉnh trực tiếp.
