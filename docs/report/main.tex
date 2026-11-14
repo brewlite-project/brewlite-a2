@@ -61,7 +61,7 @@ Nguyễn Đăng Thụy & 3124410352\\
 Hoàng Văn Lập & 3124410184\\
 Lâm Chí Khang & 3124410142\\
 Ngày cập nhật: & 14/11/2026\\
-Checkout / app baseline: & \texttt{91e6f99 / dev 0e43bcb}\\
+Checkout / app baseline: & \texttt{6ee4199 / dev 0e43bcb}\\
 Task / PR: & SCRUM-117 / A2-T5.4 / PR \#17
 \end{tabular}
 \end{center}
@@ -72,17 +72,36 @@ release/tag và review cuối còn thiếu. Kết quả build/QA ở README báo
 thái nguồn, không được hiểu là đã nghiệm thu các task khác.
 \end{titlepage}
 \hypersetup{pageanchor=true}
+\section*{Tóm tắt đồ án}
+BrewLite là ứng dụng đặt đồ uống cho một cửa hàng, hỗ trợ hành trình menu,
+chọn size/topping, giỏ hàng, xác thực, tạo đơn, thanh toán và theo dõi đơn.
+Báo cáo tổng hợp toàn đồ án từ Assignment1 đến Assignment2: bài toán/yêu cầu,
+mô hình hóa, kiến trúc và dữ liệu/API, hiện thực frontend--backend, kiểm thử,
+triển khai, quản lý Scrum và đánh giá. Hệ thống dùng Next.js, NestJS và
+PostgreSQL/Prisma; backend quyết định giá, ownership và kết quả thanh toán.
+
+A1 cung cấp nền tảng nghiệp vụ và provenance; A2 chuẩn hóa tạo phẩm/truy vết,
+monorepo/CI và evidence vận hành. Source không đồng nghĩa acceptance: báo cáo
+phân biệt kết quả local/CI, claim Sandbox kế thừa và HTTP/deployment snapshot.
+Chưa có release/tag, final demo/Review/Retro hoặc Leader nghiệm thu; các gap
+được ghi theo tác động thay vì tự miễn yêu cầu. Nhãn DRAFT áp dụng cho bản này.
+\clearpage
 \tableofcontents
+\clearpage
+\listoffigures
+\clearpage
+\listoftables
 \clearpage
 \section*{Nguồn và giới hạn tổng hợp}
 \addcontentsline{toc}{section}{Nguồn và giới hạn tổng hợp}
 Snapshot lịch sử \texttt{7dfc7ca} ngày 10/11/2026 và source runtime
-\texttt{34cbbc0} của báo cáo SCRUM-112 giữ nguyên provenance. Checkout hiện tại:
-\path{91e6f99bfd02353616b2e481fe613b7ea91118af}, branch
+\texttt{34cbbc0} của báo cáo SCRUM-112 giữ nguyên provenance. Baseline soạn trước đây: \texttt{91e6f99}. Checkout kiểm tra mới ngày14/11:
+\path{6ee4199acaab709471144295adc98ac34e9f11c3}, branch
 \path{SCRUM-117-production-release-delivery}; app/config trùng origin/dev
 \path{0e43bcb80f64d6a5fa558cd80f71a199029535d0}.
 Snapshot trước cập nhật PR \#17: remote \texttt{3543a55}, open, chưa review.
-Head và CI mới nhất xem trực tiếp PR \#17; SHA checkout trên là baseline lúc soạn báo cáo.
+PR head kiểm tra mới là \texttt{6ee4199}, CI43543439775 API/Web success.\par
+Bản report đang sửa chưa commit, nên CI đó không đại diện cho thay đổi mới.
 Main remote \texttt{02452f2} là merge promotion, không phải checkout/report release SHA.
 
 Bố cục A4, bìa, header/footer và mục lục thích nghi từ template SGU dùng
@@ -97,7 +116,7 @@ nguồn; không đổi DRAFT thành Accepted. Architecture tại \path{docs/arch
 runbook tại \path{docs/deployment.md}; readiness/mapping/evidence tại
 \path{docs/delivery/SCRUM-117-delivery.md}; notes/body PR17 tại
 \path{docs/delivery/release-notes-A2.md}. Nguồn SCRUM-117 đã có bản cũ ở commit
-\texttt{3543a55}; bản cập nhật này chưa có permalink commit mới.
+\texttt{3543a55}; bản PDF có logo ở \texttt{6ee4199} là bản trước lần tổng hợp này; bản mới chưa commit.
 
 
 
@@ -132,6 +151,7 @@ hoặc scheduler luôn chạy chỉ từ cấu trúc module. Source, runtime và
 acceptance vẫn là các loại bằng chứng khác nhau.
 
 \begin{longtable}{p{0.24\linewidth}p{0.65\linewidth}}
+\caption{Các quyết định kiến trúc ADR001–005}\\
 \toprule
 ADR nguồn & Quyết định và giới hạn kế thừa \\
 \midrule
@@ -155,7 +175,14 @@ giới hạn external /32 và expiry được phân tích trong phần productio
 \input{docs/diagrams/domain-class-figure.tex}
 \input{docs/diagrams/deployment-figure.tex}
 \clearpage
+\input{docs/report/sections/data-api-implementation.tex}
+\clearpage
 \input{docs/report/sections/deployment-release-delivery.tex}
+\clearpage
+\input{docs/report/sections/project-evaluation.tex}
+\clearpage
+\appendix
+\input{docs/report/sections/release-readiness.tex}
 \clearpage
 \input{docs/report/sections/production-evidence.tex}
 \clearpage
@@ -165,7 +192,7 @@ giới hạn external /32 và expiry được phân tích trong phần productio
 đọc text ngày 13/11/2026; dùng roster/nền tảng, không evidence nghiệm thu A2.
 \bibitem{a2brief} SGU, \emph{BrewLite Assignment 2 -- Requirements to Deployment}, v1.0.
 \href{https://drive.google.com/file/d/1CYVsexpTXZ6Uyg2FHMRE8lnJHSPkYQmi/view}{Đề A2 nguồn Drive},
-đọc lại ngày 13/11/2026, đặc biệt mục 7.2--7.4, 8.1, 9.1.
+đọc lại ngày 14/11/2026, đặc biệt mục 7.2--7.4, 8.1, 9.1.
 \bibitem{a2repo} BrewLite, \emph{Repository A2},
 \url{https://github.com/brewlite-project/brewlite-a2}.
 Source ứng dụng đối chiếu tại \texttt{dev/0e43bcb}; evidence giữ SHA riêng.

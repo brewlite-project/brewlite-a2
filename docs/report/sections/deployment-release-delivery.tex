@@ -1,33 +1,45 @@
 % SCRUM-117. Canonical sources: deployment.md and delivery dossier, audit 13/11/2026.
-\section{Hiện thực và kiểm thử Assignment 2}
+\section{Chiến lược và kết quả kiểm thử}
 \label{sec:a2-implementation-tests}
-\subsection{Cấu trúc và luồng xử lý thực tế}
-Repository có \path{apps/web}, \path{apps/api}, \path{docs}; mỗi app có
-package-lock riêng, không có npm workspace ở root. Next.js phục vụ UI mobile-first,
-Route Handler \path{apps/web/app/api/backend/[[...path]]/route.ts} forward request
-tới backend server-side; NestJS tổ chức Controller, DTO/Guard và Service,
-Prisma truy cập PostgreSQL. API Contract/SRS quyết định shape và business rules,
-không suy từ UI hoặc sơ đồ rằng runtime đã nghiệm thu.
+\subsection{Mục tiêu, mức kiểm thử và môi trường}
+Chiến lược kiểm thử tập trung vào rủi ro tài chính và toàn vẹn: tính giá,
+ownership, idempotency, stock/coupon concurrency, payment finalization và
+callback trùng/trễ. Unit test kiểm hàm/policy có cô lập; integration test kiểm
+tương tác service/API và transaction; E2E HTTP kiểm boundary request/response.
+E2E HTTP/JSDOM không tự thay browser end-to-end menu--confirmation hoặc giao
+dịch thật với Sandbox.
 
-Với catalog, Products Controller gọi Service rồi Prisma đọc sản phẩm/topping.
-Với thao tác của Customer, JWT được xác minh server-side; ownership phải dựa vào
-identity đã xác thực. Backend quyết định giá/discount và transaction giữ tài
-nguyên khi tạo Order. Thanh toán có idempotency và shared finalization để cập
-nhật Payment, Order, stock, coupon và loyalty nhất quán. Return URL phục vụ UI,
-không phải bằng chứng thanh toán; IPN và QueryDR là hai nguồn/luồng khác nhau.
-Các quy tắc chi tiết và giới hạn acceptance giữ theo SRS/API v4, không thay
-đổi trong task tài liệu này.
+API có scripts test:unit, test:integration, test:e2e tại apps/api; web có
+test:unit/test tại apps/web. CI Node24 chạy npm ci, lint, unit và build, API
+generate Prisma trước test; Docker dùng Node26. PostgreSQL opt-in phải dùng
+DB A2 cô lập theo hướng dẫn test, không production/A1. Không chạy migrate,
+seed hoặc test ghi DB chỉ để viết báo cáo. Seed có thể tái tạo fixture nhưng
+không chứng minh fresh-database setup đã được kiểm thử.
 
-CI dùng Node 24; Dockerfiles dùng Node 26. Lockfile ứng dụng được giữ nguyên;
-chạy npm ci trong từng app. PR \#16 cập nhật Next.js 16.4.6 và lọc response
-headers/message lỗi proxy. PR \#18--23 bổ sung seed Render, diagnostics,
-one-shot marker/migration và Internal Prisma TLS profile. PR \#25 bổ sung
-QueryDR diagnostics, không đổi state transition/signature/retry hoặc sửa
-nguyên nhân network timeout. Tất cả đã có trong checkout \texttt{91e6f99},
-app/config trùng \texttt{dev/0e43bcb}; diff task chỉ mười tài liệu.
+Test inventory gồm auth/products/orders, inventory PostgreSQL, coupon,
+payment/idempotency/finalization concurrency, IPN--QueryDR và reconciliation;
+web có checkout/payment/history/confirmation UI suites. CI web test:unit
+không chứa payment-confirmation-flow.test.ts dù script test có file đó.
+Vì vậy tên Unit tests hoặc CI xanh không có nghĩa mọi test trong repo đều chạy.
+
+\subsection{Kết quả MVP Sprint1 và giao diện lịch sử}
+Report SCRUM-112 kiểm source
+\path{34cbbc088117d7a4908d07a66cfbd03b0c905dea}, report vòng1
+\path{ffbaeeb3afece5d491e25e494b099496e8234ccd}.
+Report ghi API unit325, Products HTTP E2E11 và web166, tổng502/502 PASS;
+Prisma validate/build PASS. API lint1 warning, web23 warnings.
+Môi trường browser local là localhost:3000/API127.0.0.1:3001,
+viewport320x640,375x812,768x1024; không có timestamp chạy/OS để tự điền.
+Các ảnh ở hình\ref{fig:historical-ui} thuộc report này.
+
+Report còn phát hiện gap rounding và các review findings; số tests PASS
+không xóa findings. Đã đọc lại source hiện tại để giữ mismatch rounding ở
+chương hiện thực. Phiên bản web16.3.8 trong report là lịch sử; source hiện
+16.4.6 sau PR16, không chuyển số liệu cũ sang phiên bản mới.
 
 \subsection{Bằng chứng kiểm thử và phạm vi kết luận}
-\begin{longtable}{p{0.23\linewidth}p{0.67\linewidth}}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.23\linewidth}p{0.67\linewidth}}
+\caption{Bằng chứng kiểm thử theo source/môi trường}\\
 \toprule
 Nguồn & Kết quả và giới hạn \\
 \midrule
@@ -37,9 +49,14 @@ Nguồn & Kết quả và giới hạn \\
 SCRUM-112 / PR15 & Report local source \texttt{34cbbc0}, commit report vòng 1
 \texttt{ffbaeeb}; có menu/mobile và Products E2E theo report. Giữ thời điểm/môi
 trường nguồn, không chạy lại và không chuyển thành release smoke. \\
-CI hiện tại & Run \texttt{43392423041} trên dev \texttt{0e43bcb},
+CI dev lịch sử & Run \texttt{43392423041} trên dev \texttt{0e43bcb},
 2026-11-13T08:20:14Z, API CI/Web CI success; install, Prisma generate cho API,
 lint, unit, build. Không có deploy/migrate/post-deploy smoke steps. \\
+CI head đã commit & Run43543439775, pull\_request,
+\texttt{6ee4199acaab709471144295adc98ac34e9f11c3}; API success
+14/11/2026 01:56:25Z, Web success01:57:00Z. Các step install/lint/unit/build
+success; không có LaTeX/migration/production E2E. Report đang sửa chưa commit,
+không được CI này kiểm chứng. \\
 PR25 tests theo body & Source \texttt{2216b7a}, merge 13/11/2026 05:32:30Z:
 focused 38/38, Vitest 479 PASS, 6 PostgreSQL opt-in skipped, TypeScript/build
 PASS. Body chưa ghi môi trường/thời điểm từng run; không coi PostgreSQL skipped là PASS. \\
@@ -82,60 +99,39 @@ scope Mock/Sandbox, không bật Mock production trong task này.
 Nguồn readiness là đúng tám AC người dùng cung cấp, đối chiếu đề v1.0
 \cite{a2brief}; không tự tạo gate hoặc đánh đồng missing evidence với test failure.
 
-\subsection{Readiness theo tám Acceptance Criteria}
-\begin{longtable}{p{0.31\linewidth}p{0.59\linewidth}}
-\toprule
-Acceptance Criterion & Trạng thái, căn cứ và bước tiếp theo \\
-\midrule
-\endfirsthead
-\toprule Acceptance Criterion & Trạng thái và căn cứ (tiếp) \\
-\midrule \endhead
-1. Frontend HTTPS hoạt động & NOT VERIFIED toàn AC. FE URL đã có, HTTP 200
-và Vercel status success; browser tool bị dừng. Cần bind domain/deployment SHA,
-kiểm tra UI/assets/menu và quyền người chấm. \\
-2. API và health truy cập & VERIFIED phạm vi HTTP tại thời điểm probe:
-backend GET / 200 Hello World! và /products 200 với 9 items. Render Auto-Deploy
-Live 02452f2 có ảnh; GET không xuất process SHA, không chứng minh readiness liên tục. \\
-3. PostgreSQL phù hợp, không public & PARTIAL/NOT VERIFIED. DB Free18/Singapore/1GB,
-expiry 10/12/2026 và 3 external /32 có ảnh. External restricted, chưa private-only;
-Internal app usage/backup và quyết định AC3 cần manager xác nhận. \\
-4. Release/tag, notes, rollback guide & NOT VERIFIED. Notes/runbook có;
-release API rỗng, tag A2 chưa xác nhận, rollback target/tier/compatibility còn thiếu.
-Rehearsal chỉ khuyến nghị. \\
-5. README và bàn giao đầy đủ & NOT VERIFIED toàn AC; mười docs và report source
-đã chuẩn bị, chờ metadata vận hành còn thiếu và review. \\
-6. Demo và Review/Retro evidence & NOT VERIFIED. Có payment claim và report local,
-chưa video/biên bản cuối; agenda không thay họp thực. \\
-7. Tạo phẩm bắt buộc trên repo & NOT VERIFIED toàn bộ. SRS/diagrams/code/CI/matrix
-có; PDF đã build/render, chưa commit. CD/smoke/demo cuối còn thiếu; checklist tại dossier mục 7. \\
-8. PR review và nghiệm thu & NOT VERIFIED. PR17 open, draft=false, review list
-rỗng; approval PR26/27 không thay acceptance SCRUM-117. \\
-\bottomrule
-\end{longtable}
+Readiness chi tiết theo tám AC nằm ở phụ lục\ref{sec:release-readiness}
+và dossier mục2. Có HTTP/deployment evidence cho API; FE alias, DB policy/
+Internal usage, release/tag và nghiệm thu vẫn cần xác nhận. Tài liệu vận hành
+phục vụ người chạy hệ thống, còn evidence snapshot không thay kiểm tra tại
+thời điểm chấm.
 
 \subsection{Topology, HTTPS và kiểm tra không phá hủy}
-FE URL người dùng cung cấp:
-\url{https://brewlite-a2-three.vercel.app/}. Probe PowerShell ngoài sandbox
-lúc 2026-11-13T14:13:16Z trả GET / 200 HTML và
-GET /api/backend/products 200 JSON có items. Đây là HTTP/proxy response;
-không suy DB readiness hoặc upstream/deployment SHA chỉ từ JSON/UI có sản phẩm.
-Lần sandbox trước không kết nối được là giới hạn môi trường probe, không
-phải kết luận production thất bại.
+Các public origins là frontend
+\url{https://brewlite-a2-three.vercel.app/} và backend
+\url{https://brewlite-a2-api-hntn.onrender.com/}.
+Snapshot13/11 ghi frontend/proxy catalog200 và backend200; timestamp chi tiết
+được giữ trong dossier mục13--15, tách khỏi thời điểm deploy Render.
 
-Browser host unavailable ở lượt trước. Người dùng yêu cầu bỏ Edge/Computer Use;
-Người dùng đính chính ngày 14/11/2026: Leader chưa kiểm tra/nghiệm thu
-SCRUM-117. Mixed-content/assets/menu và
-quyền người chấm chưa có verification độc lập trong lượt này.
-Backend origin đã được người dùng cung cấp:
-\url{https://brewlite-a2-api-hntn.onrender.com/}. GET kế thừa phiên trợ lý trước
-ngày 13/11/2026 tại 16:12:30.8778669Z và 16:12:31.6476271Z lần lượt / và
-/products đều 200. GET mới kết thúc 16:24:59.1098808Z và 16:24:59.4284827Z,
-/ trả Hello World!, /products JSON có 9 items. Không trộn thời điểm GET với deploy.
-Source GET / trả Hello World! chỉ là liveness; Prisma connect lúc startup
-không chứng minh DB đọc được ở mọi request. Không mặc định endpoint /health.
+Ngày14/11, frontend /200 lúc09:47:56Z; proxy catalog timeout20s lúc09:48:16Z;
+backend / và /products200 lúc09:48:20Z, catalog9 items. Retry proxy lúc09:53:38Z
+trả200/9 items. Các kết quả này giữ nguyên; chưa xác định nguyên nhân timeout.
+\textbf{Audit kế thừa lúc10:31 UTC (17:31 GMT+7)} cùng ngày, ghi ở dossier
+mục16, xác nhận cả frontend /, proxy /api/backend/products, backend / và
+/products đều200; hai catalog responses là JSON9 sản phẩm. Đây là lần kiểm
+tra sau thành công, không phải bằng chứng lỗi timeout đã được sửa.
+Lượt tích hợp báo cáo này chỉ sử dụng kết quả audit đó, không chạy lại HTTP.
+
+Ý nghĩa của snapshot là reachability HTTPS và catalog response tại thời điểm
+probe. Source GET / trả Hello World! chỉ là \textbf{liveness}, không query DB;
+GET /products đi qua ProductsService và Prisma đọc catalog. Không tự đặt
+endpoint /health hoặc suy continuous database readiness từ liveness.
+HTTP200 chưa xác minh browser/UI/assets/mixed-content/quyền người chấm,
+frontend deployed SHA, process SHA của từng request, DB identity hay actual
+Internal connection. Các header/body công khai không thay cấu hình hosting.
+Không dùng Edge/Computer Use; browser smoke vẫn NOT VERIFIED.
 
 Provider evidence cho thấy Vercel/Render, trong khi ADR-005 vẫn Proposed trong
-nguồn thiết kế. Ảnh mới xác nhận DB Free18/Singapore/1GB/Available và expiry
+nguồn thiết kế. Ảnh lịch sử13/11 xác nhận DB Free18/Singapore/1GB/Available và expiry
 10/12/2026. PostgreSQL chỉ cho 3 external /32; workspace/environment 0.0.0.0/0
 không làm nới DB rules vì IP phải được mọi cấp áp dụng cho phép. External vẫn
 restricted, chưa tắt hoàn toàn. Internal fields không chứng minh env app thực;
@@ -143,15 +139,23 @@ backup/restore và policy acceptance chưa có. Diagram vẫn là target design,
 được đối chiếu bằng evidence bổ sung, không dùng thay dashboard/runtime.
 
 \subsection{CI/CD và truy vết phiên bản}
+Audit kế thừa10:31 UTC ngày14/11 đọc lại CI43543439775: API CI/Web CI
+SUCCESS cho head\texttt{6ee4199}; đây không phải run mới hay CI cho thay đổi
+chưa commit. PR17 vẫn open/base dev, body rỗng và reviews rỗng: chưa có review,
+không phải reviewer đã từ chối. Leader chưa review/nghiệm thu.
+Remote chỉ có tag A1-final; Releases API trả rỗng tại thời điểm audit,
+không đủ căn cứ ghi A2 Released. Trạng thái mergeable cũng không là approval.
+
 PR27 chỉ sửa \path{apps/api/README.md}, mô tả Render production branch main,
 root apps/api, Dockerfile và Auto-Deploy After CI Checks Pass. Câu cuối ghi sẽ
-bổ sung evidence khi quan sát thành công. Ảnh mới đã có Render Auto-Deploy/Live
+bổ sung evidence khi quan sát thành công. Ảnh lịch sử13/11 đã có Render Auto-Deploy/Live
 source 02452f2, deployed field 08:39:19Z (15:39:19 GMT+7), duration39.4s.
 CI main cùng SHA có API end08:38:47Z và Web end08:39:15Z success; chuỗi thời
 gian phù hợp After CI Checks Pass. Đây là một lần CD backend có evidence,
 chưa full image tag/migration runner/failure/rollback chain \cite{renderdeploy}.
 
-\begin{longtable}{p{0.24\linewidth}p{0.66\linewidth}}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.24\linewidth}p{0.66\linewidth}}
+\caption{Mapping source, deployment và CI/CD}\\
 \toprule
 Mốc & Mapping và sai khác cần giữ \\
 \midrule
@@ -167,8 +171,9 @@ Main PR28 & \texttt{02452f2}; CI \texttt{43394783298} success;
 Vercel status success 2026-11-13T08:38:39Z với deployment
 \texttt{AayabZWzjhJAquCMYXjoaDppJWsi}. Production FE alias chưa bind;
 Render Auto-Deploy/Live cùng source02452f2, deployed field08:39:19Z có ảnh. \\
-SCRUM-117 local & HEAD \texttt{91e6f99}, app/config trùng dev \texttt{0e43bcb};
+Snapshot SCRUM-117 & HEAD \texttt{91e6f99}, app/config trùng dev \texttt{0e43bcb};
 PR17 remote còn \texttt{3543a55}. Docs cập nhật chưa stage/push, không có deploy mới. \\
+PR17 head14/11 & \texttt{6ee4199}, CI43543439775 API/Web success; bản report mới chưa commit, không có deploy mới. \\
 Release/tag & A2-v1.0.0 chỉ đề xuất. Release API trả rỗng, local tag chỉ A1-final
 \texttt{1951dc1} dùng provenance; chưa chọn source release cuối. \\
 \bottomrule
@@ -252,3 +257,10 @@ Nguồn portable và hướng dẫn local/Overleaf vẫn có, không upload.
 Hồ sơ có thể review cập nhật PR17,
 chưa đủ căn cứ nghiệm thu release hoặc Jira Done. Source và PDF được chuẩn bị
 trong bộ thay đổi PR17; trạng thái phát hành theo evidence trên PR.
+
+
+Audit10:31 đối chiếu checksum của \textbf{PDF65 trang local trước lần tích hợp
+này}, khác \textbf{PDF53 trang ở commit6ee4199}. Bản hiện tại được build lại
+từ working tree; số trang/checksum và QA mới ghi trong Markdown bàn giao,
+không đưa checksum vào PDF để tránh vòng tự tham chiếu. Sau commit/push được
+phép, phải đọc CI đúng SHA mới; CI của6ee4199 không chứng minh bản local này.

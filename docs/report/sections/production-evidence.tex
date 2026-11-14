@@ -2,6 +2,9 @@
 \label{sec:production-evidence}
 Các ảnh Render do người dùng cung cấp, đã đọc trực tiếp ngày 13/11/2026.
 Capture time của ảnh chưa có; giờ event/deployed được giữ như hiển thị.
+Đây là evidence deployment ngày13/11, độc lập với các HTTP snapshot sau đó.
+Audit14/11 lúc10:31 UTC không cung cấp process SHA cho từng request; không
+gán source của ảnh Render cho mọi GET mới (xem mục\ref{sec:deployment-release-delivery}).
 Bản raw có credential/IP không đưa vào repository hoặc PDF. Các bản sao dùng
 opaque redaction cục bộ đã mở kiểm tra lại; không dùng ảnh để suy ra secret/config
 thực của backend. Full SHA source02452f2 được Git/GitHub xác nhận là
@@ -10,7 +13,7 @@ thực của backend. Full SHA source02452f2 được Git/GitHub xác nhận là
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{docs/delivery/evidence/render-deploy-02452f2.png}
-\caption{Render Auto-Deploy succeeded/Live, source02452f2. Deployed field
+\caption[Render Auto-Deploy Live02452f2]{Render Auto-Deploy succeeded/Live, source02452f2. Deployed field
 13/11/2026 15:39:19 GMT+7 (08:39:19Z); Nest started15:39:54 và service live15:39:59.
 Đây là deployment evidence, không phải timestamp của HTTP smoke.}
 \label{fig:render-live-evidence}
@@ -20,7 +23,7 @@ thực của backend. Full SHA source02452f2 được Git/GitHub xác nhận là
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth,height=0.55\textheight,keepaspectratio]{docs/delivery/evidence/render-db-plan.png}
-\caption{DB Available, PostgreSQL18, Singapore, Free1GB. Backend web tier và
+\caption[Render PostgreSQL18 Free tại Singapore]{DB Available, PostgreSQL18, Singapore, Free1GB. Backend web tier và
 Vercel plan vẫn chưa xác nhận; không suy từ tier database.}
 \label{fig:render-db-plan-evidence}
 \end{figure}
@@ -35,7 +38,7 @@ runbook mới chuẩn bị không được ghi là backup đã có hoặc restor
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth,height=0.62\textheight,keepaspectratio]{docs/delivery/evidence/render-db-network-redacted.png}
-\caption{Networking: workspace/environment allow-all và ba DB /32 đã che IP.
+\caption[Render database external allowlist đã che IP]{Networking: workspace/environment allow-all và ba DB /32 đã che IP.
 Theo Render inbound rules, traffic external phải được mọi cấp áp dụng cho phép;
 DB đang restricted external, chưa private-only.}
 \label{fig:render-db-network-evidence}

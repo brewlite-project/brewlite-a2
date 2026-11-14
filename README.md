@@ -4,11 +4,11 @@
 Repository: [brewlite-project/brewlite-a2](https://github.com/brewlite-project/brewlite-a2).
 Nhánh tích hợp `dev`, stable/release `main`; PR tính năng và tài liệu vào `dev`.
 
-**Baseline kiểm tra 13/11/2026:** workspace `D:/CNPM_PJ/brewlite-a2`, branch `SCRUM-117-production-release-delivery`, HEAD `91e6f99bfd02353616b2e481fe613b7ea91118af`; `origin/dev` sau fetch lượt trước và đối chiếu lại là `0e43bcb80f64d6a5fa558cd80f71a199029535d0`. Đầu lượt working tree/index sạch; thay đổi lượt này chỉ ở tài liệu, chưa stage. Source ứng dụng/config tại HEAD trùng origin/dev; diff ba chấm chỉ 10 tài liệu SCRUM-117. Merge dev trong HEAD là lịch sử đã có trước lượt này, không phải thao tác vừa thực hiện.
+**Baseline kiểm tra mới 14/11/2026:** workspace `D:/CNPM_PJ/brewlite-a2`, branch `SCRUM-117-production-release-delivery`, HEAD/PR17 `6ee4199acaab709471144295adc98ac34e9f11c3`; fetch xác nhận dev `0e43bcb80f64d6a5fa558cd80f71a199029535d0`, main `02452f228712c3501c8d27f0f1ae737ad206785d`. Working tree/index sạch trước sửa; app/config tại HEAD trùng dev. Bản report tổng hợp mới đang sửa tài liệu, chưa stage/commit/push. Các SHA91e6f99/3543a55 và kiểm tra ngày13/11 là lịch sử.
 
-[PR #17](https://github.com/brewlite-project/brewlite-a2/pull/17) đã tồn tại, **open, draft=false**, head remote `3543a55d4fed63cd343f5da59d28500f124490be`, base `dev` (API snapshot base SHA `5021743`). Local HEAD đi trước remote branch 20 commits. PR files API hiện liệt kê đúng 10 file docs; nội dung local mới chưa có trên PR. Chưa có review trong API trả về. Chỉ chuẩn bị nội dung cập nhật PR, không tạo trùng/chuyển Draft/push trong lượt này.
+[PR #17](https://github.com/brewlite-project/brewlite-a2/pull/17) open, draft=false, base dev; 21 files ở head đã commit. CI43543439775 API/Web SUCCESS cho6ee4199, không đại diện thay đổi chưa commit. Title/body vẫn chưa cập nhật (lần trước connector403); Leader chưa review/nghiệm thu. Không cập nhật PR trong lượt này.
 
-Hồ sơ sẵn sàng review tài liệu, chưa xác nhận release A2 đã phát hành/nghiệm thu. Baseline 7dfc7ca/5021743 và test report cũ giữ provenance; evidence mới của #18–28 tại [delivery §13](docs/delivery/SCRUM-117-delivery.md#13-audit-hiện-hành-ngày-13112026).
+Báo cáo là bản tổng hợp **toàn đồ án A1 → A2**, từ bài toán/yêu cầu/thiết kế đến hiện thực, kiểm thử, Scrum, triển khai và đánh giá. Hồ sơ sẵn sàng review tài liệu không đồng nghĩa release đã phát hành/nghiệm thu. Bảng đối chiếu nội dung đề ở [report README](docs/report/README.md#đối-chiếu-báo-cáo-toàn-đồ-án-với-đề-a2-v10).
 
 ## Tài liệu và bàn giao
 
@@ -22,8 +22,8 @@ Hồ sơ sẵn sàng review tài liệu, chưa xác nhận release A2 đã phát
 
 | Endpoint triển khai | Hiện trạng / bằng chứng |
 |---|---|
-| Frontend public HTTPS | https://brewlite-a2-three.vercel.app/; HTTP GET 200 ngày 13/11; browser smoke NOT VERIFIED do công cụ. Domain → deployed SHA chưa bind |
-| Backend public HTTPS | https://brewlite-a2-api-hntn.onrender.com/; Render Auto-Deploy Live02452f2 theo ảnh, GET / và /products200/9 items ngày13/11 |
+| Frontend public HTTPS | https://brewlite-a2-three.vercel.app/; HTTP GET 200 ngày13/11 và14/11; browser smoke NOT VERIFIED do công cụ. Domain → deployed SHA chưa bind |
+| Backend public HTTPS | https://brewlite-a2-api-hntn.onrender.com/; Render Auto-Deploy Live02452f2 theo ảnh, GET / và /products200/9 items ngày13/11 và14/11 |
 | Backend liveness | GET /200 Hello World! là liveness; /products200 có Prisma read theo source, không suy DB Internal identity hoặc readiness liên tục |
 | API đọc DB | `GET /products`; kiểm tra riêng, không suy DB-ready từ `GET /` |
 
@@ -48,7 +48,7 @@ Không có root `package.json`/npm workspace; chạy npm trong đúng app. Khôn
 - Cả hai app có `package-lock.json` lockfileVersion 3, chưa khai báo `packageManager` hoặc root `engines` để pin npm riêng. Dùng npm đi kèm Node được chọn, ghi `npm --version` khi kiểm chứng; cài bằng `npm ci` trong từng app, không thay lockfile để chạy hướng dẫn.
 - PostgreSQL 18 cho local theo Compose; Docker Engine + Compose v2 nếu dùng containers.
 - Git; PowerShell hoặc Bash. Kiểm tra `node --version`, `npm --version`, `docker compose version` trước setup.
-- Stack resolve trong working tree hiện tại (HEAD 91e6f99, app source trùng dev 0e43bcb): web Next.js 16.4.6, React 19.2.8; API NestJS core 12.1.2, Prisma 7.10.1. Next.js 16.3.8 là snapshot 7dfc7ca lịch sử; `npm ci` phải dùng lockfile của checkout hiện tại, không trộn hai baseline.
+- Stack resolve trong working tree hiện tại (HEAD6ee4199, app source trùng dev 0e43bcb): web Next.js 16.4.6, React 19.2.8; API NestJS core 12.1.2, Prisma 7.10.1. Next.js 16.3.8 là snapshot 7dfc7ca lịch sử; `npm ci` phải dùng lockfile của checkout hiện tại, không trộn hai baseline.
 
 ## Local setup bằng host (PowerShell)
 

@@ -168,3 +168,13 @@ Verification inventory: [CI guide](ci/README.md), [MVP local report](A2_TestRepo
 **Cập nhật tiếp 14/11/2026:** HEAD91e6f99/dev0e43bcb giữ nguyên, 10 docs unstaged đầu vào được bảo toàn. Backend https://brewlite-a2-api-hntn.onrender.com/ có ảnh Render Auto-Deploy Live02452f2 (fullSHA02452f228712c3501c8d27f0f1ae737ad206785d), deployed field13/11/2026 08:39:19Z. GET mới / và /products200 lúc16:24:59Z ngày13/11, catalog9 items; GET không xuất processSHA. DB Free18/Singapore/1GB/Available, expiry10/12/2026; external3 /32 restricted, chưa private-only. Bỏ Edge/Computer Use theo yêu cầu; Người dùng đính chính ngày 14/11/2026: Leader chưa kiểm tra/nghiệm thu SCRUM-117. Evidence và các giới hạn tại dossier §14.
 
 [PDF báo cáo](report/output/main.pdf), [build/QA](report/README.md#kết-quả-build-và-qa-ngày-14112026), [dossier §14](delivery/SCRUM-117-delivery.md#14-evidence-render-backup-và-pdf--cập-nhật-14112026). AC2 VERIFIED snapshot HTTP/liveness/catalog; AC3 PARTIAL vì external còn3 /32 và Internal app usage chưa xác nhận. Requirement mapping không tự nâng thành acceptance; payment-status/QueryDR và manual reconciliation giữ mở.
+
+
+## Báo cáo toàn đồ án A1 đến A2 — cập nhật14/11
+
+Bản tích hợp mới bổ sung dữ liệu/API/hiện thực, chiến lược test, Scrum theo mốc PR và đánh giá; giữ các section yêu cầu/sơ đồ có sẵn, chuyển8 AC/ảnh production sang phụ lục. [Nội dung đề → report](report/README.md#đối-chiếu-báo-cáo-toàn-đồ-án-với-đề-a2-v10); [baseline/evidence mới](delivery/SCRUM-117-delivery.md#15-tổng-hợp-toàn-đồ-án--baseline-mới-ngày14112026). HEAD/PR17 6ee4199, app dev0e43bcb; CI43543439775 là cho head đã commit, không cho thay đổi mới. Backend14/11 / và/products200; FEproxy timeout20s rồi retry200, không browser smoke. Leader chưa nghiệm thu.
+
+FR-11/NFR-12 còn mismatch rounding FE floor vs BE half-up ở source6ee4199; ví dụ35004×120% preview42004, backend42005 VND. Report source34cbbc0 đã nêu, source hiện tại chưa sửa; đây là gap implementation được xác nhận tĩnh, không tự miễn AC hoặc chạy lại test.
+
+
+Báo cáo/PDF đã tích hợp snapshot kế thừa audit§16 (14/11 10:31 UTC), giữ timeout trước và phân biệt HTTP với browser/DB/SHA verification; không nâng8AC. [PDF metadata và QA mới](report/README.md#pdf-tích-hợp-audit16); [nhật ký tích hợp](delivery/SCRUM-117-delivery.md#17-tích-hợp-audit16-vào-báo-cáo-và-pdf). CI6ee4199 chỉ cho bản đã commit.

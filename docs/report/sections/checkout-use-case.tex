@@ -78,7 +78,7 @@ Danh mục FR/NFR Checkout đã được đối chiếu với SRS SCRUM-102; cá
   Sơ đồ Checkout nằm tại \texttt{docs/requirements/diagrams/checkout-use-case.drawio}.\\
   Xuất PDF vào \texttt{docs/report/assets/checkout-use-case.pdf} để hiển thị.}}%
 }
-\caption{Use Case Diagram Checkout --- Customer và VNPay Sandbox là actor ngoài; các service nội bộ không phải UML actor.}
+\caption[Use Case Diagram Checkout]{Use Case Diagram Checkout --- Customer và VNPay Sandbox là actor ngoài; các service nội bộ không phải UML actor.}
 \label{fig:a2-checkout-use-case}
 \end{figure}
 
@@ -87,6 +87,7 @@ Danh mục FR/NFR Checkout đã được đối chiếu với SRS SCRUM-102; cá
 \texttt{docs/requirements/srs.md} (SCRUM-102/A2-T1.2, origin/dev ngày
 08/11/2026). SRS vẫn ở trạng thái DRAFT; mapping không có nghĩa AC PASS.
 \begin{longtable}{|p{0.21\linewidth}|p{0.31\linewidth}|p{0.31\linewidth}|}
+\caption{Checkout: mapping FR/NFR}\\
 \hline
 \textbf{Nhóm Checkout} & \textbf{FR A2} & \textbf{NFR A2} \\ \hline
 JWT / ownership & FR-03, FR-05--07 & NFR-01, 02, 05, 09 \\ \hline
@@ -108,6 +109,7 @@ là ưu tiên suy luận chờ reviewer xác nhận. AC-A2 liên quan và mappin
 API Contract v4.0 với controller/service ở \texttt{origin/dev};
 không chạy lại tests hoặc VNPay Sandbox E2E.
 \begin{longtable}{|p{0.34\linewidth}|p{0.24\linewidth}|p{0.25\linewidth}|}
+\caption{Checkout: API và implementation inventory}\\
 \hline
 \textbf{Contract route} & \textbf{Kết quả} & \textbf{Source} \\ \hline
 \texttt{POST /orders} & ROUTE PRESENT & \texttt{orders.controller.ts} \\ \hline

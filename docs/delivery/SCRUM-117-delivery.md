@@ -2,13 +2,15 @@
 
 **Trạng thái: DRAFT — hồ sơ chuẩn bị review; chưa phát hành, chưa nghiệm thu, không đề xuất Jira Done.**
 
-**Snapshot trước khi cập nhật PR17 ngày 14/11/2026:** các mô tả HEAD/index/remote và kiểm tra bên dưới ghi tại lúc chuẩn bị bộ tài liệu. Người dùng đã giao quyền hoàn thiện, gồm commit/push hồ sơ và cập nhật PR17. Xem head, CI và trạng thái review hiện hành trên PR17; quyền này không thay kết quả nghiệm thu của nhóm.
+**Kiểm tra mới nhất 14/11/2026:** HEAD/PR17 `6ee4199`, dev `0e43bcb`, main `02452f2` đã đối chiếu remote. Báo cáo 65 trang và 22 file thay đổi còn local; index rỗng. PR17 chưa có review, body vẫn rỗng. Xem §16 để phân biệt phần đã tự kiểm chứng với quyết định/hoạt động còn cần nhóm thực hiện; các snapshot bên dưới giữ nguyên provenance.
+
+**Snapshot lịch sử trước cập nhật PR17 ngày14/11 (quyền thao tác trong snapshot không áp dụng thay chỉ dẫn lượt mới):** các mô tả HEAD/index/remote và kiểm tra bên dưới ghi tại lúc chuẩn bị bộ tài liệu. Người dùng đã giao quyền hoàn thiện, gồm commit/push hồ sơ và cập nhật PR17. Xem head, CI và trạng thái review hiện hành trên PR17; quyền này không thay kết quả nghiệm thu của nhóm.
 
 **Baseline kiểm tra 13/11/2026:** workspace `D:/CNPM_PJ/brewlite-a2`, branch `SCRUM-117-production-release-delivery`, HEAD `91e6f99bfd02353616b2e481fe613b7ea91118af`; `origin/dev` sau fetch lượt trước và đối chiếu lại là `0e43bcb80f64d6a5fa558cd80f71a199029535d0`. Đầu lượt 13/11 khoảng14Z working tree/index sạch. Lượt 23:20+07 tiếp nhận nguyên 10 docs unstaged; ngày14/11 tiếp tục PDF, index vẫn giữ nguyên. Source ứng dụng/config tại HEAD trùng origin/dev; diff ba chấm chỉ 10 tài liệu SCRUM-117. Merge dev trong HEAD là lịch sử đã có trước lượt này, không phải thao tác vừa thực hiện.
 
 [PR #17](https://github.com/brewlite-project/brewlite-a2/pull/17) đã tồn tại, **open, draft=false**, head remote `3543a55d4fed63cd343f5da59d28500f124490be`, base `dev` (API snapshot base SHA `5021743`). Local HEAD đi trước remote branch 20 commits. PR files API hiện liệt kê đúng 10 file docs; nội dung local mới chưa có trên PR. Chưa có review trong API trả về. Chỉ chuẩn bị nội dung cập nhật PR, không tạo trùng/chuyển Draft/push trong lượt này.
 
-**Cách đọc lịch sử:** §1 và các evidence E117-01/R/C, §9–12 giữ nguyên ngày/SHA/môi trường của lần kiểm tra cũ. Những câu “chưa commit/chưa có PR/9 migrations/chưa có URL” trong các snapshot đó chỉ đúng lúc ghi nhận. Hiện trạng dùng §2–4 và §14; §13 giữ snapshot trước khi có backend URL/ảnh Render; không copy từ worktree TEMP.
+**Cách đọc lịch sử:** §1 và các evidence E117-01/R/C, §9–12 giữ nguyên ngày/SHA/môi trường của lần kiểm tra cũ. Những câu “chưa commit/chưa có PR/9 migrations/chưa có URL” trong các snapshot đó chỉ đúng lúc ghi nhận. Hiện trạng dùng §2–4 và §15; §14 là snapshot build trước lần tổng hợp toàn đồ án; §13 giữ snapshot trước khi có backend URL/ảnh Render; không copy từ worktree TEMP.
 
 ## 1. Phạm vi và snapshot trước khi sửa (lịch sử 10/11/2026)
 
@@ -22,18 +24,18 @@
 
 ## 2. Readiness theo Acceptance Criteria
 
-Cập nhật 14/11/2026, Windows/GitHub read-only; GET/deployment giữ thời điểm riêng ngày 13/11. Nguồn là đúng 8 AC người dùng cung cấp, đối chiếu đề A2 v1.0. VERIFIED chỉ trong phạm vi đã chứng minh; NOT VERIFIED là chưa đủ bằng chứng, không có nghĩa đã chạy và thất bại. Hồ sơ chưa nghiệm thu.
+Cập nhật 14/11/2026, Windows/GitHub read-only; GET/deployment giữ thời điểm riêng ngày13/11; GET mới ngày14/11 ở §15. Nguồn là đúng 8 AC người dùng cung cấp, đối chiếu đề A2 v1.0. VERIFIED chỉ trong phạm vi đã chứng minh; NOT VERIFIED là chưa đủ bằng chứng, không có nghĩa đã chạy và thất bại. Hồ sơ chưa nghiệm thu.
 
 | AC | Evidence và kết quả | Commit / môi trường / thời điểm | Trạng thái | Việc tiếp theo / dependency |
 |---|---|---|---|---|
-| 1. Frontend production HTTPS hoạt động | URL người dùng: https://brewlite-a2-three.vercel.app/; Vercel commit status success tại main 02452f2. HTTP GET read-only xem §13; bỏ Edge/Computer Use theo yêu cầu; người dùng đính chính 14/11: Leader chưa kiểm tra/nghiệm thu | URL hiện tại; status 02452f2 lúc 2026-11-13T08:38:39Z; audit 13/11 | NOT VERIFIED toàn AC; có deployment/HTTP evidence một phần | SCRUM-116 bind domain → deployment ID/SHA, ghi phạm vi review thực tế khi diễn ra và quyền người chấm; không yêu cầu chạy lại browser trong lượt này |
-| 2. Backend API và health endpoint truy cập được | Backend https://brewlite-a2-api-hntn.onrender.com/: GET /200 Hello World!, /products200 JSON9 items; source liveness và Prisma read tách riêng; ảnh Auto-Deploy Live02452f2 | Render deployed field2026-11-13T08:39:19Z; GET kế thừa16:12:30/31Z, GET mới16:24:59Z; fullSHA §14 | VERIFIED phạm vi public API/liveness/catalog tại thời điểm probe | GET không xuất version; chưa xác minh process SHA phục vụ từng request, DB identity/Internal usage hoặc mọi failure case |
+| 1. Frontend production HTTPS hoạt động | URL người dùng: https://brewlite-a2-three.vercel.app/; Vercel commit status success tại main 02452f2. HTTP GET /200 ngày14/11, proxy timeout20s rồi retry200/9items; §15; bỏ Edge/Computer Use theo yêu cầu; người dùng đính chính 14/11: Leader chưa kiểm tra/nghiệm thu | URL hiện tại; status 02452f2 lúc 2026-11-13T08:38:39Z; audit14/11 | NOT VERIFIED toàn AC; có deployment/HTTP evidence một phần | SCRUM-116 bind domain → deployment ID/SHA, ghi phạm vi review thực tế khi diễn ra và quyền người chấm; không yêu cầu chạy lại browser trong lượt này |
+| 2. Backend API và health endpoint truy cập được | Backend https://brewlite-a2-api-hntn.onrender.com/: GET /200 Hello World!, /products200 JSON9 items; source liveness và Prisma read tách riêng; ảnh Auto-Deploy Live02452f2 | Render deployed field2026-11-13T08:39:19Z; GET kế thừa16:12:30/31Z, GET ngày13/11 16:24:59Z; GET14/11 09:48:20Z; fullSHA §14 | VERIFIED phạm vi public API/liveness/catalog tại thời điểm probe | GET không xuất version; chưa xác minh process SHA phục vụ từng request, DB identity/Internal usage hoặc mọi failure case |
 | 3. PostgreSQL production cấu hình phù hợp, không công khai trực tiếp | Ảnh DB Free18/Singapore/1GB/Available, expiry10-12-2026; DB3 /32 giao với workspace/environment0.0.0.0/0. External restricted, chưa private-only | Ảnh người dùng, capture time chưa rõ, đọc13/11; source/deploy02452f2 riêng | PARTIAL / NOT VERIFIED AC3 | Xác nhận rule đã lưu/chủ/thời hạn, chốt private-only hoặc việc chấp nhận admin external restricted; xác nhận backend dùng Internal, runner/backup/restore |
 | 4. Có release/tag, release notes và hướng dẫn rollback | Notes/runbook đã cập nhật; GitHub Releases API trả []; local tag chỉ A1-final. Main #26/#28 là merge promotion, chưa phải A2 tag/release | main 03668e3/02452f2; API đọc 13/11; docs local | NOT VERIFIED | Chốt release SHA/tag, bind FE/BE rollback targets theo tier/compatibility. A2-v1.0.0 chỉ đề xuất; rehearsal khuyến nghị |
-| 5. README và tài liệu bàn giao đầy đủ | 10 file docs có trong HEAD và PR #17; đã đồng bộ seed/migration/CD/evidence, có demo/Review/Retro templates và report source/PDF 53 trang đã build/render | HEAD 91e6f99 + unstaged docs / Windows / 13/11 | NOT VERIFIED toàn AC; hồ sơ sẵn sàng review tài liệu | Bổ sung metadata vận hành còn thiếu và review tài liệu; phân công tại §6 là đề xuất tổ chức của nhóm |
+| 5. README và tài liệu bàn giao đầy đủ | README/runbook/matrix/report toàn đồ án đã chuẩn bị, bảng nội dung đề tại report README; hồ sơ bổ sung sau head6ee4199 | PR17/head6ee4199, dev0e43bcb / Windows /14-11; PDF mới và QA §15 | PARTIAL; sẵn sàng review tài liệu, chưa Approved toàn AC | Review khả năng làm theo hướng dẫn; bổ sung metadata vận hành còn thiếu, không tạo AC phụ |
 | 6. Có bằng chứng demo và Sprint Review/Retrospective | #26 là báo cáo kết quả Sandbox một scenario; SCRUM-112 có ảnh/report local lịch sử. Chưa tìm thấy video/biên bản Review/Retro A2 cuối | #26 13/11; report 34cbbc0; audit 13/11 | NOT VERIFIED | Nhóm/Leader cung cấp biên bản và video thật, thời gian/increment/feedback; §5 là mẫu chuẩn bị |
-| 7. Các tạo phẩm bắt buộc có trên repository | SRS/diagrams/source/CI và 48 FR + 49 NFR matrix có trong checkout/PR; checklist đề §9.1 tại §7. CD end-to-end và final demo còn mở; PDF local đã build/render, chưa đưa lên repository remote | HEAD 91e6f99, dev 0e43bcb; PR17 remote 3543a55 / 13/11 | NOT VERIFIED toàn bộ | Hoàn tất checklist, review PDF đã build/render, evidence release/CD/demo và phiên bản nộp; cập nhật PR khi được phép |
-| 8. Có PR review và nghiệm thu | PR #17 open không phải Draft, chưa có review; #26/#27 có APPROVED riêng, không thay acceptance SCRUM-117 | #26 review 2026-11-13T07:26:07Z; #27 08:20:00Z; PR17 đọc 13/11 | NOT VERIFIED | Sau review local/cho phép Git: cập nhật PR17 vào dev, reviewer/Leader quyết định nghiệm thu |
+| 7. Các tạo phẩm bắt buộc có trên repository | Source/SRS/diagrams/tests/CI/matrix và PDF53 trang có logo đã ở PR17/head6ee4199; bản report toàn đồ án mới còn unstaged. CD/full E2E/demo cuối còn mở | dev0e43bcb, PR17/fullSHA6ee4199 §15 / GitHub và local /14-11 | PARTIAL / NOT VERIFIED toàn bộ checklist | Review/bổ sung tạo phẩm thực còn thiếu; chỉ đưa bản report mới lên PR sau cho phép Git |
+| 8. Có PR review và nghiệm thu | PR #17 open không phải Draft, chưa có review; #26/#27 có APPROVED riêng, không thay acceptance SCRUM-117 | #26 review 2026-11-13T07:26:07Z; #27 08:20:00Z; PR17/head6ee4199 đọc14/11, reviews[] | NOT VERIFIED | Sau review local/cho phép Git: cập nhật PR17 vào dev, reviewer/Leader quyết định nghiệm thu |
 
 Không có AC nào được ghi “đã test thất bại” chỉ từ thiếu evidence/công cụ. CI không thay CD; payment success không chứng minh QueryDR; agenda không thay cuộc họp. SRS AC-OPS-07 cần xác nhận cửa áp dụng, không tự thêm rollback rehearsal thành gate.
 
@@ -519,3 +521,89 @@ SCRUM116/manager: FE production alias/SHA, FE/web tier, Internal config thực v
 - Bộ hồ sơ quyết định dùng `A2-v1.0.0` làm tên đề xuất cho release đầu A2; source đích là commit stable sau khi hồ sơ và phạm vi release được review/merge. Main02452f2 hiện là bản ứng dụng đã có deployment evidence, chưa chứa bộ báo cáo mới. Candidate rollback backend2216b7a giữ trạng thái đề xuất vì chưa có retained deployment ID; runbook đã nêu cách chọn artifact tương thích.
 
 - Hiệu chỉnh logo theo phản hồi người dùng14/11: bổ sung logo gốc SGU rộng3cm trên bìa và asset trong bộ portable. PDF mới53 trang, 3466242 bytes, SHA256 `B11CEFA5D56B8D54A98F0567788742B1EAF1E45938EB3F69CB26242CC75F82D1`; ba lượt build exit0, đã xem render bìa/mục lục. Chi tiết nguồn logo và QA ở report README.
+
+
+## 15. Tổng hợp toàn đồ án — baseline mới ngày14/11/2026
+
+Fetch origin thành công, HEAD/PR17 `6ee4199acaab709471144295adc98ac34e9f11c3`, dev `0e43bcb80f64d6a5fa558cd80f71a199029535d0`, main `02452f228712c3501c8d27f0f1ae737ad206785d`. Đầu lượt tree/index sạch, fingerprint `bc72e138a4c449672ea7bfec89d628d29a5eb912`. PR17 open/draft=false/base dev/reviews[]; 21 files/+1781/-434 là diff head đã commit. Connector update trước trả403 Resource not accessible by integration; lượt này không gọi cập nhật PR. Leader chưa review/nghiệm thu. Bản chỉnh mới chưa commit nên CI head không đại diện thay đổi mới.
+
+Đã đọc đề A2 qua Drive và báo cáo A1 native Docs, template/preamble, toàn bộ input report và fixture chưa input. Bảng thiếu hụt trước/sau, nguồn và vị trí tại [report README](../report/README.md#đối-chiếu-báo-cáo-toàn-đồ-án-với-đề-a2-v10). Báo cáo cũ đã có Task1–3/diagrams/architecture, không mô tả sai là chỉ có delivery. Bổ sung schema/API/frontend/backend/tests/Scrum/evaluation; giữ archive và bản nộp A1 nguyên vẹn. Không tự sửa nghiệp vụ khi contract/code lệch.
+
+### Evidence tra lại và HTTP GET mới
+
+| Nguồn | Version / môi trường / thời điểm | Kết quả và giới hạn |
+|---|---|---|
+| CI43543439775 | head6ee4199, pull_request,14/11 01:55:53–01:57:00Z | API/Web SUCCESS, không LaTeX hoặc production E2E. Giữ lịch sử riêng CI43394783298/main024 và43392423041/dev0e43 |
+| GitHub PR collection/bodies/comments | Tới#28, đọc14/11 | Không có PR mới; #25 diagnostics, #26 PAID/SUCCESS/+10 và giao dịch cần manual reconciliation vẫn mở; comments không cung cấp resolution/IPN/QueryDR trace |
+| Vercel main status | 02452f2 success, updated13/11 08:38:39Z; deployment AayabZWzjhJAquCMYXjoaDppJWsi | Không bind production alias. Public deployments REST trả[]; connector endpoint400 unsupported, đọc publicREST fallback; không suy chưa deploy |
+| Releases/reviews | GitHub14/11 | Releases[]; PR17 reviews[]; không nghiệm thu/tag mới |
+| FE GET / | Start2026-11-14T09:47:54.9931707Z/end09:47:56.5093388Z | HTTPS200 HTML, không browser smoke/assets/menu/quyền người chấm |
+| FE proxy GET /api/backend/products | Start09:47:56.6501839Z/end09:48:16.7364660Z | Timeout20s thực tế trong probe này; không kết luận toàn production down hoặc tự gán nguyên nhân cold-start |
+| Backend GET / | Start09:48:16.7551143Z/end09:48:20.2085312Z | HTTP200 Hello World!, liveness không DB query |
+| Backend GET /products | Start09:48:20.2106512Z/end09:48:20.7887624Z | HTTP200 application/json9items, đọc qua Prisma theo source; processSHA/DBidentity chưa trực tiếp xác minh |
+| Retry FE proxy GET products | Start09:53:34.9872627Z/end09:53:38.0173071Z | HTTP200 JSON9items sau backend đã đáp ứng; không bỏ kết quả timeout đầu hoặc khẳng định nguyên nhân |
+
+GET dùng HTTPS validation mặc định, không bypass certificate, không đọc env/credential, không account/order/payment/callback/QueryDR/DB connection. Browser/Computer Use không được dùng theo yêu cầu. Render ảnh/deployed field13/11 và mọi GET13/11 vẫn nguyên timestamp ở §14, không đổi thành evidence14/11.
+
+Theo [Render inbound rules](https://render.com/docs/inbound-ip-rules#combining-ip-rules) đọc lại14/11: public inbound rules không áp private traffic; kết hợp nhiều cấp bằng điều kiện mọi cấp áp dụng đều cho phép, tính năng workspace/environment thuộc Scale/Enterprise workspace plan. DB Free không cho biết workspace plan. Với ảnh3 /32 và các cấp trên allow-all, external vẫn restricted, không private-only; cần actual saved policy/Internal usage xác nhận, không tự đổi network.
+
+### Mapping hiện hành và quyết định còn mở
+
+| Release/tag | Source | FE | BE | CI/CD | Smoke |
+|---|---|---|---|---|---|
+| Chưa chọn A2 tag, A2-v1.0.0 đề xuất | main02452f228712c3501c8d27f0f1ae737ad206785d | Status success/deployment Aayab…; production alias chưa bind | Render Auto-Deploy Live02452f2 ảnh13/11, full migration/image chain chưa đủ | CI43394783298; Render event08:39:19Z | GET13/11 và14/11 không xuất processSHA |
+| PR17 chưa release | head6ee4199acaab709471144295adc98ac34e9f11c3 | Preview status BRMz8tUd1NEjZrAtt9K34RCnkbXT | Không deploy do task report | CI43543439775 SUCCESS | PDF/logo checksum lịch sử B11C… ở report README; bản toàn đồ án mới chưa commit |
+
+Cần nhóm xác nhận còn thực: SCRUM114/115 scope/payment-status/QueryDR, rounding task và đối soát giao dịch; SCRUM116 alias mapping/Internal config/migration runner/image/rollback target và policy/backup trước10-12; nhóm/Leader demo/Review/Retro/release/tag/quyền người chấm/acceptance. Không tự gán cá nhân. Các metadata còn thiếu không tự tạo AC mới. Hướng dẫn backup/restore chưa phải backup đã có/restore verified. Git actions/production writes đều dừng trước phê duyệt mới.
+
+
+### Kết quả build/render cuối của báo cáo toàn đồ án
+
+PDF **65 trang,3930674 bytes**, SHA256 **E69A3F17AFC5FD36A9C98437C424FB96C4967C315997248DE7DC59BC0B6D401C** tại [report/output/main.pdf](../report/output/main.pdf). Bản53trang/B11CE… ở commit6ee4199 giữ là lịch sử. Engine/working directory/lệnh và QA đầy đủ tại [report README](../report/README.md#pdf-tổng-hợp-hiện-hành--build-và-qa-cuối1411). Dùng tool đã cài, không cài lại hoặc đổi engine; pass11 exit0 và aux/toc/lof/lot/out ổn định. Không Overfull/undefined refs/cites/LaTeX-Package Warning cuối;16 Underfull hbox đã xem. MiKTeX maintenance notice chưa check updates không phải lỗi compile.
+
+Đã render tất cả65trang90dpi, xem8 contact sheets và các trang chi tiết: bìa/logo/TOC/danh mục, dữ liệu/API/UI/test, Scrum/đánh giá và readiness; kiểm ngắt bảng/hình/landscape/footer/references/link destinations. Có19 hình/23 bảng caption; không trang trống bất thường theo kiểm text và visual, không U+FFFD hoặc text bbox ra ngoài page bounds. Overview diagrams cần zoom, có các pha vector; không xác minh mọi external link/quyền người chấm.
+
+File đề nghị commit và body hoàn chỉnh ở [release notes](release-notes-A2.md#file-đề-nghị-commit-sau-review-lượt-tổng-hợp-toàn-đồ-án). Thay đổi chỉ hồ sơ/report/figure captions/PDF; không code/schema/pipeline/archive. Source UI ảnh và5 ảnh Render đã che giữ nguyên, không sao chép raw credential. Index còn giữ fingerprint ban đầu; working/staged whitespace, links/anchors, TeX dependency/reference, conflict/sensitive-pattern scan kiểm tra riêng trước bàn giao. Không app tests/migration/seed/backup/restore/rollback production.
+
+**Kiểm tra cuối14/11:** 21 file text thay đổi,810 local links/anchors,13 TeX files/12 inputs/21 graphics nhánh được chọn,37 labels,6 cite uses/5 bibitems;48FR/49NFR giữ coverage. Checker không báo missing/duplicate reference hoặc conflict/sensitive-pattern match. Năm ảnh Render an toàn giữ nguyên byte; đã xem3 ảnh trong PDF và mở lại2 ảnh redacted không chèn PDF, không thấy credential trong vùng được che. Đây là scan có giới hạn, không bảo đảm loại trừ mọi secret. `git diff --check` và `git diff --cached --check` PASS riêng; staged diff rỗng, fingerprint `bc72e138a4c449672ea7bfec89d628d29a5eb912` không đổi. 19 tracked files sửa +3 TeX files mới, tất cả chưa stage; danh sách22 file ở release notes. Log/render/scripts tạm ở TEMP, không thuộc bộ commit đề nghị.
+
+## 16. Đối chiếu Git và khả năng hoàn thiện ngày14/11/2026
+
+Audit mới khoảng **10:31 UTC (17:31 UTC+07)**, thực hiện từ Windows checkout chính. Đã fetch origin thành công, không tích hợp branch. HEAD/local và PR17 vẫn `6ee4199acaab709471144295adc98ac34e9f11c3`; dev `0e43bcb80f64d6a5fa558cd80f71a199029535d0`; main `02452f228712c3501c8d27f0f1ae737ad206785d`. Diff HEAD với dev trong `apps` và `.github` rỗng. Giữ 19 tracked files sửa +3 section mới; index rỗng. Không stage/commit/push hoặc sửa production trong audit này.
+
+### Evidence mới trực tiếp
+
+| Cách kiểm tra / nguồn | Kết quả | Giới hạn |
+|---|---|---|
+| [PR17](https://github.com/brewlite-project/brewlite-a2/pull/17), PR API/reviews/comments | Open, base dev, head6ee4199, mergeable=true, draft=false; reviews=[]; comment hiện có là Vercel bot; body=null, title cũ | Mergeable không phải approval; chưa thử lại cập nhật metadata và không coi lỗi403 lịch sử là một lần thử mới |
+| [CI43543439775 jobs](https://github.com/brewlite-project/brewlite-a2/actions/runs/43543439775) | Đọc lại API CI/Web CI đều success, head_sha6ee4199 | Kết quả run kế thừa được xác nhận lại; không chạy tests mới, không đại diện22file local |
+| PR list mới nhất theo updated; đọc lại [#24](https://github.com/brewlite-project/brewlite-a2/pull/24), [#26](https://github.com/brewlite-project/brewlite-a2/pull/26), #27/#28 | Không có PR số mới hơn28 trong danh sách trả về; #24 báo10migrations/seed marker, #26 báo Sandbox success nhưng còn manual reconciliation | Đây là báo cáo kế thừa; chưa có runner log, QueryDR recovery hay resolution mới từ các nguồn này |
+| `git ls-remote --tags origin`; [GitHub Releases API](https://api.github.com/repos/brewlite-project/brewlite-a2/releases) | Remote chỉ A1-final và peeled target; releases=[] | Không có A2 tag/release tại thời điểm kiểm tra; không tự tạo tag để thay approval |
+| GET [frontend](https://brewlite-a2-three.vercel.app/) lúc10:31:07.192Z | HTTP200, text/html | Không chạy browser, chưa bind production alias/SHA |
+| GET [frontend proxy catalog](https://brewlite-a2-three.vercel.app/api/backend/products) lúc10:31:07.192Z | HTTP200 JSON,9 sản phẩm | Xác nhận proxy GET lần này; không xác nhận mọi UI flow hoặc nguyên nhân timeout của lần trước |
+| GET [backend root](https://brewlite-a2-api-hntn.onrender.com/) lúc10:31:07.192Z | HTTP200, text/html | Liveness snapshot; không thay database readiness hoặc xác định processSHA |
+| GET [backend catalog](https://brewlite-a2-api-hntn.onrender.com/products) lúc10:31:07.194Z | HTTP200 JSON,9 sản phẩm | Catalog read snapshot; không suy ra DB identity, actual Internal URL hoặc access policy |
+| SHA256 PDF local bằng Get-FileHash | E69A3F17AFC5FD36A9C98437C424FB96C4967C315997248DE7DC59BC0B6D401C, khớp bản65trang §15 | Lần này xác nhận byte/hash; build/render65trang là kết quả §15, không tuyên bố đã render mới |
+
+### Phần có thể tự hoàn thiện và phần chưa thể xác nhận thay nhóm
+
+- **Có thể tự làm trong hồ sơ:** sửa mô tả snapshot lỗi thời/nhập nhằng, kiểm tra source và public Git/HTTP, chuẩn bị report/PDF/runbook/release notes/body PR, đối chiếu8AC và kiểm tra diff. Audit này không phát hiện nguồn mới đủ để nâng trạng thái nghiệm thu.
+- **Cần quyền đọc hosting hoặc evidence đã che:** domain→deployment/SHA, actual DB Internal usage, migration runner/log, saved network policy và eligible rollback target. Không có connector Vercel/Render trong phiên này; public Git/HTTP không cung cấp các metadata đó. Không đọc credential để bù thiếu quyền.
+- **Cần quyết định nghiệp vụ/vận hành:** chấp nhận hoặc sửa gap payment-status/rounding/QueryDR, resolution giao dịch đối soát, DB external policy, phương án dữ liệu trước10/12 và release/rollback target. Chỉ chốt dựa nguồn được duyệt; không gán người vận hành từ tên tác giả commit.
+- **Cần hoạt động thực tế:** demo, Sprint Review/Retro và reviewer/Leader nghiệm thu. Agent có thể chuẩn bị agenda/kịch bản và tổng hợp evidence; không thay cuộc họp hoặc approval bằng tài liệu tự viết.
+- **Bước Git/phát hành riêng:** bản65trang còn local; sau khi được phép commit/push phải kiểm tra CI đúng SHA mới. PR17 hiện còn title cũ/body rỗng; dùng connector có quyền hoặc cập nhật thủ công, không lấy token để vượt403. Tag/release/merge và production writes cần mục tiêu/commit được chốt và quyền tương ứng.
+
+Kết luận audit: hồ sơ đủ để đưa vào review nội dung sau kiểm tra cuối; **không có căn cứ xác nhận toàn bộ SCRUM-117 đã hoàn thành**. AC2 có HTTP evidence mới, các AC còn lại giữ giới hạn tại§2. Rehearsal và người tiếp nhận riêng không tự trở thành AC bổ sung.
+
+
+## 17. Tích hợp audit16 vào báo cáo và PDF
+
+Lượt này xác minh Git local: branch SCRUM-117-production-release-delivery, HEAD6ee4199acaab709471144295adc98ac34e9f11c3, refs dev0e43bcb/main02452f2 khớp snapshot đầu vào; staged diff rỗng, fingerprint bc72e138a4c449672ea7bfec89d628d29a5eb912. Giữ nguyên19tracked files sửa và3section mới, không reset/stash/chuyển branch/copy worktree. Không fetch/HTTP/GitHub mới: fetch/CI/review/tag/release/GET10:31 là evidence kế thừa§16, không kiểm tra thực hiện lại trong lượt tích hợp này.
+
+Đã cập nhật trực tiếp4section: deployment-release-delivery (§10.1/10.2/10.5), production-evidence (ảnh/deployed13-11 độc lập HTTP), release-readiness (8AC giữ nguyên, reviews[] không phải rejection), project-evaluation (§12.1 ý nghĩa snapshot). Không chép nguyên bảng§16 vào report hoặc tạo chương audit; nhật ký chi tiết ở dossier. Không thay source/ngày/SHA/checksum lịch sử. Không tự thêm /health; GET / chỉ liveness, catalog có đường đọc Prisma nhưng HTTP không xác nhận Internal usage hoặc processSHA. Lần timeout09:48 và các lần proxy thành công09:53/10:31 giữ riêng, không tự kết luận fix nguyên nhân.
+
+PDF mới **65trang/3932356bytes**, SHA256 **E3A8956E269950261286A22CB6DBD46862E4F8C3E207FDBEBCDF090CE676B59F**, tại [PDF report](../report/output/main.pdf). Metadata/lệnh/QA ở [report README](../report/README.md#pdf-tích-hợp-audit16). Ba lượt pdfLaTeX exit0, aux/TOC/LoF/LoT/out ổn định; không Overfull/undefined refs/cites/LaTeX-Package Warning cuối,14 Underfull đã xem. Render toàn65trang90dpi, xem8contact sheets và riêng55–57/59/61–62; không thấy cắt/chồng/trang trống bất thường, bbox/glyph check không báo lỗi. Bookmarks/named destinations đọc bằng MuPDF. Không kiểm mọi external URL/quyền người chấm. Log/render tạm ngoài bộ PR; không upload, không cài lại toolchain.
+
+AC2 được bổ sung HTTP snapshot kế thừa, nhưng **không AC nào đổi trạng thái**. Các gap alias/SHA, actual Internal URL, runner/log/saved policy/rollback/data-expiry plan, payment-status/rounding/QueryDR/financial reconciliation, demo/Review/Retro/release/review/nghiệm thu giữ mở. Leader chưa review/nghiệm thu; rehearsal/người tiếp nhận riêng không trở thành AC mới. CI6ee4199 không đại diện thay đổi chưa commit.
+
+Kiểm tra mới của lượt tích hợp:21file text thay đổi,824local links/anchors,13TeX files/12inputs/21graphics nhánh được chọn,37labels/6cite uses/5bibitems,48FR/49NFR; không báo missing/duplicate reference, conflict marker hoặc mẫu nhạy cảm đã dò. `git diff --check` và `git diff --cached --check` kiểm tra riêng PASS; staged diff rỗng, index fingerprint không đổi. Không có app tests hoặc production probe mới. Mẫu dò có giới hạn, không chứng minh loại trừ mọi secret; ảnh evidence không bị thay đổi trong lượt này. Lượt này sửa4section/PDF và Markdown liên quan, không thêm source/asset mới ngoài3section đã có từ đầu lượt; toàn working tree vẫn19tracked sửa+3section mới chưa stage.

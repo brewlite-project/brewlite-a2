@@ -1,0 +1,38 @@
+% Extracted from existing section; detailed audit remains in dossier.
+\section{Readiness theo tám Acceptance Criteria}
+\label{sec:release-readiness}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.31\linewidth}>{\raggedright\arraybackslash}p{0.59\linewidth}}
+\caption{Readiness theo tám AC SCRUM-117}\\
+\toprule
+Acceptance Criterion & Trạng thái, căn cứ và bước tiếp theo \\
+\midrule
+\endfirsthead
+\toprule Acceptance Criterion & Trạng thái và căn cứ (tiếp) \\
+\midrule \endhead
+1. Frontend HTTPS hoạt động & NOT VERIFIED toàn AC. FE URL đã có, HTTP 200
+và Vercel status success; audit kế thừa14/11 10:31 UTC xác nhận HTTP/proxy200.
+Browser smoke chưa verified. Cần bind domain/deployment SHA,
+kiểm tra UI/assets/menu và quyền người chấm. \\
+2. API và health truy cập & VERIFIED phạm vi HTTP tại thời điểm probe:
+backend GET / 200 Hello World! và /products 200 với 9 items, được audit10:31 UTC
+xác nhận lại ngày14/11. Render Auto-Deploy
+Live 02452f2 có ảnh; GET không xuất process SHA, không chứng minh readiness liên tục. \\
+3. PostgreSQL phù hợp, không public & PARTIAL/NOT VERIFIED. DB Free18/Singapore/1GB,
+expiry 10/12/2026 và 3 external /32 có ảnh. External restricted, chưa private-only;
+Internal app usage/backup và quyết định AC3 cần manager xác nhận. \\
+4. Release/tag, notes, rollback guide & NOT VERIFIED. Notes/runbook có;
+audit10:31 chỉ thấy remote tag A1-final và Releases API rỗng; chưa có A2 release.
+Rollback target/tier/compatibility còn thiếu.
+Rehearsal chỉ khuyến nghị. \\
+5. README và bàn giao đầy đủ & NOT VERIFIED toàn AC; README/runbook và report tổng hợp
+đã chuẩn bị, chờ metadata vận hành còn thiếu và review. \\
+6. Demo và Review/Retro evidence & NOT VERIFIED. Có payment claim và report local,
+chưa video/biên bản cuối; agenda không thay họp thực. \\
+7. Tạo phẩm bắt buộc trên repo & NOT VERIFIED toàn bộ. SRS/diagrams/code/CI/matrix
+có; commit6ee4199 chứa PDF53 trang, bản tổng hợp local được rebuild riêng,
+chưa commit. CD/smoke/demo cuối còn thiếu; checklist tại dossier mục 7. \\
+8. PR review và nghiệm thu & NOT VERIFIED. PR17 open, draft=false, review list
+rỗng theo audit10:31 UTC là chưa có review, không phải reviewer đã từ chối.
+Leader chưa nghiệm thu; approval PR26/27 không thay acceptance SCRUM-117. \\
+\bottomrule
+\end{longtable}

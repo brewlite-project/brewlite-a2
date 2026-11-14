@@ -1,6 +1,6 @@
 # BrewLite - Deployment Diagram: Vercel & Render
 
-> **Cập nhật SCRUM-117, 13/11/2026:** workspace chính D:/CNPM_PJ/brewlite-a2, branch SCRUM-117-production-release-delivery, HEAD 91e6f99bfd02353616b2e481fe613b7ea91118af; app/config trùng origin/dev 0e43bcb80f64d6a5fa558cd80f71a199029535d0. §§1–7/9–10 giữ provenance thiết kế SCRUM-108 và ngày/SHA cũ. Không dùng target design/ADR-005 Proposed làm proof-of-deployment.
+> **Snapshot SCRUM-117 ngày13/11/2026 (baseline mới ở §11.7):** workspace chính D:/CNPM_PJ/brewlite-a2, branch SCRUM-117-production-release-delivery, HEAD 91e6f99bfd02353616b2e481fe613b7ea91118af; app/config trùng origin/dev 0e43bcb80f64d6a5fa558cd80f71a199029535d0. §§1–7/9–10 giữ provenance thiết kế SCRUM-108 và ngày/SHA cũ. Không dùng target design/ADR-005 Proposed làm proof-of-deployment.
 >
 > Hiện đã có FE URL Vercel, Vercel commit status và PR24/26 báo Render/catalog/payment runtime. Ảnh Render bổ sung xác nhận Auto-Deploy Live02452f2 lúc08:39:19Z và backend URL. DB Free18/Singapore/1GB/expiry10-12 và3 /32 có ảnh; actual Internal usage, web tier, runner/rollback targets vẫn thiếu; §8/11 và [delivery §13](delivery/SCRUM-117-delivery.md#13-audit-hiện-hành-ngày-13112026) ghi đúng giới hạn. Browser smoke NOT VERIFIED do công cụ bị dừng, không phải website fail.
 >
@@ -491,3 +491,12 @@ Backend02452f2 Live hiện tại có HTTP smoke, không phải đích cũ để 
 Frontend Vercel status02452f2 có ID AayabZWzjhJAquCMYXjoaDppJWsi nhưng production alias chưa bind. Preview36hKnqgZCX4NvuX8o24VgDUPW8W9/source2216b7a chưa chứng minh từng production nên không coi eligible. Manager chọn production target cũ theo plan/retention, kiểm tra FE/BE/schema/proxy/env compatibility. Sau rollback được duyệt: ghi UTC/IDs/SHA, GET FE/proxy/backend, migrationstate/catalog/payment invariants/scheduler và smoke được phép; chỉ ghi success theo actual.
 
 Nhóm tiếp tục quản lý dự án; tên cá nhân phụ trách tài nguyên chưa được xác nhận. Mẫu tiếp nhận ở delivery §6 là khuyến nghị khi đổi người quản lý. Bàn giao qua invite role Render/Vercel/GitHub phù hợp plan; người nhận tự mở deploy/logs/network/expiry/backup manifest và xác nhận. Không chuyển password tài khoản chủ; credential DB qua secret manager/role riêng. Plan không hỗ trợ role mong muốn cần Leader chốt phương án trước ký nhận.
+
+
+### 11.7. Đối chiếu mới ngày14/11 và giới hạn thực thi
+
+App source HEAD6ee4199 trùng dev0e43bcb; tài liệu/report mới không thay script/runtime/schema. Probe14/11 FE/200, backend/200 và/products200/9items; FEproxy một lần timeout20s rồi retry200. Timestamp/result ở [dossier§15](delivery/SCRUM-117-delivery.md#15-tổng-hợp-toàn-đồ-án--baseline-mới-ngày14112026). Không suy HTTP200 là browser smoke, DB Internal identity hoặc continuous readiness. Chưa làm clean-clone setup, Compose, migration, seed, backup/restore hay rollback mới.
+
+Đọc lại Render [IP rules](https://render.com/docs/inbound-ip-rules#combining-ip-rules), [Free](https://render.com/docs/free), [rollback](https://render.com/docs/rollbacks)14/11: rules nhiều cấp là giao khi áp dụng, workspace/environment rules yêu cầu workspace Scale/Enterprise; DB Free không xác định workspace/web tier. External3 /32 vẫn không private-only. Rollback dùng target artifact và một số target config (bao gồm environment variables); environment groups có quy tắc riêng, không tự đảo giá trị nhóm. Disks/DB state không được rollback cùng app; cần kiểm compatibility/config thực. Không đổi env/policy hoặc thực thi production trong lượt docs.
+
+Vercel rollback tra lại14/11 qua [official docs](https://vercel.com/docs/instant-rollback) và [CLI rollback](https://vercel.com/docs/cli/rollback): eligible production deployment phụ thuộc plan/retention, Hobby chỉ previous production. Project tier/eligible target chưa xác minh; không thao tác rollback. URL docs trực tiếp một lần trả lỗi fetch, nội dung official search/CLI vẫn truy cập được; không suy provider down.

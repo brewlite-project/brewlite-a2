@@ -39,6 +39,7 @@ So với phiên bản A1 vốn chỉ chia hai phân vùng tổng quát (\emph{Ng
 \begingroup\small
 \renewcommand{\arraystretch}{1.2}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.20\linewidth}>{\raggedright\arraybackslash}p{0.44\linewidth}>{\raggedright\arraybackslash}p{0.28\linewidth}}
+\caption{Swimlane, trách nhiệm và bất biến}\\
 \hline
 \textbf{Swimlane} & \textbf{Hành động chính trên sơ đồ} & \textbf{Ràng buộc / Bất biến} \\ \hline
 \endfirsthead
@@ -122,7 +123,7 @@ So với phiên bản A1 vốn chỉ chia hai phân vùng tổng quát (\emph{Ng
     }%
   }%
 }
-\caption{Activity Diagram Checkout --- \textbf{Pha 1}: Kiểm tra phiên JWT, tạo \texttt{Order (Order.status = PENDING)} nguyên tử và phân nhánh khởi tạo thanh toán (\texttt{ZERO\_AMOUNT}, \texttt{Mock}, \texttt{VNPay Sandbox}).}
+\caption[Activity: tạo Order]{Activity Diagram Checkout --- \textbf{Pha 1}: Kiểm tra phiên JWT, tạo \texttt{Order (Order.status = PENDING)} nguyên tử và phân nhánh khởi tạo thanh toán (\texttt{ZERO\_AMOUNT}, \texttt{Mock}, \texttt{VNPay Sandbox}).}
 \label{fig:a2-activity-checkout-phase1}
 \end{figure}
 
@@ -142,7 +143,7 @@ So với phiên bản A1 vốn chỉ chia hai phân vùng tổng quát (\emph{Ng
     }%
   }%
 }
-\caption{Activity Diagram Checkout --- \textbf{Pha 2A}: Tương tác \texttt{VNPay Sandbox}, luồng trình duyệt Return URL độc lập (tham chiếu sang Pha~2B), đồng bộ \texttt{GET /orders/me} và phân biệt rõ \texttt{Order.status} với \texttt{Payment.reconciliationState}.}
+\caption[Activity: khởi tạo thanh toán]{Activity Diagram Checkout --- \textbf{Pha 2A}: Tương tác \texttt{VNPay Sandbox}, luồng trình duyệt Return URL độc lập (tham chiếu sang Pha~2B), đồng bộ \texttt{GET /orders/me} và phân biệt rõ \texttt{Order.status} với \texttt{Payment.reconciliationState}.}
 \label{fig:a2-activity-checkout-phase2a}
 \end{figure}
 
@@ -162,7 +163,7 @@ So với phiên bản A1 vốn chỉ chia hai phân vùng tổng quát (\emph{Ng
     }%
   }%
 }
-\caption{Activity Diagram Checkout --- \textbf{Pha 2B}: Luồng nền độc lập xử lý webhook IPN, vòng lặp chu kỳ Scheduler \texttt{repeat ... repeat while} đánh giá các khoảng \(\text{now} < E\), \(E \le \text{now} < G\) (không hủy trong Grace) và \(\text{now} \ge G\), cùng khối chốt kết cục \texttt{Shared Finalization}.}
+\caption[Activity: callback và đối soát]{Activity Diagram Checkout --- \textbf{Pha 2B}: Luồng nền độc lập xử lý webhook IPN, vòng lặp chu kỳ Scheduler \texttt{repeat ... repeat while} đánh giá các khoảng \(\text{now} < E\), \(E \le \text{now} < G\) (không hủy trong Grace) và \(\text{now} \ge G\), cùng khối chốt kết cục \texttt{Shared Finalization}.}
 \label{fig:a2-activity-checkout-phase2b}
 \end{figure}
 
@@ -182,6 +183,6 @@ So với phiên bản A1 vốn chỉ chia hai phân vùng tổng quát (\emph{Ng
     }%
   }%
 }
-\caption{Activity Diagram Checkout tổng thể End-to-End (\texttt{UC-A2-CHECKOUT-001}) hợp nhất toàn bộ 5 swimlane (bản vector phóng đại không vỡ nét).}
+\caption[Activity Checkout tổng thể]{Activity Diagram Checkout tổng thể End-to-End (\texttt{UC-A2-CHECKOUT-001}) hợp nhất toàn bộ 5 swimlane (bản vector phóng đại không vỡ nét).}
 \label{fig:a2-activity-checkout-full}
 \end{figure}
