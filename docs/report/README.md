@@ -35,7 +35,7 @@ SHA256 source template đã đọc: `B74C3E07D5D1453B0BA6E98E678FC621F0F043B2561
 
 **Chọn pdfLaTeX.** Căn cứ: preamble mẫu dùng `vntex`, không có `fontspec`/font OpenType bắt buộc. Log mẫu đi kèm `Assignment_report.log` dòng đầu ghi **pdfTeX 1.40.26 / TeX Live 2024, preloaded format=pdflatex**, ngày build lịch sử 08/10/2025; `.fdb_latexmk` cũng ghi rule `pdflatex`. Đây là bằng chứng engine đã dùng cho **template lịch sử**, không phải build mới của báo cáo BrewLite.
 
-Main hiện dùng `inputenc[utf8]`, `fontenc[T5]`, `vntex`; default font family được T5/VnTeX cung cấp, không phụ thuộc font hệ điều hành chưa được chỉ định. [VnTeX trên CTAN](https://ctan.org/pkg/vntex) cung cấp font và macros tiếng Việt cho TeX Live/MiKTeX. Các assets được chèn là PDF, phù hợp pdfLaTeX. Chín inputs của main không yêu cầu `fontspec`; `domain-class-check.tex` có fontspec nhưng là fixture độc lập, **không được input vào main**. Không dùng engine của fixture để chọn engine báo cáo.
+Main hiện dùng `inputenc[utf8]`, `fontenc[T5]`, `vntex`; default font family được T5/VnTeX cung cấp, không phụ thuộc font hệ điều hành chưa được chỉ định. [VnTeX trên CTAN](https://ctan.org/pkg/vntex) cung cấp font và macros tiếng Việt cho TeX Live/MiKTeX. Các assets được chèn gồm PDF và PNG, phù hợp pdfLaTeX. Chín inputs của main không yêu cầu `fontspec`; `domain-class-check.tex` có fontspec nhưng là fixture độc lập, **không được input vào main**. Không dùng engine của fixture để chọn engine báo cáo.
 
 Không chuyển sang XeLaTeX/LuaLaTeX hoặc bỏ package để ép build. Nếu nhóm yêu cầu template/font mới khác mẫu đã đọc, cần cập nhật preamble và xác nhận riêng. Bản main là bản thích nghi cấu trúc SGU đã mô tả, không khẳng định sao chép nguyên trạng mọi package/logo của mẫu.
 
@@ -67,7 +67,7 @@ Nếu log còn yêu cầu rerun reference/TOC thì tiếp tục đúng engine đ
 Không có tài liệu nào được upload trong lượt này. Chỉ đóng gói allowlist sau, giữ path từ repository root:
 
 - `docs/report/main.tex` → **`main.tex` ở root của ZIP/Overleaf** (nội dung nguyên byte); không đổi các input paths.
-- `docs/report/sections/*.tex`, `docs/report/assets/*.pdf`.
+- `docs/report/sections/*.tex`, `docs/report/assets/*.pdf` và `docs/report/assets/logoITSGU.png`.
 - Năm ảnh an toàn `docs/delivery/evidence/*.png` dùng cho production evidence; không lấy ảnh raw từ clipboard.
 - `docs/diagrams/domain-class-figure.tex`, `deployment-figure.tex`, `brewlite-domain-class.pdf`, `brewlite-deployment.pdf`.
 - Các Markdown để reviewer đối chiếu: `docs/report/README.md`, `docs/deployment.md`, `docs/delivery/SCRUM-117-delivery.md`, `docs/delivery/release-notes-A2.md`, `docs/traceability-matrix.md`.
@@ -88,6 +88,7 @@ $reportFiles = @(
 )
 $reportFiles += Get-ChildItem docs/report/sections -Filter *.tex | ForEach-Object { 'docs/report/sections/' + $_.Name }
 $reportFiles += Get-ChildItem docs/report/assets -Filter *.pdf | ForEach-Object { 'docs/report/assets/' + $_.Name }
+$reportFiles += 'docs/report/assets/logoITSGU.png'
 $reportFiles += Get-ChildItem docs/delivery/evidence -Filter *.png | ForEach-Object { 'docs/delivery/evidence/' + $_.Name }
 $reportArchive = [IO.Compression.ZipFile]::Open($reportZip, [IO.Compression.ZipArchiveMode]::Create)
 try {
@@ -133,4 +134,11 @@ PDF53 trang và source hiện tại dành cho review tài liệu. Không có tag
 
 Người dùng đính chính Leader chưa kiểm tra/nghiệm thu. Báo cáo và dossier đã sửa nhận định PASS trước đó. Phương án soạn thảo là nhóm tiếp tục quản lý dự án; mẫu chuyển quyền áp dụng khi đổi người quản lý, tên cá nhân chỉ ghi khi có nguồn.
 
-PDF hiện hành có **53 trang**, 3175123 bytes, SHA256 `F796B94AA56D2D80F341F182627E21FB64F58F6B705843911EBD05C35E5B9CCB`. Rebuild bằng pdfLaTeX + VnTeX, ba lượt cuối exit 0. Log không có Overfull, undefined reference/citation hoặc LaTeX/Package Warning. Có Underfull hbox ở các đoạn/bảng căn đều; đã xem toàn bộ sáu contact sheets và trang 47/49 ở 140 dpi, không thấy cắt/chồng chữ. Các hình sơ đồ tổng thể cần zoom để đọc chi tiết. MuPDF render toàn bộ 53 trang. Kết quả pass9 ở trên là lịch sử. Build/render mới nằm ở TEMP/brewlite-scrum117-review-final.
+Bản trước bổ sung logo có **53 trang**, 3175123 bytes, SHA256 `F796B94AA56D2D80F341F182627E21FB64F58F6B705843911EBD05C35E5B9CCB`. Rebuild bằng pdfLaTeX + VnTeX, ba lượt cuối exit 0. Log không có Overfull, undefined reference/citation hoặc LaTeX/Package Warning. Có Underfull hbox ở các đoạn/bảng căn đều; đã xem toàn bộ sáu contact sheets và trang 47/49 ở 140 dpi, không thấy cắt/chồng chữ. Các hình sơ đồ tổng thể cần zoom để đọc chi tiết. MuPDF render toàn bộ 53 trang. Kết quả pass9 ở trên là lịch sử. Build/render mới nằm ở TEMP/brewlite-scrum117-review-final.
+
+
+## Bổ sung logo SGU ngày 14/11/2026
+
+Bìa dùng đúng `logoITSGU.png` từ bộ template SGU người dùng cung cấp, đặt rộng 3 cm như lệnh trong template. Asset được lưu tại `docs/report/assets/logoITSGU.png`, SHA256 `F489C5117713707DD63FC4707E3EE7990CE3D5C76A2406AF8D99C59574B74E26`; hướng dẫn ZIP đã bao gồm ảnh.
+
+PDF hiện hành **53 trang**, 3466242 bytes, SHA256 `B11CEFA5D56B8D54A98F0567788742B1EAF1E45938EB3F69CB26242CC75F82D1`. Ba lượt pdfLaTeX exit 0, không có Overfull hoặc LaTeX/Package Warning trong log cuối. Đã render và xem bìa cùng trang mục lục đầu bằng MuPDF ở 120 dpi; logo hiển thị đúng, thông tin nhóm và nhãn DRAFT nằm trong trang bìa. Phần nội dung đã QA ở bản trước; thay đổi này chỉ chèn logo trên titlepage.
