@@ -2,23 +2,13 @@
 
 Trung tâm điều hướng tài liệu và tạo phẩm của đồ án **BrewLite Assignment 2**. Các đường dẫn trong file này được viết tương đối từ thư mục `docs/`.
 
-**Cập nhật SCRUM-117 ngày 11/11/2026:** thư mục chính `D:/CNPM_PJ/brewlite-a2`, branch
-`SCRUM-117-production-release-delivery`, HEAD/origin/dev `5021743e99d73c2ce795df72ee5aaa90b04bb0da`.
-Hồ sơ đang chờ review, chưa release/nghiệm thu. [Readiness, evidence, demo và checklist nộp](delivery/SCRUM-117-delivery.md),
-[release notes + PR draft](delivery/release-notes-A2.md),
-[runbook migration/seed/rollback](deployment.md#11-runbook-scrum-117--migration-seed-và-rollback).
+**Baseline kiểm tra 13/11/2026:** workspace `D:/CNPM_PJ/brewlite-a2`, branch `SCRUM-117-production-release-delivery`, HEAD `91e6f99bfd02353616b2e481fe613b7ea91118af`; `origin/dev` sau fetch lượt trước và đối chiếu lại là `0e43bcb80f64d6a5fa558cd80f71a199029535d0`. Đầu lượt working tree/index sạch; thay đổi lượt này chỉ ở tài liệu, chưa stage. Source ứng dụng/config tại HEAD trùng origin/dev; diff ba chấm chỉ 10 tài liệu SCRUM-117. Merge dev trong HEAD là lịch sử đã có trước lượt này, không phải thao tác vừa thực hiện.
 
-Readiness dùng **8 AC SCRUM-117 do người dùng đã cung cấp** và bản đề
-[A2 v1.0](https://drive.google.com/file/d/1CYVsexpTXZ6Uyg2FHMRE8lnJHSPkYQmi/view)
-đã đọc qua Drive; checklist §9.1 được ánh xạ ở delivery §7. Rehearsal rollback là khuyến nghị hiện tại;
-scope payment-status/QueryDR cần quyết định A2 cụ thể, không tự chặn mọi AC.
-Report chọn **pdfLaTeX** theo preamble và log template SGU lịch sử; chưa tìm được
-engine local khả dụng để build PDF mới. [Hướng dẫn local/Overleaf và bộ nguồn](report/README.md)
-ghi các bước người dùng thực hiện; chưa upload tài liệu.
+[PR #17](https://github.com/brewlite-project/brewlite-a2/pull/17) đã tồn tại, **open, draft=false**, head remote `3543a55d4fed63cd343f5da59d28500f124490be`, base `dev` (API snapshot base SHA `5021743`). Local HEAD đi trước remote branch 20 commits. PR files API hiện liệt kê đúng 10 file docs; nội dung local mới chưa có trên PR. Chưa có review trong API trả về. Chỉ chuẩn bị nội dung cập nhật PR, không tạo trùng/chuyển Draft/push trong lượt này.
 
-**Source hiện tại:** PR #16 đã được tích hợp tại HEAD `5021743`; phần thay đổi là proxy và
-package/lockfile web, không thêm CD hoặc deployment evidence. Snapshot `7dfc7ca` và các SHA
-test cũ giữ vai trò lịch sử. [Readiness, source mapping và trạng thái draft PR](delivery/SCRUM-117-delivery.md#12-đối-chiếu-dev-mới-5021743-chưa-tích-hợp).
+[Readiness/evidence/demo/checklist](delivery/SCRUM-117-delivery.md), [release notes và body cập nhật PR17](delivery/release-notes-A2.md), [runbook migration/seed/rollback](deployment.md#11-runbook-scrum-117--migration-seed-và-rollback). Source mới #18–23/#25/#27 đã có trong checkout; CI không thay CD. Browser smoke NOT VERIFIED do công cụ; FE URL đã có và HTTP evidence ghi ở delivery §13.
+
+Report [main.tex](report/main.tex) kế thừa roster/nền tảng A1 có nguồn, bổ sung triển khai/kiểm thử/vận hành A2; compiler **pdfLaTeX + VnTeX**. [Build local/Overleaf](report/README.md); PDF tổng hợp đã build/render, xem README báo cáo, không upload dịch vụ ngoài.
 
 ## 1. Bản đồ tài liệu
 
@@ -90,3 +80,9 @@ git status --short
 ```
 
 Khi PR có thay đổi đường dẫn, đối chiếu link tương đối với file thực tế trong Git tree. Có thể dùng công cụ Markdown link checker đã được nhóm chấp thuận nếu đã được cấu hình; không giả định một checker chưa có trong repository. Trước khi commit, bảo đảm không stage file môi trường, secret, log chứa thông tin nhạy cảm hoặc file review tạm.
+
+## Cập nhật evidence và PDF ngày14/11/2026
+
+**Cập nhật tiếp 14/11/2026:** HEAD91e6f99/dev0e43bcb giữ nguyên, 10 docs unstaged đầu vào được bảo toàn. Backend https://brewlite-a2-api-hntn.onrender.com/ có ảnh Render Auto-Deploy Live02452f2 (fullSHA02452f228712c3501c8d27f0f1ae737ad206785d), deployed field13/11/2026 08:39:19Z. GET mới / và /products200 lúc16:24:59Z ngày13/11, catalog9 items; GET không xuất processSHA. DB Free18/Singapore/1GB/Available, expiry10/12/2026; external3 /32 restricted, chưa private-only. Bỏ Edge/Computer Use theo yêu cầu; Người dùng đính chính ngày 14/11/2026: Leader chưa kiểm tra/nghiệm thu SCRUM-117. Evidence và các giới hạn tại dossier §14.
+
+[PDF báo cáo](report/output/main.pdf), [build/QA](report/README.md#kết-quả-build-và-qa-ngày-14112026), [dossier §14](delivery/SCRUM-117-delivery.md#14-evidence-render-backup-và-pdf--cập-nhật-14112026). AC2 VERIFIED snapshot HTTP/liveness/catalog; AC3 PARTIAL vì external còn3 /32 và Internal app usage chưa xác nhận. Requirement mapping không tự nâng thành acceptance; payment-status/QueryDR và manual reconciliation giữ mở.

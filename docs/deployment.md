@@ -1,54 +1,10 @@
 # BrewLite - Deployment Diagram: Vercel & Render
 
-> **Cập nhật SCRUM-117, 11/11/2026:** §§1–10 giữ provenance thiết kế SCRUM-108;
-> không dùng snapshot `b542ee4` bên dưới như source hiện hành. Đối chiếu remote
-> `dev` và HEAD của branch SCRUM-117 hiện tại: `5021743e99d73c2ce795df72ee5aaa90b04bb0da`;
-> CI hiện đã có `.github/workflows/ci.yml`, chưa có CD trong tree; các mô tả
-> “chưa có workflow” bên dưới chỉ đúng snapshot thiết kế cũ. ADR-005 vẫn Proposed.
-> [Readiness và evidence SCRUM-117](delivery/SCRUM-117-delivery.md) ghi các gate
-> runtime còn thiếu. Runbook hiện hành bổ sung ở §11; không deployment/rollback
-> production trong lượt chuẩn bị hồ sơ.
+> **Cập nhật SCRUM-117, 13/11/2026:** workspace chính D:/CNPM_PJ/brewlite-a2, branch SCRUM-117-production-release-delivery, HEAD 91e6f99bfd02353616b2e481fe613b7ea91118af; app/config trùng origin/dev 0e43bcb80f64d6a5fa558cd80f71a199029535d0. §§1–7/9–10 giữ provenance thiết kế SCRUM-108 và ngày/SHA cũ. Không dùng target design/ADR-005 Proposed làm proof-of-deployment.
 >
-> **Sau review SCRUM-117:** 8 AC đã được người dùng cung cấp tại
-> [delivery §2](delivery/SCRUM-117-delivery.md#2-readiness-theo-acceptance-criteria).
-> Các checklist thiết kế lịch sử bên dưới không tự thêm gate vào AC này.
-> Payment-status/QueryDR cần đối chiếu scope release theo
-> [bảng nguồn và tác động](delivery/SCRUM-117-delivery.md#phạm-vi-release-gap-và-quyết-định-cần-xác-nhận);
-> rehearsal chưa có căn cứ bắt buộc. Runbook theo candidate provider không
-> chứng minh đã thực thi được trên môi trường thật chưa có ID/tier.
+> Hiện đã có FE URL Vercel, Vercel commit status và PR24/26 báo Render/catalog/payment runtime. Ảnh Render bổ sung xác nhận Auto-Deploy Live02452f2 lúc08:39:19Z và backend URL. DB Free18/Singapore/1GB/expiry10-12 và3 /32 có ảnh; actual Internal usage, web tier, runner/rollback targets vẫn thiếu; §8/11 và [delivery §13](delivery/SCRUM-117-delivery.md#13-audit-hiện-hành-ngày-13112026) ghi đúng giới hạn. Browser smoke NOT VERIFIED do công cụ bị dừng, không phải website fail.
 >
-> **Nguồn đề đã bổ sung:** [Assignment 2 v1.0](https://drive.google.com/file/d/1CYVsexpTXZ6Uyg2FHMRE8lnJHSPkYQmi/view),
-> §7.3 yêu cầu image tag theo SHA/semantic version, push registry khi nền tảng
-> yêu cầu, safe migration và health/smoke sau deploy. §7.2 chỉ nêu GET /health
-> làm ví dụ; source hiện có GET /, không cần tự đặt endpoint mới. §7.4/9.1 yêu
-> cầu rollback guide, không nêu rehearsal. Các câu “nếu rubric yêu cầu” trong
-> snapshot thiết kế cũ được hiểu theo nguồn mới này; không tự thêm registry
-> độc lập hoặc coi host-build chưa có image version evidence là đã đáp ứng.
->
-> **Source hiện tại tại HEAD 5021743:** PR #16 của SCRUM-116
-> chỉ nâng Next.js 16.4.6 và sửa web proxy. Response proxy bỏ connection,
-> keep-alive, transfer-encoding, content-length, content-encoding; 502 public
-> dùng message chung, error được log phía server. Không suy đã rà sạch log hoặc
-> đã sửa nguyên nhân 502 lịch sử. Biến proxy, URL resolution, health, Docker/
-> Compose, migration/seed và workflow không đổi; hướng dẫn ở §11 vẫn có điều
-> kiện theo candidate provider/tier. [Evidence/new baseline](delivery/SCRUM-117-delivery.md#12-đối-chiếu-dev-mới-5021743-chưa-tích-hợp)
-> phân biệt CI của PR #16 với deploy/smoke còn follow-up.
-
-| Thuộc tính | Giá trị |
-| --- | --- |
-| Task | A2-T3.2 / SCRUM-108 |
-| Phiên bản | 1.1 - sửa DEP-01/02/03 sau review vòng 1, PR #6 |
-| Ngày đối chiếu source và tài liệu hosting | 08/11/2026 |
-| Source snapshot | `b542ee4`, cùng commit với `origin/dev` tại thời điểm kiểm tra local |
-| Trạng thái | **TARGET DESIGN - CHƯA XÁC MINH MÔI TRƯỜNG DEPLOY** |
-| Review base | `dev` |
-
-Đây là kiến trúc được chọn để triển khai thử: Next.js trên Vercel Hobby, NestJS
-trên Render Web Service, Render PostgreSQL Free, GitHub Actions cho CI/CD và
-VNPay Sandbox. Các node thể hiện đích triển khai, không xác nhận dịch vụ đã được
-tạo hay đã chạy thành công. Chưa có URL, service ID, region hoặc dashboard
-evidence thực tế được xác minh trong task này. Không triển khai production,
-thay đổi nghiệp vụ thanh toán, endpoint, Prisma Schema hoặc workflow CI/CD.
+> Đề [A2 v1.0](https://drive.google.com/file/d/1CYVsexpTXZ6Uyg2FHMRE8lnJHSPkYQmi/view) §7.2 nêu /health làm ví dụ; source dùng GET /. §7.3 yêu cầu image tag SHA/semantic version, registry khi provider yêu cầu, migration an toàn và smoke; §7.4 yêu cầu rollback guide, chưa bắt buộc rehearsal. 8 AC ở [delivery §2](delivery/SCRUM-117-delivery.md#2-readiness-theo-acceptance-criteria). Không tự miễn payment-status/QueryDR hoặc thay đổi production.
 
 ## 1. Sơ đồ và cách đọc
 
@@ -259,7 +215,7 @@ là đã được CI bảo vệ.
 | PostgreSQL Free hết hạn sau 30 ngày, không có managed backup | Demo có thể mất DB hoặc mất dữ liệu nếu không có phương án phục hồi | Ghi ngày tạo/hết hạn, chủ sở hữu và phương án export/restore hoặc quyết định nâng plan được duyệt |
 | Nếu Web Service dùng Free: ngủ sau 15 phút không có inbound traffic, filesystem tạm thời | Cold start có thể làm IPN/proxy timeout; timer scheduler không chạy lúc ngủ | Ghi tier thực tế; thử idle/cold start, IPN retry, restart/recovery; không cam kết SLA hoặc scheduler luôn chạy |
 | Vercel Hobby dành cho personal/non-commercial use, có giới hạn Git integration với private organization repository/commit author | Repository `brewlite-project/brewlite-a2` có thể không phù hợp quyền deploy hiện tại | Xác minh mục đích demo, visibility, owner, scope và quyền deploy thực tế; nếu không phù hợp, ghi quyết định hosting được duyệt trước khi đổi thiết kế |
-| Backend status route chưa có | Return UI chưa đọc được trạng thái có thẩm quyền | Theo dõi task triển khai route riêng rồi kiểm thử Return/IPN trên host thật |
+| Backend status route/API-03 chưa có | Helper FE gọi route chưa được đáp ứng; current PaymentPageView/Order Confirmation polling orders/me, không suy toàn bộ Return mất server truth | Chốt contract/scope riêng, kiểm thử đúng API-03 và Return/orders/me trên host thật; audit 13/11 tại delivery §3 |
 | QueryDR Sandbox E2E còn mở, source IP outbound chưa xác minh | Chưa chứng minh phục hồi khi mất IPN | Tiếp tục gate trong ADR/SCRUM-95; không đánh dấu pass từ unit tests |
 | Cơ chế private migration runner và CD chưa triển khai | Chưa có rollout tái lập được | Chốt cấu hình theo tier thật, kiểm tra migration/checks và gắn evidence |
 | Build tại host, không có registry ứng dụng độc lập | Chưa có bằng chứng image tag/digest và rollback tương ứng release | Thu mapping commit → build/artifact/image → deploy; xác nhận yêu cầu tagged image ở Task 5 theo §7.1, không coi source deploy là đã chứng minh image promotion |
@@ -319,29 +275,28 @@ registry trong vòng sửa PR #6.
 
 ## 8. Đối chiếu môi trường thực tế trước nghiệm thu cuối
 
-**Chưa thực hiện:** không có URL deployment được cung cấp/xác minh, và deployment
-production ngoài scope. Người triển khai phải thay `TBD` bằng dữ liệu quan sát,
+**Đối chiếu 13/11/2026:** có URL FE và evidence provider/CI một phần; browser và direct backend chưa verified. Lượt này không thay đổi production. Người triển khai phải thay `TBD` bằng dữ liệu quan sát,
 đính kèm bằng chứng an toàn và cập nhật nguồn `.drawio`, SVG/PDF cùng lúc nếu có
 khác biệt. Chỉ đánh dấu `[x]` sau khi có evidence tương ứng; tài liệu thiết kế
 không thay thế kết quả runtime.
 
 | Hạng mục | Giá trị thực tế / evidence | Trạng thái |
 | --- | --- | --- |
-| Vercel project, plan, owner/scope, deploy branch/environment, commit SHA | TBD | Chưa xác minh |
-| Frontend public HTTPS origin, `/` và `/payment` | TBD | Chưa xác minh |
-| Render service ID, tier, workspace, region, deploy branch, commit SHA | TBD | Chưa xác minh |
-| Backend public HTTPS origin, `$PORT`/bind, health path `/` | TBD | Chưa xác minh |
-| DB instance/region/workspace, ngày tạo/hết hạn | TBD, không ghi credential | Chưa xác minh |
-| Internal DB URL được dùng; external access đã tắt; TLS DB thực tế | TBD, chỉ mô tả kết quả, không dán URL có password | Chưa xác minh |
+| Vercel project, plan, owner/scope, deploy branch/environment, commit SHA | GitHub status main 02452f2 success, deployment AayabZWzjhJAquCMYXjoaDppJWsi; plan/quyền/domain alias chưa bind | PARTIAL, delivery §4/13 |
+| Frontend public HTTPS origin, `/` và `/payment` | https://brewlite-a2-three.vercel.app/; GET / 200; /payment không probe | HTTP một phần; browser NOT VERIFIED |
+| Render service ID, tier, workspace, region, deploy branch, commit SHA | #26 báo Live 2216b7a; ảnh mới Auto-Deploy Live02452f2, full SHA/mốc giờ tại delivery §14; web tier/region và image artifact chưa xác minh | VERIFIED một deployment, PARTIAL cấu hình vận hành |
+| Backend public HTTPS origin, `$PORT`/bind, health path `/` | https://brewlite-a2-api-hntn.onrender.com/; GET / 200 Hello World!, /products 200 JSON9 items ngày13/11; GET không xuất processSHA | VERIFIED HTTP/liveness/catalog snapshot; bind/runtime config chưa kiểm tra trực tiếp |
+| DB instance/region/workspace, ngày tạo/hết hạn | Ảnh Render Free/PostgreSQL18/Singapore/1GB/Available; expires10/12/2026; không suy ngày tạo hoặc workspace từ thời hạn | PARTIAL, kế hoạch trước expiry còn cần nhóm chốt |
+| Internal DB URL được dùng; external policy; TLS DB thực tế | DB external3 /32 giao với workspace/environment allow-all; external restricted, chưa private-only. Internal fields không chứng minh app đang sử dụng; không đưa credential | PARTIAL AC3; cần manager xác nhận actual config và policy |
 | Vercel proxy env trỏ public Render HTTPS; browser/proxy và CORS fallback | TBD | Chưa xác minh |
 | VNPay merchant Return URL và IPN URL, URL không có signed query | TBD | Chưa xác minh |
 | Secrets chỉ hiện diện trong scope được phép; source/logs sạch | TBD, chỉ tên và trạng thái, không giá trị | Chưa xác minh |
 | Scheduler production config, QueryDR source IP, cold start/restart | TBD | Chưa xác minh |
 | Migration runner private, migration status, rollout commit | TBD | Chưa xác minh |
-| GitHub Actions checks/CD run, trigger không chạy trùng | TBD | Chưa xác minh |
+| GitHub Actions checks/CD run, trigger không chạy trùng | CI 43392423041 (dev 0e43bcb) và 43394783298 (main 02452f2) success; workflow chỉ CI | Một Render Auto-Deploy Live cùng main SHA có ảnh; trigger/failure/migration/rollback chain chưa đầy đủ |
 | Local/CI/Production DB và secrets tách biệt | TBD, không ghi giá trị secret | Chưa xác minh |
 | Build context, Git SHA → frontend artifact / Render image → deployment và rollback | TBD; xác nhận build/tag-image theo rubric, registry nếu cần | Chưa xác minh tại Task 5 |
-| PR tới `dev`, reviewer và merge commit | TBD | Chờ commit/push/PR/review/merge được cho phép |
+| PR tới `dev`, reviewer và merge commit | PR17 open, draft=false, remote head 3543a55; review list rỗng; local mới chưa push | Chờ cho phép cập nhật PR17 và review/acceptance |
 
 - [ ] Ghi URL public thực tế, TLS hợp lệ và commit SHA của cả hai deployment.
 - [ ] Browser tải UI và gọi API qua proxy; API JWT/ownership vẫn hoạt động.
@@ -349,16 +304,14 @@ không thay thế kết quả runtime.
 - [ ] Backend/DB cùng workspace/region; private DB connection được xác nhận; external DB access đã tắt.
 - [ ] Return đi qua browser về `/payment`; không tin query string để finalize.
 - [ ] IPN gọi thẳng Render, kiểm chữ ký, ACK và durable state theo API Contract.
-- [ ] Payment-status route đã được task riêng xử lý; Return UI đọc authoritative state.
+- [ ] Chốt scope/task cho gap payment-status/API-03 và kiểm chứng Return/orders/me riêng; không coi tồn tại helper là route đã triển khai.
 - [ ] QueryDR/E2E và giới hạn idle/restart được đối chiếu; ghi rõ mọi gate chưa đạt.
 - [ ] Health/config/logs/migration/recovery có bằng chứng an toàn, không chứa secrets.
 - [ ] Local/CI/Production cô lập; build/artifact/image provenance và yêu cầu tag/registry/rollback được xác nhận tại Task 5.
 - [ ] Sơ đồ nguồn và SVG/PDF phản ánh môi trường thật; báo cáo LaTeX dùng bản đã cập nhật.
 - [ ] PR được review, xử lý findings và merge vào `dev` sau phê duyệt của người dùng.
 
-**Điều kiện kết thúc:** bộ tài liệu/sơ đồ có thể review trước deploy; task chưa
-được tuyên bố nghiệm thu cuối hay Jira Done khi runtime evidence và PR gate
-ở trên còn mở. Commit, push, review/merge và quyết định Done thuộc người dùng.
+**Đánh giá nghiệm thu:** đối chiếu tám AC trong delivery dossier và yêu cầu đề có dẫn nguồn. Checklist kỹ thuật trên phục vụ review từng phạm vi; khuyến nghị và gap thuộc task phụ thuộc cần ghi tác động, không tự trở thành AC bổ sung. Reviewer/Leader xác nhận kết quả nghiệm thu thực tế.
 
 ## 9. Nguồn dự án và lưu ý baseline
 
@@ -432,11 +385,11 @@ Kết quả: `5.1.0`, `OK: brewlite-deployment.svg`,
 
 ## 11. Runbook SCRUM-117 — migration, seed và rollback
 
-**Ngày đối chiếu: 10/11/2026, source 7dfc7ca; quy trình nháp, chưa diễn tập.** Không có URL production, provider project ID, region/tier, deploy SHA hoặc người vận hành đã được xác nhận. Bảng runtime §8 vẫn mở. [Delivery](delivery/SCRUM-117-delivery.md) là sổ evidence và release mapping chuẩn; không tạo danh sách URL song song.
+**Ngày đối chiếu: 13/11/2026, HEAD 91e6f99/app trùng dev 0e43bcb; quy trình chưa diễn tập.** FE URL đã có; backend URL và deployed02452f2 đã có ảnh; DB Free18/Singapore xác nhận qua dashboard. Web tier/Internal usage/runner/người vận hành còn thiếu. Bảng runtime §8 vẫn mở. [Delivery](delivery/SCRUM-117-delivery.md) là sổ evidence và release mapping chuẩn; không tạo danh sách URL song song.
 
 ### 11.1. Giới hạn hosting đối chiếu lại
 
-Chỉ áp dụng sau khi nhóm xác nhận đúng provider/tier; không khẳng định nhóm đang dùng các plan này. Tài liệu chính thức được mở lại ngày 10/11/2026:
+Ảnh R117-I2/I3 xác nhận Render PostgreSQL Free. Tier của Render web service và Vercel vẫn chưa có bằng chứng; chỉ áp giới hạn tương ứng khi xác định đúng tier. Tài liệu provider được mở lại ngày 13/11/2026:
 
 | Provider/tier dự kiến | Giới hạn và ảnh hưởng cần xử lý |
 |---|---|
@@ -446,12 +399,12 @@ Chỉ áp dụng sau khi nhóm xác nhận đúng provider/tier; không khẳng 
 Nguồn: [Render Free](https://render.com/docs/free). Render khuyến nghị Free cho thử nghiệm, không production thực; môi trường online phục vụ bài tập vẫn phải ghi đúng tier và giới hạn.
 
 - [Render deploys](https://render.com/docs/deploys): pre-deploy command chỉ có ở paid web/private services và workers. Không giả định Free có pre-deploy hoặc shell để chạy Prisma. Rollback nền tảng không khôi phục schema/data.
-- [Vercel Hobby](https://vercel.com/docs/plans/hobby): personal/non-commercial; 100 GB Fast Data Transfer, 1 triệu Function Invocations, 100 deployments/ngày theo trang hiện hành. Vượt usage có thể phải chờ reset; xác minh quota/project eligibility và quyền nhóm. Serverless request/proxy có cold start/giới hạn duration; không dùng Vercel request lifecycle làm scheduler NestJS. Không suy hạn sleep của Render cho Vercel.
+- Vercel plan thực tế chưa xác nhận; không áp quota Hobby cho project này. Kiểm tra plan/usage/quyền project trước demo. [Instant Rollback](https://vercel.com/docs/instant-rollback) ghi Hobby chỉ rollback production deployment liền trước; chưa có eligible target ID. Không dùng request lifecycle của Vercel làm scheduler NestJS.
 - [Render Postgres connectivity](https://render.com/docs/postgresql-creating-connecting): kiểm tra cùng region/workspace, internal connection và **external access policy riêng**. Evidence dashboard Networking phải che connection strings; dùng internal URL không đủ chứng minh DB không public. Chưa kiểm tra cấu hình thực.
 
-### 11.2. Migration và seed
+### 11.2. Migration và seed an toàn
 
-**Source thực tế:** 9 migration directories ở `apps/api/prisma/migrations/`; `db:migrate` = `prisma migrate deploy --config prisma7.config.ts`. `Dockerfile` target `migrate` giữ Prisma CLI/schema/config; target `runtime` chỉ có package/runtime dependencies/dist, đã loại CLI. Không chạy `npm run db:migrate` trong runtime rồi giả định thành công.
+**Source thực tế tại HEAD 91e6f99:** 10 migration directories (migration mới: 20261112153000_seed_executions_once_guard) ở `apps/api/prisma/migrations/`; `db:migrate` = `prisma migrate deploy --config prisma7.config.ts`. `Dockerfile` target `migrate` giữ Prisma CLI/schema/config; target `runtime` có package/runtime dependencies/dist và dist-seed, đã loại CLI/schema/migrations. Không chạy `npm run db:migrate` trong runtime rồi giả định thành công.
 
 **Local A2:** xem [README setup](../README.md#local-setup-bằng-host-powershell); Compose dùng service `migrate`, chờ PostgreSQL healthy, rồi backend chờ migrate exit 0. Không chạy A1 scripts/bootstrap/reset cho deployed DB.
 
@@ -471,9 +424,20 @@ npx --no-install prisma migrate status --config prisma7.config.ts
 
 Status báo pending/failed phải được đọc và phân loại trước khi tiếp tục. Deploy lỗi thì dừng rollout; ghi migration failed và chuyển người phụ trách DB. Không tự chạy `migrate resolve`, reset, `migrate dev`, sửa migration đã áp dụng hoặc lặp mù lệnh deploy. Nếu plan không hỗ trợ runner cần thiết, SCRUM-116/Leader phải chốt giải pháp hợp lệ trước release; tài liệu này không thay CD.
 
-**Seed:** `db:seed` gọi `tsx prisma/seed.ts`, chỉ cho DB `brewlite_seed_*` hoặc DB Compose chính xác `brewlite_a2` tại `postgres:5432` với `ALLOW_COMPOSE_DEMO_SEED=true`. Upsert 9 demo products, category/topping/relations; cập nhật metadata/giá, giữ stock hiện có; từ chối sản phẩm ngoài catalog, không xóa order. Không đổi tên DB/guard để chạy trên production. Production catalog provisioning chưa có quy trình được duyệt; chuyển SCRUM-115/Leader xác nhận.
+**Seed local:** `db:seed` qua Prisma seed config gọi `tsx prisma/seed.ts`, chỉ cho DB `brewlite_seed_*` hoặc DB Compose chính xác `brewlite_a2` tại `postgres:5432` với `ALLOW_COMPOSE_DEMO_SEED=true`. Upsert 9 demo products, category/topping/relations; cập nhật metadata/giá, giữ stock hiện có; từ chối sản phẩm ngoài catalog, không xóa order. Không đổi tên DB/guard để chạy trên production. Đây là local demo seed, không dùng thay cloud seed mới. Render demo seed đã có source/runbook riêng; trạng thái runtime theo #24 chưa chứng minh khả năng áp dụng cho mọi production database.
 
 User seed riêng tạo tối đa 2 account demo, Argon2id, bỏ qua xung đột, yêu cầu local DB và xác nhận tương tác; coupon helpers insert demo coupons/skip duplicates, có guard riêng. Không nằm trong catalog seed, không tự chạy như bước production. Hướng dẫn chi tiết: [user seed](../apps/api/prisma/seed_user_README.md), [promotion seed](../apps/api/prisma/README-promotion-seed.md). Đọc đường dẫn hiện hành `apps/api`, không dùng absolute path A1 kế thừa trong helper README.
+
+
+**Render demo seed đã có trong checkout (#18–22):** [runbook one-shot](../apps/api/prisma/README-render-demo-seed-once-guard.md), [internal policy](../apps/api/prisma/seed-render-internal.policy.ts), [executor](../apps/api/prisma/seed-render-demo.ts). Đây là fixture demo trên dịch vụ online, không phải provisioning catalog nghiệp vụ tùy ý.
+
+- Docker build ở apps/api build dist-seed và verify artifact; runtime /app có script `npm run seed:render-internal` gọi JS đã biên dịch. Nó **không** có Prisma CLI để migrate. Không giả định tier thật có shell/pre-deploy/one-off job; runner seed/migration thực và artifact SHA còn cần SCRUM-116 xác nhận.
+- Policy Internal yêu cầu NODE_ENV=production, marker SEED_RENDER_INTERNAL_ENV=render-a2-internal-manual, expected host/user exact, database brewlite_a2/port 5432 và sslmode=require. Mode mặc định dry-run; apply yêu cầu explicit confirmation và approval riêng theo runbook. Không sửa env service hoặc chạy lệnh ghi trong SCRUM-117.
+- Seed cloud insert-only các records thiếu sau kiểm tra catalog/identity; giữ stock/quota/redemptions, không ghi users/orders/payments, không delete/deactivate dữ liệu. Bộ fixture có 4 categories, 5 toppings, 9 products, 13 product–topping links, 5 coupons; dry-run expected inserts trong trạng thái chuẩn của runbook là 0/5/9/13/5. Nếu đã có dữ liệu, không ép các counts này; drift phải dừng.
+- Migration 10 tạo seed_executions; key render-demo-v1 được ghi cùng fixture trong Serializable transaction với advisory lock. Marker có nhưng thiếu/sai fixture thì fail-closed. Không xóa marker hoặc đổi key để chạy lại. Khi apply outcome unknown/APPLY_COMMITTED_CLEANUP_FAILED, chỉ kiểm tra dry-run/marker trước, không retry apply mù.
+- PR24 báo 10 migrations applied, một completion marker và catalog đọc được, nhưng chưa đính kèm actual migration runner/status/deploy ID. Phân biệt lời báo cáo đó với static code review và trạng thái production hiện tại.
+
+**Prisma Internal TLS (#23):** runtime adapter chỉ dùng Pool exception khi PRISMA_RENDER_INTERNAL_MODE/target và expected host/port/database/user khớp exact; nhánh mặc định khác. Internal profile dùng TLS rejectUnauthorized=false do self-signed; encryption không chứng minh peer identity/private-only. Không áp profile rộng cho external/local DB, không suy network policy từ URL. Đây là source được kế thừa, SCRUM-117 không đổi cấu hình bảo mật.
 
 ### 11.3. Rollback ứng dụng và phục hồi DB
 
@@ -492,18 +456,38 @@ User seed riêng tạo tối đa 2 account demo, Argon2id, bỏ qua xung đột,
 
 #### Thao tác theo provider và điều kiện thực thi
 
-Đây là hướng dẫn **có điều kiện cho candidate Vercel/Render**, không phải xác nhận provider/tier thực tế. Trước dùng, SCRUM-116 điền project/service, region/tier, executor, deployment hiện tại và target ID/SHA vào delivery §4/6; kiểm tra target tồn tại và schema/API tương thích. Nếu hosting khác, cần cập nhật hướng dẫn theo provider thật trước đánh giá tính thực thi.
+Vercel/Render đã có evidence provider trong PR/status; hướng dẫn vẫn **có điều kiện theo tier/quyền/eligible artifact**, chưa xác nhận plan hay actual rollback target. Trước dùng, SCRUM-116 điền project/service, region/tier, executor, deployment hiện tại và target ID/SHA vào delivery §4/6; kiểm tra target tồn tại và schema/API tương thích. Nếu hosting khác, cần cập nhật hướng dẫn theo provider thật trước đánh giá tính thực thi.
 
-**Frontend Vercel:** Project → Production Deployment → Instant Rollback; đối chiếu domain/target SHA rồi Confirm Rollback khi được phép. Hobby chỉ chọn deployment production liền trước; Preview chưa từng gắn production domain không đủ điều kiện. Build/env cũ được dùng lại, không lấy env vừa sửa trong project để cập nhật artifact cũ; cần kiểm tra proxy/API compatibility. Sau rollback, tự gán production domain bị tắt; executor phải chốt cách phục hồi deployment flow sau remediation. Nguồn: [Vercel Instant Rollback](https://vercel.com/docs/instant-rollback), đọc 10/11/2026. Chưa có target/deployment thật nên chưa xác minh thao tác UI/quyền.
+**Frontend Vercel:** Project → Production Deployment → Instant Rollback; đối chiếu domain/target SHA rồi Confirm Rollback khi được phép. Hobby chỉ chọn deployment production liền trước; Preview chưa từng gắn production domain không đủ điều kiện. Build/env cũ được dùng lại, không lấy env vừa sửa trong project để cập nhật artifact cũ; cần kiểm tra proxy/API compatibility. Sau rollback, tự gán production domain bị tắt; executor phải chốt cách phục hồi deployment flow sau remediation. Nguồn: [Vercel Instant Rollback](https://vercel.com/docs/instant-rollback), đọc lại 13/11/2026. Có status deployment nhưng chưa có eligible rollback target nên chưa xác minh thao tác UI/quyền.
 
-**Backend Render:** Service → Deploys → chọn deploy thành công còn artifact → Rollback → Rollback to this deploy khi được phép. Free chỉ giữ khả năng rollback tới hai deploy trước gần nhất; plan khác tùy retention. Dashboard rollback tắt auto-deploy; API rollback không tắt, cần phối hợp CD tránh rollout mới ghi đè. Dùng target artifact và kiểm tra env/env groups hiện tại; không suy tất cả cấu hình/DB được quay lại. Nguồn: [Render Rollbacks](https://render.com/docs/rollbacks), [Render Free](https://render.com/docs/free), đọc 10/11/2026. Chưa có service/tier/target nên chưa xác minh thực thi.
+**Backend Render:** Service → Deploys → chọn deploy thành công còn artifact → Rollback → Rollback to this deploy khi được phép. Free chỉ giữ khả năng rollback tới hai deploy trước gần nhất; plan khác tùy retention. Dashboard rollback tắt auto-deploy; API rollback không tắt, cần phối hợp CD tránh rollout mới ghi đè. Dùng target artifact và kiểm tra env/env groups hiện tại; không suy tất cả cấu hình/DB được quay lại. Nguồn: [Render Rollbacks](https://render.com/docs/rollbacks), [Render Free](https://render.com/docs/free), đọc lại 13/11/2026. Đã có backend service URL/Live evidence; web tier và eligible rollback target chưa xác minh nên hướng dẫn chưa được rehearsal.
 
 **DB recovery:** không có nút app rollback nào đảo PostgreSQL schema/data. Chưa có backup/restore target được xác nhận; Render PostgreSQL Free không có managed backup. Chỉ DB owner được phép xác nhận bản export/restore dùng được, đích phục hồi, phạm vi mất dữ liệu và đối soát financial state trước chuyển kết nối; không cung cấp lệnh restore phá dữ liệu khi chưa biết topology/backup thật. Đây là phương án cần binding theo môi trường, không phải recovery đã diễn tập.
 
 Source đối chiếu thêm: `apps/api/Dockerfile` giữ CLI ở target `migrate`, không ở `runtime`; `apps/api/package.json` có script `deploy = nest deploy`, **không phải** evidence pipeline CD hoặc lệnh migration/rollback đã cấu hình cho Render.
 
-### 11.4. Kiểm tra production read-only chờ URL
+### 11.4. Kiểm tra production read-only và giới hạn
 
 Sau khi có origins sạch đã xác nhận, chỉ GET frontend `/`, backend `/`, backend `/products` và frontend `/api/backend/products`; ghi UTC, HTTPS/certificate, status/body shape, latency, source SHA/deployment ID lấy từ dashboard (không tự thêm version endpoint). Không đi theo signed URL/callback hay gọi internal API để “smoke”. Browser riêng kiểm tra asset, mixed content, proxy request và dữ liệu menu; GET liveness không đủ DB readiness. Case DB outage chỉ thử môi trường riêng được cho phép, không ngắt production để test.
 
-Chưa có URL nên không gửi request production trong SCRUM-117. Auth/order/payment write smoke và VNPay E2E cần QA executor được cấp quyền riêng; không lấy public GET thành full checkout PASS.
+Ngày 13/11/2026 đã GET read-only FE / (200 HTML) và proxy /api/backend/products (200 JSON items); UTC, kết quả và giới hạn ở delivery §13. Source proxy forward tới backend, nhưng current upstream origin/deploy SHA chưa bind nên không coi đó là direct backend/DB readiness đã verified. Browser smoke NOT VERIFIED do Computer Use dừng; không gọi lại browser. Auth/order/payment write smoke và VNPay E2E cần QA executor được cấp quyền riêng; không lấy public GET thành full checkout PASS.
+
+### 11.5. Backup/restore PostgreSQL18 và hết hạn DB
+
+**Hướng dẫn chưa thực thi:** chưa có backup archive/hash hoặc restore test. DB ảnh: Free18/Singapore/1GB/Available, expires10/12/2026. [Render Free recovery](https://render.com/docs/postgresql-backups) không cung cấp managed backups/PITR; nhóm cần chọn nâng tier hoặc export+restore/migrate trước expiry, chốt người phụ trách, retention/RPO/RTO và thời gian chuyển. Không dùng grace sau expiry cho kế hoạch demo. Không tự nâng tier/đổi network/environment/backup/restore production.
+
+Tools thực có: PostgreSQL pg_dump/pg_restore18.6, thư mục C:/Program Files/PostgreSQL/18/bin. Executor được duyệt dùng PGHOST/PGPORT/PGDATABASE/PGUSER và PGPASSFILE user-only ACL do secret manager chuẩn bị. External TLS verify-full và CA/trust store đúng provider; không paste Prisma URL/query params vào libpq, không đặt password trong lệnh/history/log. Runner Internal cần network/TLS thực được manager duyệt, không tự mở external access.
+
+Sau phê duyệt backup: khóa kế hoạch DDL, dùng tài khoản đủ quyền đọc objects, snapshot một DB bằng pg_dump --format=custom --no-owner --no-acl --no-password --file=$backupFile (chạy trong thư mục backup mã hóa ngoài repo, PG* từ môi trường). Trong PowerShell gọi qua & và path pg_dump.exe đầy đủ; dừng khi LASTEXITCODE khác0. Chọn tên UTC duy nhất, không ghi đè file đã có. pg_restore --list $backupFile chỉ kiểm tra TOC, không chứng minh phục hồi. Tính SHA256 và lưu manifest an toàn: sourceDB/deploySHA, UTC start/end, toolversion, migrationstate, size/hash, storageID/access/retention, executor/reviewer và warnings. Không commit archive/logTOC/dữ liệu. Roles/privileges không có trong archive do no-owner/no-acl phải tái lập theo least privilege.
+
+Restore verification sau phê duyệt riêng: manager cấp DB PostgreSQL18 **mới rỗng/cô lập**, host/port/user/DB khác production. Inject PG* và passfile target riêng; đặt biến BREWLITE_RESTORE_APPROVED_DB và dừng nếu PGDATABASE không khớp hoặc bằng brewlite_a2. Không dùng --clean/drop, không restore đè DB đang phục vụ. Executor phải xác minh identity/target rỗng trước lệnh: pg_restore --exit-on-error --single-transaction --no-owner --no-acl --no-password --dbname=$env:PGDATABASE $backupFile. Dừng khi exit khác0. Đây là template được chuẩn bị, chưa chạy.
+
+Đối chiếu _prisma_migrations (10 migrations), seed_executions/render-demo-v1, counts/keys/constraints, order/payment/amount/coupon/loyalty invariants với snapshot nguồn. Không seed Apply; cô lập scheduler/gateway callback của app restore trước test. Chỉ chạy GET/tests được duyệt trên bản cô lập. So khớp financial state với gateway và chấp nhận khoảng mất dữ liệu trước cutover; đổi DATABASE_URL/redeploy cần approval riêng. Chỉ ghi restore verified sau actual results và reviewer. Nguồn [pg_dump18](https://www.postgresql.org/docs/18/app-pgdump.html), [pg_restore18](https://www.postgresql.org/docs/18/app-pgrestore.html).
+
+### 11.6. Candidate rollback và bàn giao quyền
+
+Backend02452f2 Live hiện tại có HTTP smoke, không phải đích cũ để rollback ngay. Candidate2216b7a: PR26 báo Render Live/Sandbox payment success, nhưng chưa có deployID/retained artifact hoặc approval; giao dịch khác vẫn đối soát. Main03668e3/02452f2 và dev0e43bcb chỉ merge/docs so với app2216b7a, cần manager bind actual artifact/env. Không chọn version trước TLS fix95906b5 vì Internal runtime có thể không connect. Candidate2216b7a đã chứa migration10 additive seed_executions; giữ table/marker/_prisma_migrations khi rollback app, không drop/xóa để ép reseed. Chọn pre10 cần compatibility test cô lập; DB restore snapshot cũ mất mọi ghi sau đó và không là rollback mặc định.
+
+Frontend Vercel status02452f2 có ID AayabZWzjhJAquCMYXjoaDppJWsi nhưng production alias chưa bind. Preview36hKnqgZCX4NvuX8o24VgDUPW8W9/source2216b7a chưa chứng minh từng production nên không coi eligible. Manager chọn production target cũ theo plan/retention, kiểm tra FE/BE/schema/proxy/env compatibility. Sau rollback được duyệt: ghi UTC/IDs/SHA, GET FE/proxy/backend, migrationstate/catalog/payment invariants/scheduler và smoke được phép; chỉ ghi success theo actual.
+
+Nhóm tiếp tục quản lý dự án; tên cá nhân phụ trách tài nguyên chưa được xác nhận. Mẫu tiếp nhận ở delivery §6 là khuyến nghị khi đổi người quản lý. Bàn giao qua invite role Render/Vercel/GitHub phù hợp plan; người nhận tự mở deploy/logs/network/expiry/backup manifest và xác nhận. Không chuyển password tài khoản chủ; credential DB qua secret manager/role riêng. Plan không hỗ trợ role mong muốn cần Leader chốt phương án trước ký nhận.

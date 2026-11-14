@@ -1,8 +1,10 @@
 # BrewLite A2 — Requirement Traceability Matrix
 
-Current checkout: `D:/CNPM_PJ/brewlite-a2`, branch `SCRUM-117-production-release-delivery`, HEAD `5021743e99d73c2ce795df72ee5aaa90b04bb0da`. Historical mapping source: `7dfc7ca996c2eb6190a5ec3e7812f70d441a61cb`; **DRAFT — static mapping, not implementation acceptance or runtime PASS.**
+Current checkout: `D:/CNPM_PJ/brewlite-a2`, branch `SCRUM-117-production-release-delivery`, HEAD `91e6f99bfd02353616b2e481fe613b7ea91118af`; app/config trùng origin/dev `0e43bcb80f64d6a5fa558cd80f71a199029535d0`. **DRAFT — static mapping, not runtime PASS or acceptance.**
 
-Source audit hiện hành tại HEAD `5021743e99d73c2ce795df72ee5aaa90b04bb0da`, branch `SCRUM-117-production-release-delivery`. SRS, US/UC, diagrams, API source, test inventory và config paths không đổi so với snapshot lịch sử `7dfc7ca`; G6/web proxy hiện có hardening và Next.js 16.4.6. Mapping 48 FR/49 NFR vẫn chỉ là static mapping, không phải runtime/test coverage PASS. Evidence và PR body ở [delivery §12](delivery/SCRUM-117-delivery.md#12-đối-chiếu-dev-mới-5021743-chưa-tích-hợp).
+Audit 13/11/2026: SRS/US/UC/diagram sources giữ mapping lịch sử 7dfc7ca; source vận hành mới gồm #18–23 seed/one-shot marker/migration10/TLS và #25 QueryDR diagnostics, #27 CD config README. Các test files chỉ là inventory. PR26 payment success được báo cáo không đóng FR-34/status route hay FR-38/QueryDR lost-IPN. Chi tiết/version/environment ở [delivery §13](delivery/SCRUM-117-delivery.md#13-audit-hiện-hành-ngày-13112026).
+
+
 
 Ma trận này dùng cấu trúc truy vết requirement tại §8.1 của [Assignment 2 v1.0](https://drive.google.com/file/d/1CYVsexpTXZ6Uyg2FHMRE8lnJHSPkYQmi/view), đọc qua Drive connector ngày 10/11/2026. [TRACEABILITY.md](TRACEABILITY.md) giữ vai trò truy vết task/PR/commit, khác với ma trận requirement này.
 
@@ -141,20 +143,28 @@ Thiết kế: [API v4](a1-archive/api/BrewLite_API_Contract_v4.0.md), [Sequence 
 
 Test inventory: [payments E2E](../apps/api/test/payments-foundation.e2e-spec.ts), [payments PostgreSQL](../apps/api/test/payments-postgres.integration-spec.ts), [initiation](../apps/api/test/vnpay-initiation.integration-spec.ts), [IPN/QueryDR](../apps/api/test/vnpay-ipn-querydr.integration-spec.ts), [reconciliation](../apps/api/test/payment-reconciliation.integration-spec.ts), [finalization concurrency](../apps/api/test/payment-finalization-concurrency.integration-spec.ts), [zero-amount integration](../apps/api/test/zero-amount-payment.integration-spec.ts), [zero-amount E2E](../apps/api/test/zero-amount-payment.e2e-spec.ts), [web payment UI](../apps/web/tests/payment-ui.test.ts).
 
-FR-34 backend status GET còn thiếu dù FE gọi; không mô tả như implemented endpoint. QueryDR Sandbox/lost-IPN evidence chưa có mới; [ADR](a1-archive/decisions/ADR-P2-QueryDR-Sandbox-E2E-Deferred.md) chỉ điều chỉnh A1 rồi chuyển A2. Tests không thay Sandbox E2E; release applicability cần quyết định theo delivery §3.
+FR-34 backend status GET còn thiếu; FE có helper nhưng current PaymentPageView/Order Confirmation polling orders/me. Không mô tả API-03 đã implemented hoặc suy toàn bộ Return UI hỏng. PR26 có báo cáo Sandbox payment PAID/SUCCESS/+10 nhưng không có QueryDR/lost-IPN trace; #25 chỉ thêm diagnostics và không sửa timeout; [ADR](a1-archive/decisions/ADR-P2-QueryDR-Sandbox-E2E-Deferred.md) chỉ điều chỉnh A1 rồi chuyển A2. Tests không thay Sandbox E2E; release applicability cần quyết định theo delivery §3.
 
 ### G5 Coupon Loyalty V-PROMO
 
 Thiết kế: [Domain Class](diagrams/brewlite-domain-class.drawio), [preview addendum](a1-archive/api/SCRUM96_Coupon_Preview_Addendum.md), [Checkout UC](requirements/A2_T1.3_Checkout_Use_Case_Specification.md). Code: [coupons controller](../apps/api/src/coupons/coupons.controller.ts), [coupons service](../apps/api/src/coupons/coupons.service.ts), [promotions](../apps/api/src/promotions/), G3/G4 cho side effects, [seed](../apps/api/prisma/).
 
-Test inventory: [preview integration](../apps/api/test/coupon-preview.integration-spec.ts), [preview E2E](../apps/api/test/coupon-preview.e2e-spec.ts), [promotion PostgreSQL](../apps/api/test/promotions-postgres.integration-spec.ts), [promotion specs](../apps/api/src/promotions/), [seed guard](../apps/api/prisma/seed.guard.spec.ts). FR-43 SHOULD/Deferred dù có files; FR-48 fresh DB/reseed chưa evidence mới.
+Test inventory: [preview integration](../apps/api/test/coupon-preview.integration-spec.ts), [preview E2E](../apps/api/test/coupon-preview.e2e-spec.ts), [promotion PostgreSQL](../apps/api/test/promotions-postgres.integration-spec.ts), [promotion specs](../apps/api/src/promotions/), [seed guard](../apps/api/prisma/seed.guard.spec.ts). FR-43 SHOULD/Deferred dù có files; FR-48 có cloud seed/marker được PR24 báo cáo, chưa chứng minh fresh DB/reseed đầy đủ đúng release SHA.
 
 ### G6 Operations V-OPS
 
 Thiết kế/quy trình: [architecture](architecture/architecture.md), [deployment](deployment.md), [delivery](delivery/SCRUM-117-delivery.md). Code/config: [Compose](../docker-compose.yml), [API Dockerfile](../apps/api/Dockerfile), [web Dockerfile](../apps/web/Dockerfile), [CI](../.github/workflows/ci.yml), [migrations](../apps/api/prisma/migrations/), [catalog seed](../apps/api/prisma/seed.ts).
+
+Inventory bổ sung hiện có: [cloud seed one-shot runbook](../apps/api/prisma/README-render-demo-seed-once-guard.md), [Internal seed](../apps/api/prisma/seed-render-internal.ts), [migration 10](../apps/api/prisma/migrations/20261112153000_seed_executions_once_guard/migration.sql), [one-shot PostgreSQL test](../apps/api/test/seed-render-demo-once-guard.integration.spec.ts), [Prisma target/TLS profile](../apps/api/src/prisma/prisma.connection.ts), [QueryDR client/specs](../apps/api/src/payments/vnpay-querydr.client.ts). #25 báo 6 PostgreSQL opt-in skipped, không coi các test đó PASS.
 
 Verification inventory: [CI guide](ci/README.md), [MVP local report](A2_TestReport/MVP_Sprint1_Verification_Report.md), scripts/config/unit tests theo từng app. Performance, PWA/installability, security/log review, deployment, DB network policy, CD và production smoke cần measurement/runtime evidence riêng; không suy PASS từ file có sẵn. SRS §11 AC-OPS được đối chiếu tại delivery; matrix không tạo pipeline, endpoint hoặc approval.
 
 ## 4. Coverage và giới hạn nghiệm thu
 
 48 FR + 49 NFR có ID/AC/US/UC truy từ SRS. Đây chỉ là **mapping coverage tĩnh**, không phải test coverage, implementation coverage hay nghiệm thu. NFR cross-cutting/technical enabler không bị ép thành UC mới. SRS giữ priority/gap/approval caveats; matrix không đổi Deferred/SHOULD thành MUST/PASS. Reviewer cần bổ sung run/scenario/commit/environment cho requirement áp dụng và nguồn quyết định giới hạn được chấp nhận. Artifact checklist đề chính thức ở delivery §7.
+
+## Cập nhật evidence và PDF ngày14/11/2026
+
+**Cập nhật tiếp 14/11/2026:** HEAD91e6f99/dev0e43bcb giữ nguyên, 10 docs unstaged đầu vào được bảo toàn. Backend https://brewlite-a2-api-hntn.onrender.com/ có ảnh Render Auto-Deploy Live02452f2 (fullSHA02452f228712c3501c8d27f0f1ae737ad206785d), deployed field13/11/2026 08:39:19Z. GET mới / và /products200 lúc16:24:59Z ngày13/11, catalog9 items; GET không xuất processSHA. DB Free18/Singapore/1GB/Available, expiry10/12/2026; external3 /32 restricted, chưa private-only. Bỏ Edge/Computer Use theo yêu cầu; Người dùng đính chính ngày 14/11/2026: Leader chưa kiểm tra/nghiệm thu SCRUM-117. Evidence và các giới hạn tại dossier §14.
+
+[PDF báo cáo](report/output/main.pdf), [build/QA](report/README.md#kết-quả-build-và-qa-ngày-14112026), [dossier §14](delivery/SCRUM-117-delivery.md#14-evidence-render-backup-và-pdf--cập-nhật-14112026). AC2 VERIFIED snapshot HTTP/liveness/catalog; AC3 PARTIAL vì external còn3 /32 và Internal app usage chưa xác nhận. Requirement mapping không tự nâng thành acceptance; payment-status/QueryDR và manual reconciliation giữ mở.

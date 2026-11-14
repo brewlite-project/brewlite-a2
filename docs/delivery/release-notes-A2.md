@@ -1,12 +1,12 @@
 # BrewLite A2 — Release notes nháp
 
-**DRAFT, cập nhật 11/11/2026. Chưa tạo tag, publish release, deploy hoặc nghiệm thu.**
+**DRAFT, cập nhật 13/11/2026. Hồ sơ chưa nghiệm thu; SCRUM-117 không tạo tag/release hoặc deploy. Main đã có promotion #24/#26/#28 của nhóm, không đồng nghĩa A2 release/tag đã phát hành.**
 
 ## Phiên bản và nguồn
 
 - Tag đề xuất: `A2-v1.0.0`, theo ví dụ trong planning; nhóm chưa xác nhận quy ước cuối. Không dùng `A1-final` làm release A2.
 - Snapshot lịch sử dùng ở lần soạn đầu: `7dfc7ca996c2eb6190a5ec3e7812f70d441a61cb` trên remote `dev`; đây **không phải commit phát hành đã chốt**.
-- Source hiện tại trong checkout chính: branch `SCRUM-117-production-release-delivery`, HEAD `5021743e99d73c2ce795df72ee5aaa90b04bb0da` (cũng là origin/dev). SHA `7dfc7ca` chỉ là baseline kiểm tra lịch sử; giữ nguyên SHA/test evidence cũ.
+- Checkout chính: branch SCRUM-117-production-release-delivery, HEAD `91e6f99bfd02353616b2e481fe613b7ea91118af`, app/config trùng origin/dev `0e43bcb80f64d6a5fa558cd80f71a199029535d0`. Remote main `02452f228712c3501c8d27f0f1ae737ad206785d`; không phải source được checkout. Bản docs cũ ở 3543a55/PR17, cập nhật mới chưa stage. SHA 7dfc7ca/5021743 và test evidence cũ giữ lịch sử.
 - Commit release: chờ review, required CI, dependency merge, quy trình release qua nhánh stable và approval của Leader. Notes phải cập nhật theo final diff/commit khi được phép phát hành.
 - [Mapping release → FE/BE deploy → CI/CD → smoke](SCRUM-117-delivery.md#4-releasetag--source--deployments--runs--smoke).
 
@@ -21,59 +21,81 @@
 | Docs navigation/traceability | [#14](https://github.com/brewlite-project/brewlite-a2/pull/14), `34cbbc088117d7a4908d07a66cfbd03b0c905dea` | Merge xác minh từ Git; nội dung matrix cũ bên trong giữ provenance riêng |
 | MVP Sprint 1 report | [#15](https://github.com/brewlite-project/brewlite-a2/pull/15), `7dfc7ca996c2eb6190a5ec3e7812f70d441a61cb` | Evidence local kế thừa chạy source 34cbbc0, không production smoke |
 | Next.js/proxy hardening, phần PR SCRUM-116 | [#16](https://github.com/brewlite-project/brewlite-a2/pull/16), `5021743e99d73c2ce795df72ee5aaa90b04bb0da`; head `e8b1498ab0fe70a1bacd0f2b221492c46796643f` | Next 16.4.6 + lockfile, lọc 5 response headers và message 502 chung. CI mới success; PR ghi deployment/CD/production smoke là follow-up, không coi toàn task 116 hoàn tất |
+| Render guarded demo seed và diagnostics | [#18](https://github.com/brewlite-project/brewlite-a2/pull/18) 6e004d764ca9027290f100c0f010d7e5c33824ac; #19 63b9195; #20 f674897; #21 3d412b4 | Runtime dist-seed, exact target policy, drift diagnostics và bakery fixture; không gán tự động đã chạy cloud |
+| One-shot seed / migration 10 | [#22](https://github.com/brewlite-project/brewlite-a2/pull/22) af31196125e93243b2b89a02b33134a764eeddc9 | seed_executions marker + lock/transaction/tests/runbook, không xóa marker để reseed |
+| Prisma Internal TLS | [#23](https://github.com/brewlite-project/brewlite-a2/pull/23) 95906b56c1a2842eb04cdbd7bf60a267ef98fbf9 | Exact target profile, TLS exception cho self-signed Internal; không chứng minh DB external access đã tắt |
+| QueryDR diagnostics | [#25](https://github.com/brewlite-project/brewlite-a2/pull/25) 2216b7a246b21491cf81cd2f2196f907c0aa7a98 | Classify lỗi, duration, sanitized metadata/tests; không sửa underlying timeout/state/signature/retry |
+| Render CD configuration docs | [#27](https://github.com/brewlite-project/brewlite-a2/pull/27) 0e43bcb80f64d6a5fa558cd80f71a199029535d0 | Chỉ apps/api/README.md: main, Dockerfile, After CI Checks Pass; verification deployment sẽ ghi sau, chưa có CD event |
 
-SCRUM-117 README/runbook/report/delivery/matrix là **thay đổi đề xuất chưa merge**; chỉ thêm vào shipped sau merge SHA. Chưa thấy nguồn xác nhận 114/115 hoàn tất; #16 là phần code của 116, không release/deploy evidence. Các kết quả tìm kiếm “chưa có PR116” trong sổ evidence trước đó chỉ đúng thời điểm lịch sử.
+SCRUM-117 README/runbook/report/delivery/matrix là **docs đề xuất của PR17, chưa merge**. #24/#26/#28 promote dev vào main, không phải tag/release; #26 báo Sandbox payment thành công trên source 2216b7a trước merge, chưa bind final deployment. Full SHA/ngày/môi trường từng evidence tại delivery §13.
 
 ## Environment và database
 
 - Paths chạy npm chuyển sang app tương ứng; không có root npm workspace. CI Node 24 khác Docker Node 26, ghi version thực của artifact khi release.
 - Runtime variables, proxy/public origins, JWT/internal/VNPay secrets xem [deployment §5](../deployment.md#5-environment-và-vị-trí-secrets). Chưa xác nhận cấu hình thật trên host; tên secret CD trong target design còn dự kiến.
-- Source đang có 9 migrations; SCRUM-117 không thêm migration/schema. Runner production chưa xác minh; runtime image không có Prisma CLI. Chỉ runner được duyệt chạy `db:migrate` (= migrate deploy).
-- Catalog seed là dữ liệu demo có guard/upsert, không seed production; chưa có production provisioning được duyệt. Đọc [migration/rollback runbook](../deployment.md#11-runbook-scrum-117--migration-seed-và-rollback).
+- Source hiện có 10 migrations; SCRUM-117 không thêm migration/schema. Runner production chưa xác minh; runtime image không có Prisma CLI. Chỉ runner được duyệt chạy `db:migrate` (= migrate deploy).
+- Catalog seed local có guard/upsert; seed Render riêng insert-only/dry-run/apply có marker/approval. PR24 báo cloud seed/migration thành công nhưng actual runner/status/current deployment còn cần evidence. Đọc [migration/rollback runbook](../deployment.md#11-runbook-scrum-117--migration-seed-và-rollback).
 
 ## Known limitations và quyết định còn mở
 
-- Chưa có URL/ID/SHA production FE/BE, DB network policy, runner và CI/CD run đúng release. Không khẳng định production chưa tồn tại ngoài quyền truy cập.
-- **Cần xác nhận scope A2:** payment-status GET còn thiếu theo API v4 §5/SRS FR-34; QueryDR lost-IPN chưa có evidence mới theo ADR chuyển A1→A2 và SRS FR-38. [Bảng nguồn/tác động](SCRUM-117-delivery.md#phạm-vi-release-gap-và-quyết-định-cần-xác-nhận) phân biệt lỗi scenario, giới hạn chỉ được chấp nhận trong A1 và quyết định release chưa có. Không tự miễn yêu cầu A2 hoặc mặc định hai gap chặn toàn bộ release.
-- Hosting ADR-005 Proposed; giới hạn tier, quota, expiry, backup và scheduler cần xác nhận theo deployment §11.1.
-- Report nháp chưa compile/render; thông tin nhóm và bản nộp cuối chưa chốt. Đã đọc đề A2 v1.0 từ Drive và đối chiếu §9.1; không còn thiếu nguồn checklist này. Đề không quy định tên/vị trí PDF tổng hợp riêng.
-- **AC chưa đủ evidence:** release/tag A2, demo cuối, Sprint Review/Retro và acceptance record chưa có. Hướng dẫn rollback đã viết theo candidate Vercel/Render, cần bind IDs/tier/schema compatibility thật. Không dùng notes làm bằng chứng đã phát hành.
-- **Khuyến nghị:** rollback rehearsal chưa thực hiện; không tự làm điều kiện chặn AC4 khi chưa có đề/quy trình được duyệt hoặc SCRUM-116 yêu cầu. Không đồng nhất rehearsal với hướng dẫn rollback mà AC đã yêu cầu.
-- **Nguồn đã có:** [8 AC người dùng cung cấp](SCRUM-117-delivery.md#2-readiness-theo-acceptance-criteria) và [đề A2 v1.0](https://drive.google.com/file/d/1CYVsexpTXZ6Uyg2FHMRE8lnJHSPkYQmi/view), không chờ lại AC/checklist. [Push CI 42782530478](https://github.com/brewlite-project/brewlite-a2/actions/runs/42782530478) success tại 7dfc7ca xác nhận baseline lint/unit/build, không CD/production và không phải CI cho docs chưa commit. CI failure/phục hồi cũng đã thu trong delivery E117-C3.
+- Payment-status GET/API-03 còn thiếu tại HEAD 91e6f99; FE có helper gọi route và re-export, nhưng PaymentPageView/Order Confirmation hiện polling GET /orders/me. Không suy toàn bộ Return UI hỏng từ gap API-03. Order History success không chứng minh endpoint theo contract đã có; Leader/API owner cần quyết định/task cụ thể.
+- PR26 báo VNPay Sandbox payment PASS, Order PAID/Payment SUCCESS/Loyalty +10, backend Render Live 2216b7a, FE Vercel Live. Chưa có trace để xác nhận riêng IPN validation/ACK/duplicate handling hay QueryDR Sandbox/lost-IPN recovery. #25 chỉ thêm observability, không sửa network timeout.
+- PR26 ghi một giao dịch Sandbox trước vẫn cần manual financial reconciliation; chưa có ID đã lọc/time/state/outcome/owner/resolution. Không claim resolved/refunded hoặc tự chấp nhận giới hạn tài chính; cần quyết định nhóm trước nghiệm thu phạm vi liên quan.
+- FE URL đã có; backend origin và Auto-Deploy02452f2 được ảnh xác nhận, GET / và /products200/9 items. Vercel status02452f2 success nhưng production alias chưa bind. Bỏ browser theo yêu cầu; Người dùng xác nhận Leader chưa kiểm tra/nghiệm thu. DB Free18/Singapore/1GB/expiry10-12/3 external /32 có ảnh, Internal usage/runner/backup/rollback targets vẫn chưa đủ.
+- #27 mô tả Render After CI Checks Pass; ảnh mới và CI jobs xác nhận một lần Auto-Deploy backend02452f2 sau checks success. Chưa chứng minh pipeline đầy đủ image tag → migration → smoke/failure handling theo đề §7.3. Không tự kết luận GitHub phải có CD workflow riêng nếu provider integration hợp lệ; cần observed event chain.
+- Demo/Review/Retro cuối và acceptance PR17 chưa có; report PDF đã build/render, chưa nghiệm thu. Rollback guide có điều kiện theo provider/tier; rehearsal khuyến nghị, chưa thực hiện.
+
+Các giới hạn không tự waive requirement A2 hoặc mặc định chặn mọi AC; xem bảng 8 AC/dependency tại delivery §2/3.
 
 ## Điều kiện chốt notes và phát hành
 
-Xem [delivery §8](SCRUM-117-delivery.md#8-trình-tự-còn-lại-và-điều-kiện-thực-hiện). Chốt source SHA sau merge/release workflow, thu CI/CD + deploy IDs + smoke đúng SHA, hoàn thiện PDF/bộ nộp và quyền người chấm, xác nhận người tiếp nhận, rồi mới xin quyền tạo/push tag và publish. Mỗi bước ngoài lượt tài liệu này cần quyền theo AGENTS.md; không thay đổi Jira Approved/Done tự động.
+Xem [delivery §8](SCRUM-117-delivery.md#8-trình-tự-còn-lại-và-điều-kiện-thực-hiện). Chốt source SHA sau merge/release workflow, thu CI/CD + deploy IDs + smoke đúng SHA, hoàn thiện PDF/bộ nộp và quyền người chấm, ghi cách nhóm tiếp tục quản lý tài nguyên, rồi chốt bước tạo/push tag và publish theo quyền được cấp. Mỗi bước ngoài lượt tài liệu này cần quyền theo AGENTS.md; không thay đổi Jira Approved/Done tự động.
 
-## Nội dung PR đề xuất vào dev
+## Nội dung cập nhật PR #17 vào dev
 
-**Title:** `docs(SCRUM-117): prepare A2 release, operations and delivery dossier`
+**Title:** `docs(SCRUM-117): complete A2 report PDF and production delivery evidence`
 
-**Body:**
+Hoàn thiện hồ sơ SCRUM-117 / A2-T5.4 trên baseline ứng dụng dev `0e43bcb`, bổ sung báo cáo PDF 53 trang và evidence triển khai Render. Cập nhật các mô tả cũ về backend, database, migration và trạng thái review để nhóm có thể nghiệm thu từng AC theo nguồn thực tế.
 
-README còn mô tả A1 trong khi ứng dụng đã chuyển sang apps/web và apps/api. PR cập nhật hướng dẫn A2 theo scripts hiện tại, bổ sung runbook migration/seed/rollback tại deployment.md, readiness/evidence/release mapping và hồ sơ demo/bàn giao; thêm entrypoint LaTeX nháp tái sử dụng fragments và bố cục SGU. Đã tìm và đọc đề A2 v1.0, ánh xạ checklist §9.1 và bổ sung requirement matrix theo path bắt buộc §8.1.
+## Thay đổi
 
-Phạm vi đã chuẩn bị:
+- Đồng bộ README, deployment/runbook, delivery dossier, release notes và hai bảng traceability.
+- Bổ sung 5 ảnh Render đã che credential/IP, xác nhận Auto-Deploy Live source `02452f2`, PostgreSQL Free 18 tại Singapore và network allowlist 3 IP /32.
+- Tổng hợp HTTP evidence backend `GET /` và `GET /products` ngày 13/11/2026. Giữ timestamp của request riêng với deployment.
+- Tích hợp LaTeX theo template SGU, báo cáo A1 làm nguồn lịch sử, xuất `docs/report/output/main.pdf`.
+- Sửa nhận định Leader PASS theo đính chính của người dùng: Leader chưa kiểm tra/nghiệm thu SCRUM-117.
+- Ghi phương án nhóm tiếp tục quản lý tài nguyên. Mẫu chuyển quyền và rollback rehearsal là khuyến nghị, không bổ sung AC mới.
+- Chuẩn bị backup/restore PostgreSQL 18, rollback ứng dụng có điều kiện và kịch bản demo/Review/Retro.
 
-- Readiness đối chiếu đủ 8 AC SCRUM-117 do người dùng cung cấp, tách hồ sơ draft PR với release đã phát hành/nghiệm thu.
-- Hướng dẫn rollback theo candidate provider/tier, giới hạn eligibility/retention, schema/API compatibility và DB recovery riêng. Rehearsal chỉ khuyến nghị khi chưa có nguồn bắt buộc.
-- Ghi rõ source/evidence/SHA khác nhau; phân loại payment-status/QueryDR là quyết định release cần xác nhận, không tự waive hoặc chặn mọi AC.
-- Engine pdfLaTeX xác định từ preamble và log template SGU; bộ nguồn và hướng dẫn build local/Overleaf, chưa upload dịch vụ ngoài.
-- Requirement matrix mới truy 48 FR + 49 NFR theo SRS → US/UC → design/code/test inventory, không tự ghi runtime PASS; mẫu demo/Review/Retro/ký nhận đã có để nhóm điền sau hoạt động thực.
+## Kiểm chứng
 
-Validation thực chạy ở lượt tài liệu:
+- pdfLaTeX + VnTeX/MiKTeX, các lượt build cuối exit 0, PDF 53 trang.
+- Render MuPDF toàn bộ và xem các trang thay đổi. Không có Overfull hoặc undefined references/citations trong log cuối. Underfull hbox ở một số bảng/đoạn căn đều đã kiểm tra trực quan.
+- PDF SHA256 `F796B94AA56D2D80F341F182627E21FB64F58F6B705843911EBD05C35E5B9CCB`.
+- 798 local links/anchors, 9 TeX inputs, 18 graphics references, 48 FR và 49 NFR được kiểm tra.
+- Whitespace, conflict markers và các mẫu credential/token được dò đạt kiểm tra. Các mẫu dò không loại trừ mọi loại secret.
+- Thay đổi thuộc tài liệu/evidence/PDF. Không chạy lại app tests local. CI và test claims lịch sử được ghi cùng nguồn/SHA/môi trường.
 
-- Kiểm tra local Markdown paths/anchors, LaTeX inputs/assets, package scripts/lockfiles, whitespace/conflict và các mẫu nhạy cảm; kết quả sau đối chiếu dev mới ở delivery §12: 10 files, 776 local references, 8 TeX inputs, 19 graphics references; 55 code/config paths trong Git tree 5021743 tồn tại. Không khẳng định loại trừ mọi secret; counts/SHA cũ giữ ở sổ lịch sử.
-- `git diff --check` và review phạm vi: chỉ tài liệu; không sửa app, schema, CI/CD hay archive A1; không chạy lại toàn bộ app tests.
-- Chưa compile/render PDF mới do chưa tìm được engine khả dụng trên máy. pdfLaTeX trong log SGU chỉ là build template lịch sử.
-- Evidence kế thừa mới thu từ GitHub: push CI 42782530478 success trên 7dfc7ca; PR CI 42780158363 success trên e942cbe. Chỉ lint/unit/build, không thay CD/E2E/production smoke.
+## Phần còn cần nhóm xác nhận
 
-Dependency và phần chưa xác minh:
+- Vercel status success trên `02452f2` đã có, còn thiếu mapping production alias tới deployment.
+- Backend HTTP/liveness/catalog VERIFIED tại thời điểm probe. Actual Internal DB usage và migration runner chưa có evidence trực tiếp.
+- External DB access giới hạn 3 IP /32. Cần quyết định phạm vi truy cập quản trị phù hợp AC3 và kế hoạch trước ngày DB hết hạn 10/12/2026.
+- Release/tag và eligible rollback artifacts chưa chốt. `A2-v1.0.0` là tên đề xuất cho commit stable sau review.
+- Demo, Sprint Review/Retrospective và nghiệm thu SCRUM-117 chưa có evidence.
+- PR26 báo payment PAID/SUCCESS/+10, QueryDR/IPN và giao dịch cần đối soát được giữ đúng giới hạn bằng chứng.
 
-- SCRUM-114: scope MVP/PR/commit và giới hạn được chấp nhận; SCRUM-115: report/run integration/browser/Sandbox với environment/SHA/scenario; SCRUM-116: CD/deploy URLs, IDs/SHA, provider/tier/region, DB policy, runner và rollback targets. PR liên quan #6/#9/#12/#15 chưa chứng minh ba task này hoàn tất.
-- Leader: chỉ dẫn giảng viên mới hơn đề v1.0 nếu có, metadata report, ownership/tiếp nhận, quyết định scope Mock/VNPay/payment-status/QueryDR và bộ nộp cuối. AC và checklist v1.0 đã có nguồn.
-- Production, PDF cuối, demo/Review/Retro, release/tag và nghiệm thu còn mở; không đề xuất SCRUM-117 Done.
+Báo cáo giữ DRAFT. PR này chuẩn bị hồ sơ để review, chưa đề nghị đánh dấu SCRUM-117 Done.
 
-PR draft được chuẩn bị cho source branch `SCRUM-117-production-release-delivery` → base `dev`, từ thư mục `D:/CNPM_PJ/brewlite-a2` tại HEAD `5021743`. Nội dung ở đây chỉ là PR body nháp; chưa commit/push, chưa tạo PR GitHub/PR number. Chỉ mở sau khi người dùng review và cho phép các bước Git riêng.
+## Bổ sung body PR17 — evidence/PDF14-11
 
-**Trạng thái Git hiện tại (11/11/2026):** checkout chính ở `D:/CNPM_PJ/brewlite-a2`, branch `SCRUM-117-production-release-delivery`, HEAD/origin/dev `5021743e99d73c2ce795df72ee5aaa90b04bb0da`. 9 tài liệu staged và có unstaged edits; matrix mới untracked. Không dùng branch/path TEMP như hướng dẫn thao tác hiện hành; các tham chiếu đó nếu có trong dossier là lịch sử.
+**Cập nhật tiếp 14/11/2026:** HEAD91e6f99/dev0e43bcb giữ nguyên, 10 docs unstaged đầu vào được bảo toàn. Backend https://brewlite-a2-api-hntn.onrender.com/ có ảnh Render Auto-Deploy Live02452f2 (fullSHA02452f228712c3501c8d27f0f1ae737ad206785d), deployed field13/11/2026 08:39:19Z. GET mới / và /products200 lúc16:24:59Z ngày13/11, catalog9 items; GET không xuất processSHA. DB Free18/Singapore/1GB/Available, expiry10/12/2026; external3 /32 restricted, chưa private-only. Bỏ Edge/Computer Use theo yêu cầu; Người dùng đính chính ngày 14/11/2026: Leader chưa kiểm tra/nghiệm thu SCRUM-117. Evidence và các giới hạn tại dossier §14.
+
+Title đề nghị: docs(SCRUM-117): complete A2 report PDF and production delivery evidence.
+
+Nội dung bổ sung dùng kèm body cập nhật PR17: thêm Render evidence đã che và báo cáo PDF53 trang, bộ build/render/QA có nguồn; AC2 VERIFIED snapshot, AC3 vẫn PARTIAL. Hướng dẫn backup/restore PostgreSQL18 và candidate rollback được chuẩn bị, chưa backup/restore/rollback production. Không gọi PDF hoàn tất là release nghiệm thu. Chưa stage/commit/push/update PR17.
+
+
+### Hiệu chỉnh trước review PR17 ngày 14/11
+
+Người dùng xác nhận Leader chưa kiểm tra/nghiệm thu. Bỏ các nhận định Leader PASS, dùng phương án nhóm tiếp tục quản lý tài nguyên và giữ mẫu chuyển quyền là khuyến nghị. Sửa checklist/backend/CD đã lỗi thời. PDF53 trang được build/render lại; checksum hiện hành ở report README. Ba lượt build cuối exit0; log không có Overfull/undefined refs/citations/LaTeX-Package Warning, có Underfull hbox đã kiểm tra trực quan. GitHub/Vercel đã được tra lại, còn thiếu alias binding và nguồn runtime Internal DB usage.

@@ -2,19 +2,15 @@
 
 **Trạng thái: DRAFT — hồ sơ chuẩn bị review; chưa phát hành, chưa nghiệm thu, không đề xuất Jira Done.**
 
-**Checkout hiện tại (11/11/2026):** repository `D:/CNPM_PJ/brewlite-a2`, branch
-`SCRUM-117-production-release-delivery`, HEAD `5021743e99d73c2ce795df72ee5aaa90b04bb0da`
-(baseline `origin/dev`). 9 tài liệu đang staged và có chỉnh sửa unstaged; ma trận mới
-untracked. PR body là bản nháp trong release notes; chưa có commit/push hoặc PR draft trên GitHub.
-Worktree TEMP `C:/Users/Khai Hoang/AppData/Local/Temp/SCRUM-117-production-release-delivery-sync`
-và branch `SCRUM-117-production-release-delivery-sync` là hoạt động lịch sử riêng; không phải
-thư mục/branch checkout hiện hành.
+**Snapshot trước khi cập nhật PR17 ngày 14/11/2026:** các mô tả HEAD/index/remote và kiểm tra bên dưới ghi tại lúc chuẩn bị bộ tài liệu. Người dùng đã giao quyền hoàn thiện, gồm commit/push hồ sơ và cập nhật PR17. Xem head, CI và trạng thái review hiện hành trên PR17; quyền này không thay kết quả nghiệm thu của nhóm.
 
-**Snapshot lịch sử sau fetch (10/11/2026):** đã đọc remote dev `5021743e99d73c2ce795df72ee5aaa90b04bb0da`;
-tại thời điểm đó HEAD task vẫn `7dfc7ca`, chưa tích hợp source mới. Hiện trạng checkout xem ở đầu dossier;
-10 file/staged–unstaged và dự phòng được ghi trong snapshot lịch sử. Các kết quả §9–11 giữ thời điểm và SHA lịch sử.
+**Baseline kiểm tra 13/11/2026:** workspace `D:/CNPM_PJ/brewlite-a2`, branch `SCRUM-117-production-release-delivery`, HEAD `91e6f99bfd02353616b2e481fe613b7ea91118af`; `origin/dev` sau fetch lượt trước và đối chiếu lại là `0e43bcb80f64d6a5fa558cd80f71a199029535d0`. Đầu lượt 13/11 khoảng14Z working tree/index sạch. Lượt 23:20+07 tiếp nhận nguyên 10 docs unstaged; ngày14/11 tiếp tục PDF, index vẫn giữ nguyên. Source ứng dụng/config tại HEAD trùng origin/dev; diff ba chấm chỉ 10 tài liệu SCRUM-117. Merge dev trong HEAD là lịch sử đã có trước lượt này, không phải thao tác vừa thực hiện.
 
-## 1. Phạm vi và snapshot trước khi sửa
+[PR #17](https://github.com/brewlite-project/brewlite-a2/pull/17) đã tồn tại, **open, draft=false**, head remote `3543a55d4fed63cd343f5da59d28500f124490be`, base `dev` (API snapshot base SHA `5021743`). Local HEAD đi trước remote branch 20 commits. PR files API hiện liệt kê đúng 10 file docs; nội dung local mới chưa có trên PR. Chưa có review trong API trả về. Chỉ chuẩn bị nội dung cập nhật PR, không tạo trùng/chuyển Draft/push trong lượt này.
+
+**Cách đọc lịch sử:** §1 và các evidence E117-01/R/C, §9–12 giữ nguyên ngày/SHA/môi trường của lần kiểm tra cũ. Những câu “chưa commit/chưa có PR/9 migrations/chưa có URL” trong các snapshot đó chỉ đúng lúc ghi nhận. Hiện trạng dùng §2–4 và §14; §13 giữ snapshot trước khi có backend URL/ảnh Render; không copy từ worktree TEMP.
+
+## 1. Phạm vi và snapshot trước khi sửa (lịch sử 10/11/2026)
 
 - Ngày kiểm tra: 10/11/2026, múi giờ UTC+07. Evidence mới thuộc workspace Windows, không thuộc production.
 - Repository/remote: `https://github.com/brewlite-project/brewlite-a2.git`.
@@ -26,27 +22,20 @@ tại thời điểm đó HEAD task vẫn `7dfc7ca`, chưa tích hợp source m�
 
 ## 2. Readiness theo Acceptance Criteria
 
-Cập nhật ngày 10/11/2026. **Nguồn của cả 8 dòng là Description/AC SCRUM-117 do người dùng cung cấp**, đối chiếu thêm đề v1.0 tại §1. Số 1–8 chỉ là số thứ tự đối chiếu, không giả định Jira có mã AC riêng. Các nhận định chưa tìm thấy đề trong evidence lần trước là lịch sử tìm kiếm, không phải trạng thái hiện tại; checklist từ đề đã được ánh xạ tại §7.
+Cập nhật 14/11/2026, Windows/GitHub read-only; GET/deployment giữ thời điểm riêng ngày 13/11. Nguồn là đúng 8 AC người dùng cung cấp, đối chiếu đề A2 v1.0. VERIFIED chỉ trong phạm vi đã chứng minh; NOT VERIFIED là chưa đủ bằng chứng, không có nghĩa đã chạy và thất bại. Hồ sơ chưa nghiệm thu.
 
-VERIFIED = đạt đúng phạm vi có evidence; NOT VERIFIED = chưa chứng minh đủ; BLOCKED = thiếu đầu vào cụ thể để kiểm tra; NOT APPLICABLE chỉ khi có quyết định/giải thích hợp lệ. Các phần source/tài liệu đã kiểm tra không tự làm cả AC production đạt.
-
-Sau đối chiếu dev mới 5021743 ở §12, trạng thái 8 AC dưới đây chưa thay đổi:
-PR #16/CI đã có nhưng production, DB policy, CD/migration/deploy/smoke và nghiệm
-thu SCRUM-117 vẫn chưa có evidence. Source backend và cấu hình liên quan không
-đổi; không thay các SHA của runtime/test report cũ bằng SHA mới.
-
-| AC đã được cung cấp | Artifact / căn cứ và kết quả | Commit / môi trường / thời điểm đối chiếu | Trạng thái AC | Còn thiếu / đầu mối cần xác nhận |
+| AC | Evidence và kết quả | Commit / môi trường / thời điểm | Trạng thái | Việc tiếp theo / dependency |
 |---|---|---|---|---|
-| 1. Frontend production HTTPS hoạt động | Deployment §8 còn TBD; chưa có URL để mở browser/TLS/asset | 7dfc7ca / repo + nguồn GitHub truy cập được / 10-11 | BLOCKED | SCRUM-116 cung cấp URL, deploy ID/SHA; chưa xác nhận người cung cấp |
-| 2. Backend API và health endpoint truy cập được | Source có `GET /` → `Hello World!`, `GET /products` đọc DB; không tự đặt `/health`. Chưa kiểm tra deployed API | 7dfc7ca / static / 10-11 | BLOCKED | SCRUM-116: backend origin, deploy SHA; sau đó chỉ GET read-only để xác minh |
-| 3. PostgreSQL production cấu hình phù hợp, không công khai trực tiếp | ADR-005 Proposed; internal URL không chứng minh external access tắt; Docker local không chứng minh production | 7dfc7ca / deployment §3,8; ADR-005 / 10-11 | BLOCKED | SCRUM-116/DB owner: tier/region, Networking policy đã che secret, DB read/migration status; tên owner chưa xác nhận |
-| 4. Có release/tag, release notes và hướng dẫn rollback | Notes nháp đã có; deployment §11.3 có hướng dẫn theo candidate provider. Remote tag chỉ A1-final ở lần kiểm tra đầu; chưa có release A2 được xác minh | 7dfc7ca + docs chưa commit / repo; remote evidence §3 / 10-11 | NOT VERIFIED | Release commit/tag và rollback target IDs/compatibility còn thiếu. Rehearsal **khuyến nghị**, chưa thực hiện; chưa có căn cứ bắt buộc cho AC này |
-| 5. README và tài liệu bàn giao đầy đủ | README, runbook, delivery mapping/demo/ownership đã được chuẩn bị và static review; runtime URLs/ownership chưa điền vì chưa có evidence | 7dfc7ca + docs chưa commit / Windows static / 10-11 | NOT VERIFIED (phần tài liệu đã chuẩn bị) | Hoàn thiện metadata vận hành từ SCRUM-116/Leader rồi reviewer đánh giá tính đầy đủ; không yêu cầu lại AC |
-| 6. Có bằng chứng demo và Sprint Review/Retrospective | Có report/ảnh local SCRUM-112; agenda cuối ở §5 chưa phải biên bản hoặc demo đã diễn ra | Report source 34cbbc0, evidence kế thừa; đọc lại 10-11 | NOT VERIFIED | Nhóm cung cấp video/log demo A2, Review/Retro thực, thời gian/phạm vi/version; chưa xác nhận người phụ trách |
-| 7. Các tạo phẩm bắt buộc đã có trên repository | Đã đối chiếu đề v1.0 §8.1/9.1 và bổ sung docs/traceability-matrix.md với 48 FR + 49 NFR. Artifacts nguồn tồn tại; CD/production/demo và bản bàn giao cuối chưa có evidence; docs chưa commit | 7dfc7ca + docs chưa commit / local repo + Drive / 10-11 | NOT VERIFIED | Hoàn thiện các dòng checklist §7 còn mở và đưa bản đã review lên repo sau khi được phép; không còn bị chặn vì chưa có checklist |
-| 8. Có PR review và nghiệm thu | PR body đã chuẩn bị; chưa tạo PR SCRUM-117 theo ranh giới lượt này; không có acceptance record | Branch SCRUM-117 / 10-11 | NOT VERIFIED | Sau cho phép riêng: commit/push/open draft PR vào dev; reviewer/Leader review và quyết định nghiệm thu |
+| 1. Frontend production HTTPS hoạt động | URL người dùng: https://brewlite-a2-three.vercel.app/; Vercel commit status success tại main 02452f2. HTTP GET read-only xem §13; bỏ Edge/Computer Use theo yêu cầu; người dùng đính chính 14/11: Leader chưa kiểm tra/nghiệm thu | URL hiện tại; status 02452f2 lúc 2026-11-13T08:38:39Z; audit 13/11 | NOT VERIFIED toàn AC; có deployment/HTTP evidence một phần | SCRUM-116 bind domain → deployment ID/SHA, ghi phạm vi review thực tế khi diễn ra và quyền người chấm; không yêu cầu chạy lại browser trong lượt này |
+| 2. Backend API và health endpoint truy cập được | Backend https://brewlite-a2-api-hntn.onrender.com/: GET /200 Hello World!, /products200 JSON9 items; source liveness và Prisma read tách riêng; ảnh Auto-Deploy Live02452f2 | Render deployed field2026-11-13T08:39:19Z; GET kế thừa16:12:30/31Z, GET mới16:24:59Z; fullSHA §14 | VERIFIED phạm vi public API/liveness/catalog tại thời điểm probe | GET không xuất version; chưa xác minh process SHA phục vụ từng request, DB identity/Internal usage hoặc mọi failure case |
+| 3. PostgreSQL production cấu hình phù hợp, không công khai trực tiếp | Ảnh DB Free18/Singapore/1GB/Available, expiry10-12-2026; DB3 /32 giao với workspace/environment0.0.0.0/0. External restricted, chưa private-only | Ảnh người dùng, capture time chưa rõ, đọc13/11; source/deploy02452f2 riêng | PARTIAL / NOT VERIFIED AC3 | Xác nhận rule đã lưu/chủ/thời hạn, chốt private-only hoặc việc chấp nhận admin external restricted; xác nhận backend dùng Internal, runner/backup/restore |
+| 4. Có release/tag, release notes và hướng dẫn rollback | Notes/runbook đã cập nhật; GitHub Releases API trả []; local tag chỉ A1-final. Main #26/#28 là merge promotion, chưa phải A2 tag/release | main 03668e3/02452f2; API đọc 13/11; docs local | NOT VERIFIED | Chốt release SHA/tag, bind FE/BE rollback targets theo tier/compatibility. A2-v1.0.0 chỉ đề xuất; rehearsal khuyến nghị |
+| 5. README và tài liệu bàn giao đầy đủ | 10 file docs có trong HEAD và PR #17; đã đồng bộ seed/migration/CD/evidence, có demo/Review/Retro templates và report source/PDF 53 trang đã build/render | HEAD 91e6f99 + unstaged docs / Windows / 13/11 | NOT VERIFIED toàn AC; hồ sơ sẵn sàng review tài liệu | Bổ sung metadata vận hành còn thiếu và review tài liệu; phân công tại §6 là đề xuất tổ chức của nhóm |
+| 6. Có bằng chứng demo và Sprint Review/Retrospective | #26 là báo cáo kết quả Sandbox một scenario; SCRUM-112 có ảnh/report local lịch sử. Chưa tìm thấy video/biên bản Review/Retro A2 cuối | #26 13/11; report 34cbbc0; audit 13/11 | NOT VERIFIED | Nhóm/Leader cung cấp biên bản và video thật, thời gian/increment/feedback; §5 là mẫu chuẩn bị |
+| 7. Các tạo phẩm bắt buộc có trên repository | SRS/diagrams/source/CI và 48 FR + 49 NFR matrix có trong checkout/PR; checklist đề §9.1 tại §7. CD end-to-end và final demo còn mở; PDF local đã build/render, chưa đưa lên repository remote | HEAD 91e6f99, dev 0e43bcb; PR17 remote 3543a55 / 13/11 | NOT VERIFIED toàn bộ | Hoàn tất checklist, review PDF đã build/render, evidence release/CD/demo và phiên bản nộp; cập nhật PR khi được phép |
+| 8. Có PR review và nghiệm thu | PR #17 open không phải Draft, chưa có review; #26/#27 có APPROVED riêng, không thay acceptance SCRUM-117 | #26 review 2026-11-13T07:26:07Z; #27 08:20:00Z; PR17 đọc 13/11 | NOT VERIFIED | Sau review local/cho phép Git: cập nhật PR17 vào dev, reviewer/Leader quyết định nghiệm thu |
 
-Jira Done không thay merge/test; PR merged không thay nghiệm thu. CI xanh không thay CD; agenda không thay họp đã tổ chức. Hướng dẫn rollback được yêu cầu bởi AC4; rehearsal chỉ nâng mức tin cậy khi chưa có quy định được duyệt buộc thực hiện. SRS AC-OPS-07 là nguồn yêu cầu liên quan cần xác nhận cửa nghiệm thu áp dụng, không tự nâng thành điều kiện mới của SCRUM-117.
+Không có AC nào được ghi “đã test thất bại” chỉ từ thiếu evidence/công cụ. CI không thay CD; payment success không chứng minh QueryDR; agenda không thay cuộc họp. SRS AC-OPS-07 cần xác nhận cửa áp dụng, không tự thêm rollback rehearsal thành gate.
 
 ## 3. Sổ bằng chứng
 
@@ -71,39 +60,43 @@ Mọi evidence bổ sung phải có: ID, UTC timestamp, environment, source SHA 
 
 ### Phạm vi release, gap và quyết định cần xác nhận
 
-| Vấn đề / nguồn cụ thể | Phân loại hiện tại và tác động | Xác nhận cần có |
+| Nguồn / vấn đề | Implementation / test / acceptance | Tác động và đầu vào còn thiếu |
 |---|---|---|
-| Payment status: [SRS §8](../requirements/srs.md#8-bảng-gap-và-mục-cần-leader-xác-nhận), FR-34; [API v4 §5](../a1-archive/api/BrewLite_API_Contract_v4.0.md); `apps/web/services/payment.service.ts` gọi status, inventory `apps/api/src/payments/*controller.ts` không có GET status tại 7dfc7ca | **Implementation gap, quyết định release cần xác nhận.** Cản chứng minh Return UI đọc authoritative state cho scenario đó; không tự cản chứng minh HTTPS, GET / hoặc menu public | Leader/API owner xác nhận contract/scope release A2 lần này và task xử lý hoặc quyết định chấp nhận giới hạn cụ thể. Chưa thấy waiver A2; không tự miễn hoặc đóng gap |
-| QueryDR: [ADR APPROVED ngày 03/11/2026, §2.2](../a1-archive/decisions/ADR-P2-QueryDR-Sandbox-E2E-Deferred.md), SRS FR-38 và §8 | **Giới hạn được chấp nhận trong A1**, chuyển Sandbox E2E/lost-IPN recovery sang A2/SCRUM-95, không miễn yêu cầu A2. Chưa có evidence mới; không claim financial recovery E2E. Chưa có quyết định cửa nghiệm thu release A2 lần này | Leader/QA xác nhận scenario/cửa nghiệm thu SCRUM-95/114/115; nếu chấp nhận giới hạn ở release này cần link quyết định và tác động. Không mặc định chặn toàn bộ 8 AC |
-| Proxy 502 lịch sử: [SCRUM94](../a1-archive/verification/SCRUM94_Verification_Evidence.md) | Không tái hiện ở rerun A1 theo archive; lần này không production runtime probe | SCRUM-116 cung cấp FE→API evidence; không khẳng định còn lỗi hoặc đã hết ở deployed version |
-| Hosting: [ADR-005](../architecture/adr/005-production-hosting.md), deployment §8 | Candidate vẫn Proposed; URL/tier/region/migration runner thực chưa xác minh, trực tiếp thiếu đầu vào AC1–3 và rollback binding AC4 | SCRUM-116/Leader xác nhận actual topology, không dùng sơ đồ làm proof-of-deployment |
-| Scope demo: đề v1.0 §7.1 ghi thanh toán Ví/Thẻ mô phỏng; [Mock policy](../a1-archive/api/SCRUM85_Mock_Payment_Environment_Access_Policy.md) và source chặn Mock khi NODE_ENV=production | **Cần quyết định môi trường/phạm vi demo.** VNPay Sandbox là phần mở rộng có nguồn riêng, chưa có quyết định ở hồ sơ xác nhận nó thay toàn bộ demo Mock của đề. Không bật Mock production để làm demo | Leader/QA/SCRUM-114/116 chốt cách chứng minh luồng tối thiểu đúng đề và policy: môi trường demo được phép, production và evidence tương ứng; không tự miễn Mock hoặc giả Sandbox PASS |
-| CD/image: đề v1.0 §7.3 yêu cầu image có tag SHA/semantic version; push registry chỉ khi nền tảng yêu cầu | Không còn là giả định “nếu rubric yêu cầu image tag”; candidate Render host-build vẫn cần bằng chứng image version/artifact và deploy mapping thực | SCRUM-116 xác nhận image/tag/build provenance và cơ chế deploy. Không tự bắt buộc registry độc lập khi đề chỉ yêu cầu có điều kiện |
+| Payment-status: SRS FR-34/§8, API v4 §5, payment.service.ts:2153, payments controllers | Tại HEAD 91e6f99 (= dev 0e43bcb cho app), helper fetchPaymentStatusApi gọi GET /payments/:paymentId/status nhưng backend chưa có route tương ứng. Helper được re-export ở order-confirmation.service.ts; chưa thấy component gọi helper này. PaymentPageView.tsx:616/818 và order-confirmation/page.tsx:119/193 polling GET /orders/me | Gap endpoint/contract API-03 vẫn mở; caller dùng helper sẽ không có route. Không suy toàn bộ Return UI mất server truth: hai UI hiện dùng orders/me. Order History success không đóng gap API-03. Leader/API owner chốt task hoặc giới hạn A2 bằng văn bản |
+| QueryDR: ADR A1 APPROVED 03/11/2026; PR #25/#26 | Có client/scheduler và tests; #25 thêm diagnostics DNS/network/TLS/timeout/HTTP/gateway, không đổi signature/state/retry/timeout. #26 không có log QueryDR thành công | Sandbox QueryDR/lost-IPN recovery NOT VERIFIED. ADR A1 chỉ deferred sang A2/SCRUM-95, không miễn A2. Leader/QA xác nhận cửa nghiệm thu và xử lý timeout |
+| VNPay payment success theo PR #26 | PR body báo Sandbox E2E PASS, Order PAID, Payment SUCCESS, Loyalty +10 qua Order History; backend Render Live source 2216b7a, FE Vercel Live. Review APPROVED cho patch, chưa phải nghiệm thu SCRUM-117 | Ghi nhận **PASS theo người báo cáo cho scenario payment success**, chưa có transaction/event/log/time/FE SHA kèm theo để tái kiểm chứng. Không suy đã xác minh IPN ACK/HMAC/idempotency hoặc QueryDR |
+| Giao dịch Sandbox trước còn manual financial reconciliation (#26) | Chỉ biết flagged, chưa có ID đã che dữ liệu, time/amount, gateway outcome, internal state, owner hay quyết định xử lý trong body/comments | Chưa xác định root cause hoặc đánh dấu resolved/refunded. Có rủi ro chênh gateway–Order/Payment; không tự retry/finalize/hoàn tiền. Leader/QA và người vận hành được xác nhận cung cấp kết quả đối soát, phạm vi ảnh hưởng và quyết định release |
+| Mock demo theo đề §7.1 và policy | Source chặn Mock khi NODE_ENV=production; Sandbox success không tự thay requirement Ví/Thẻ mô phỏng | Leader/SCRUM-114 chốt môi trường demo Mock được phép và phạm vi Sandbox bổ sung, không bật Mock production |
+| Hosting/CD theo #27 và ảnh R117-I1 | Vercel/Render có evidence provider; ADR-005 vẫn Proposed trong nguồn. apps/api/README.md ghi main, apps/api, Dockerfile, After CI Checks Pass; ảnh R117-I1 xác nhận một Auto-Deploy Live source02452f2 | VERIFIED một lần CD backend theo ảnh và CI §14. SCRUM-116 cần deploy events/artifact/image version, runner, smoke/failure handling; tier/network/rollback target chưa có |
 
-Không sửa app, policy hoặc quyết định nghiệp vụ trong SCRUM-117. Chưa có quyết định A2 chấp nhận hai gap thanh toán; hồ sơ không đánh đồng “cần xác nhận” với lỗi chặn toàn bộ release, và không đánh dấu PASS cho các scenario chưa đủ evidence.
+### Evidence các task phụ thuộc sau tìm kiếm rộng (13/11/2026)
 
-### Evidence các task phụ thuộc sau tìm kiếm rộng
+Đã đọc title/body/diff và comments PR liên quan, không chỉ Jira key. Không tìm thấy PR xác nhận SCRUM-114/115 độc lập trong tập PR #1–28; không có nghĩa task chưa làm ở nguồn ngoài quyền truy cập.
 
-| Task cần đối chiếu | Nguồn tìm được và giới hạn | Đầu vào còn cần |
+| Task | Evidence hiện có | Phần vẫn cần xác nhận |
 |---|---|---|
-| SCRUM-114 — MVP thực tế | Không thấy PR theo key hoặc nội dung đủ xác nhận thuộc task. [PR #15](https://github.com/brewlite-project/brewlite-a2/pull/15) / SCRUM-112 merged tại 7dfc7ca có report menu/mobile source 34cbbc0; là evidence **liên quan**, không đổi tên thành SCRUM-114 | Link scope/PR/commit hoặc xác nhận cách task 114 kế thừa MVP; các giới hạn đã được chấp nhận |
-| SCRUM-115 — integration/E2E | Không có PR/evidence gắn task. Report #15 nêu 11 Products E2E, local tests và ảnh; CI #12 chạy unit/build. Các tests A1 trong archive là historical, không chứng minh Sprint 2 integration/browser/Sandbox E2E hiện tại | Run/report với SHA, environment, scenario và actual result; ghi riêng browser, DB integration, Sandbox |
-| SCRUM-116 — CD/deploy/rollback | Đã có [PR #16](https://github.com/brewlite-project/brewlite-a2/pull/16), merge 5021743: Next/proxy hardening; CI PR/push success. Body PR ghi Render/Vercel deploy, CD và production smoke là follow-up. Không đổi workflow và chưa có actual origins/deploy SHA. Runbook vẫn candidate | Còn cần CD workflow/integration/run, FE/BE URLs + deployment IDs/SHA, provider/tier/region, runner/rollback targets; merge #16 không đồng nghĩa toàn task Done |
+| SCRUM-114 — MVP | #15/SCRUM-112 report local source 34cbbc0; #24 mô tả catalog Render; #26 báo Sandbox success + Order History. Source hiện có auth/cart/orders/payment, status route vẫn gap | Scope/PR/commit/giới hạn đã được duyệt cho 114; mapping phần kế thừa, lựa chọn Mock/Sandbox; không tự coi file code là nghiệm thu |
+| SCRUM-115 — integration/E2E | #25 body: focused 38/38, full Vitest 479 PASS, 6 opt-in PostgreSQL integration skipped, build/TypeScript PASS; không nêu OS/Node/DB/time run. #26 Sandbox payment success được báo cáo; #15 Products E2E local lịch sử | Report integration/menu→confirmation đúng SHA/environment/scenarios/results; IPN/QueryDR evidence riêng. Không lấy 479 PASS làm PostgreSQL integration PASS |
+| SCRUM-116 — CD/deploy | #18–23 seed/guard/TLS code, #24 migration/catalog runtime claim; #27 cấu hình auto-deploy trong README; GitHub CI success và Vercel status có link ở §13 | Backend origin/IDs/SHA hiện tại, actual runner/log migration, image tag/digest, CD event sau checks + smoke/failure path, tier/DB policy/backup/rollback targets |
 
-Tìm cả title/body/diff và toàn bộ hai trang PR trả về, không chỉ mã task. PR số #115/#116 trong lịch sử A1 là số PR, không phải bằng chứng cho Jira SCRUM-115/116. Không thấy URL production sạch trong nguồn được truy cập nên chưa gửi GET production. Các nguồn bên ngoài quyền truy cập vẫn có thể tồn tại; không suy Jira trạng thái hoặc người phụ trách từ việc không tìm thấy.
+Các đầu mối ở đây là **dependency theo task**, chưa có tên executor/receiver đã xác nhận. Không gán người làm hosting/DB chỉ từ tác giả PR hoặc vai trò Leader.
 
 ## 4. Release/tag → source → deployments → runs → smoke
 
-| Phiên bản | Source commit | Frontend deployment | Backend deployment | CI/CD run | Smoke evidence / khác biệt |
+| Release / nguồn | Source SHA | Frontend deployment | Backend deployment | CI/CD | Smoke / khác biệt |
 |---|---|---|---|---|---|
-| A1-final (provenance) | 1951dc124c83359556f04adb6ba3f0ee9f22fce4 | Không xác minh A2 | Không xác minh A2 | Không dùng làm CI A2 | Archive lịch sử, không release A2 |
-| dev baseline cũ | 7dfc7ca996c2eb6190a5ec3e7812f70d441a61cb | Chưa có ID/SHA | Chưa có ID/SHA | [Push CI 42782530478](https://github.com/brewlite-project/brewlite-a2/actions/runs/42782530478) success, đúng SHA; CD chưa thấy | E112-H chạy source 34cbbc0, **khác SHA dev**, không production; không dùng CI success làm deployment evidence |
-| Source 5021743 hiện tại; deployment chưa xác minh | 5021743e99d73c2ce795df72ee5aaa90b04bb0da | Chưa có ID/SHA | Chưa có ID/SHA | [Push CI 42846397766](https://github.com/brewlite-project/brewlite-a2/actions/runs/42846397766) success, 15:38:07Z–15:39:50Z ngày 10-11 | Không có deploy/smoke evidence; không tự gắn A2 tag vào SHA này |
-| PR #16 head, không release | e8b1498ab0fe70a1bacd0f2b221492c46796643f | Không xác minh | Không xác minh | [PR CI 42845148086](https://github.com/brewlite-project/brewlite-a2/actions/runs/42845148086) success, 15:31:04Z–15:32:49Z ngày 10-11 | Khác merge SHA; body PR ghi CD/hosting/smoke follow-up |
-| PR #15 (source branch, không release) | e942cbe9be479e53ba76f8c3bf99e3e489db93f6 | Không xác minh | Không xác minh | [PR CI 42780158363](https://github.com/brewlite-project/brewlite-a2/actions/runs/42780158363) success | Khác SHA merge 7dfc7ca và runtime report 34cbbc0; chỉ xác nhận CI branch |
-| A2-v1.0.0 (đề xuất, chưa tạo) | Chờ release commit được duyệt | Chờ URL/ID/artifact/SHA | Chờ URL/ID/image/SHA | Chờ CI + CD run cùng SHA | Chờ production smoke đúng deployment; không tự điền 7dfc7ca làm final |
+| A1-final — provenance | 1951dc124c83359556f04adb6ba3f0ee9f22fce4 | Không mapping A2 | Không mapping A2 | Không dùng làm CI A2 | Archive giữ nguyên |
+| Dev lịch sử | 7dfc7ca996c2eb6190a5ec3e7812f70d441a61cb | Chưa xác minh | Chưa xác minh | CI 42782530478 success | Report runtime 34cbbc0 khác SHA; không production |
+| PR16 merge lịch sử | 5021743e99d73c2ce795df72ee5aaa90b04bb0da | Chưa xác minh | Chưa xác minh | CI 42846397766 success | Chỉ Next/proxy; giữ giờ/SHA §12 |
+| Promotion #24 | 1b394f1dae75fd0a11c1b1b3f4390a588dedf18f (main); source dev 95906b5 | Vercel follow-up theo body | Render deployed theo body; ID/SHA deployed không ghi | CI 43230923812 success 2026-11-12T13:49:03Z | #24 báo 10 migrations, marker, GET products 200/9 products và detail/toppings 200. Không phải smoke mới tại merge SHA |
+| Payment scenario #26 trước merge | 2216b7a246b21491cf81cd2f2196f907c0aa7a98 | Vercel Live theo body, SHA chưa có; Preview Ready 36hKnqgZCX4NvuX8o24VgDUPW8W9 tại 06:50:37Z không phải production-domain proof | Render Live 2216b7a theo body; ID/origin chưa có | CI 43372690322 success 2026-11-13T05:32:33Z | Payment PAID/SUCCESS/+10 theo body, chưa IPN/QueryDR proof. Manual reconciliation còn mở |
+| Promotion #26 | 03668e36b85a9958d5a6e1cd2b468295fdb0fb2d (main) | ID/SHA chưa bind | ID/SHA chưa bind | CI 43385759238 success 07:26:20Z | Body nói final alignment/smoke sau merge; không chuyển test 2216b7a sang merge SHA |
+| PR27 / dev hiện tại | 0e43bcb80f64d6a5fa558cd80f71a199029535d0; head 7dbad80602fb936b35e375beafe9f99739b0fb33 | Preview Ready 614zH4B1wpb5aWFCgtTMAhHwkwx8 (08:09:14Z); không production | README mô tả auto-deploy main, chưa observed event | CI head 43390995680 và push/dev 43392423041 success 08:09:18Z/08:20:14Z | Chỉ README đổi trong #27; không có CD workflow mới |
+| Promotion #28 / main hiện tại | 02452f228712c3501c8d27f0f1ae737ad206785d | Vercel status success, [deployment AayabZWzjhJAquCMYXjoaDppJWsi](https://vercel.com/brewlite-a2/brewlite-a2/AayabZWzjhJAquCMYXjoaDppJWsi), updated 08:38:39Z; domain alias chưa bind | Render Auto-Deploy Live02452f2, dep-dbrcpdu8bjmc73bl81u0; ảnh deployed field08:39:19Z; URL backend đã có | [CI 43394783298](https://github.com/brewlite-project/brewlite-a2/actions/runs/43394783298) success, API end08:38:47Z/Web end08:39:15Z | HTTP ở URL người dùng không chứng minh chính SHA này; backend GET mới / và /products200 lúc16:24:59Z; browser bỏ theo yêu cầu |
+| Local SCRUM-117, PR17 cập nhật đang chuẩn bị | 91e6f99bfd02353616b2e481fe613b7ea91118af + docs unstaged | Không deploy | Không deploy | PR17 CI cũ 42875834011 trên 3543a55, không cho local mới | App/config trùng dev 0e43bcb; remote PR17 head còn 3543a55 |
+| A2-v1.0.0 — chỉ tên đề xuất | Chờ SHA được nhóm duyệt | Chờ deployment/domain/SHA | Chờ deployment/image/SHA | Chờ CI/CD đúng version | Chờ smoke và nghiệm thu |
 
-SCRUM-117 chỉ thêm tài liệu chưa commit. Khi release có FE/BE khác SHA, ghi cả hai, lý do và tương thích; reviewer phải chấp nhận hoặc dừng phát hành. Không che khác biệt bằng nhãn “latest”. [Release notes nháp và PR body](release-notes-A2.md).
+Giờ trong các dòng 13/11 là UTC, lấy từ GitHub; provider IDs là link an toàn, không phải credential. Release API trả rỗng, local tags chỉ A1-final; không tạo tag/release. Các status/deploy assertions không thay browser/DB policy hoặc migration runner evidence. [Notes và PR17 body nháp](release-notes-A2.md).
 
 ## 5. Demo và Scrum evidence (chưa thực hiện)
 
@@ -114,7 +107,7 @@ SCRUM-117 chỉ thêm tài liệu chưa commit. Khi release có FE/BE khác SHA,
 | 1 phút | Mở README, release mapping, FE HTTPS ở browser không đăng nhập provider | Đúng SHA, UI tải, không interstitial/mixed content | URL sạch, screenshot, giờ/viewport |
 | 1 phút | Menu, chi tiết, size/topping; thêm/sửa giỏ trên client | Giá/giới hạn theo contract, loading/empty/error trình bày khi có fixture được duyệt | Video thao tác và API public đọc DB |
 | 2 phút | Auth → tạo đơn tại demo environment được phép | JWT/ownership server-side; tổng tiền từ backend | Step log đã lọc dữ liệu, SHA/environment |
-| 2 phút | VNPay Sandbox đã được cho phép, Return và authoritative outcome | Return không tự finalize; IPN/QueryDR được xác minh, Payment/Order nhất quán | Gateway + callback + DB evidence; status-route gap phải xử lý/được quyết định rõ trước claim PASS |
+| 2 phút | VNPay Sandbox đã được cho phép, Return và authoritative outcome | Return không tự finalize; xác minh riêng nguồn IPN/QueryDR và Payment/Order nhất quán | Gateway + callback + DB evidence; nêu rõ UI polling orders/me, API-03 status gap và quyết định scope, không lấy một success scenario làm mọi scenario PASS |
 | 1 phút | Xác nhận/lịch sử và giới hạn | UI phản ánh trạng thái thật; nêu gap chưa đóng | Video, expected/actual |
 | 1 phút | CI/CD, rollback và bàn giao | Chỉ trình bày run/rehearsal thực có | Link run/deploy, runbook; chưa thử thì nói chưa thử |
 
@@ -172,7 +165,9 @@ Lưu link biên bản thực và quyền đọc; action cần người nhận x�
 
 ## 6. Tiếp nhận quyền vận hành
 
-| Tài nguyên | Người phụ trách đã xác nhận | Người tiếp nhận đã xác nhận | Cách cấp quyền cần thống nhất | Điều kiện ký nhận |
+**Phương án bàn giao trong nhóm:** nhóm BrewLite tiếp tục quản lý dự án; các thành viên đang có quyền nền tảng duy trì công việc trong phạm vi được giao. Bảng dưới là mẫu phân công và chuyển quyền khi cần. Chưa có tên cá nhân được xác nhận. Việc có người tiếp nhận riêng hoặc ký biên bản riêng là khuyến nghị tổ chức, không phải AC mới của SCRUM-117. Khi chưa có thay đổi người quản lý, bàn giao gồm source, hướng dẫn vận hành, báo cáo và evidence cho nhóm/reviewer.
+
+| Tài nguyên | Người phụ trách đã xác nhận | Người tiếp nhận đã xác nhận | Cách cấp quyền cần thống nhất | Kiểm tra đề xuất khi chuyển quyền |
 |---|---|---|---|---|
 | Frontend hosting | Chưa xác nhận | Chưa xác nhận | Invite vào project/scope bằng tài khoản cá nhân, role theo plan; nếu plan không hỗ trợ nhóm, Leader chốt phương án hợp lệ | Người nhận mở project, kiểm tra domain/deployment/env names và hiểu cách rollback |
 | Backend hosting | Chưa xác nhận | Chưa xác nhận | Invite vào workspace/service với role tối thiểu; không bàn giao password tài khoản chủ | Người nhận đọc được logs/deploy history, hiểu port/health/scheduler và runner thực |
@@ -186,36 +181,38 @@ Khang được nhắc là Leader trong planning, nhưng **không suy ra** là ch
 
 ## 7. Checklist nộp bài và khả năng truy cập của người chấm
 
-Nguồn: **Assignment 2 v1.0 §9.1**, bổ sung chi tiết bắt buộc ở §6.4, §7.2–7.4, §8.1. Đây là checklist đã đối chiếu với bản đề tìm được, không còn chỉ dựa Jira/planning. Cột trạng thái không phải điểm nghiệm thu. Mọi tạo phẩm cuối cần khóa về release SHA/tag được chọn; checkout hiện tại ở source 5021743; 7dfc7ca là baseline evidence lịch sử. Docs SCRUM-117 chưa có commit.
+Nguồn: **Assignment 2 v1.0 §9.1**, bổ sung chi tiết bắt buộc ở §6.4, §7.2–7.4, §8.1. Đây là checklist đã đối chiếu với bản đề tìm được, không còn chỉ dựa Jira/planning. Cột trạng thái không phải điểm nghiệm thu. Mọi tạo phẩm cuối cần khóa về release SHA/tag được chọn; checkout hiện tại HEAD 91e6f99, app source trùng dev 0e43bcb; 7dfc7ca là baseline evidence lịch sử. Bản docs cũ đã ở commit 3543a55/PR17; cập nhật mới chưa stage.
 
 | Mục theo đề | Vị trí chuẩn của tạo phẩm | Evidence/phiên bản hiện có | Trạng thái và việc còn lại |
 |---|---|---|---|
 | Link repo và quyền giảng viên | [Repository A2](https://github.com/brewlite-project/brewlite-a2), [README](../../README.md) | GitHub connector đọc được; chưa thử bằng tài khoản/quyền giảng viên | NOT VERIFIED: người chấm phải clone/đọc được release; chưa có xác nhận quyền |
-| SRS, use-case và requirement matrix | [SRS](../requirements/srs.md), [UC](../requirements/A2_T1.3_Checkout_Use_Case_Specification.md), [traceability-matrix.md](../traceability-matrix.md) | SRS/UC ở 7dfc7ca; matrix mới map 48 FR + 49 NFR, có design/code/test inventory | Source mapping đã chuẩn bị; chưa commit/reviewer xác nhận coverage và runtime evidence. [TRACEABILITY.md](../TRACEABILITY.md) là ma trận task/PR riêng |
+| SRS, use-case và requirement matrix | [SRS](../requirements/srs.md), [UC](../requirements/A2_T1.3_Checkout_Use_Case_Specification.md), [traceability-matrix.md](../traceability-matrix.md) | SRS/UC ở 7dfc7ca; matrix mới map 48 FR + 49 NFR, có design/code/test inventory | Matrix đã có ở commit 3543a55/PR17; cập nhật local chưa publish; reviewer chưa xác nhận coverage/runtime evidence. [TRACEABILITY.md](../TRACEABILITY.md) là ma trận task/PR riêng |
 | Activity, sequence, class, deployment | [Diagram sources/exports](../diagrams/), [architecture](../architecture/architecture.md) | Source và exports hiện có, xem task/merge SHA trong TRACEABILITY | Deployment còn target design; cần SCRUM-116 đối chiếu actual topology, image/registry/provider theo đề §5.2 |
-| Frontend, backend và migrations | [apps/web](../../apps/web/), [apps/api](../../apps/api/), [migrations](../../apps/api/prisma/migrations/) | Source 7dfc7ca, 9 migration directories | VERIFIED tồn tại source; build/deploy release và migration production chưa xác minh |
+| Frontend, backend và migrations | [apps/web](../../apps/web/), [apps/api](../../apps/api/), [migrations](../../apps/api/prisma/migrations/) | HEAD 91e6f99 / app trùng dev 0e43bcb, 10 migration directories | VERIFIED tồn tại source; build/deploy release và migration production chưa xác minh |
 | Unit, integration và ít nhất một E2E menu→confirmation | [API tests](../../apps/api/test/), [web tests](../../apps/web/tests/), [matrix lookup](../traceability-matrix.md#3-design-codeapi-và-test-lookup) | Có test files; local report SCRUM-112 source 34cbbc0; CI chỉ unit/build | NOT VERIFIED cho Sprint 2/release: SCRUM-115 cung cấp đúng scenario, SHA/environment/result; không dùng JSDOM/Mock làm Sandbox E2E |
-| CI/CD chạy thành công | [CI workflow](../../.github/workflows/ci.yml), §3 E117-C2/C3 | CI success/failure có run/SHA; chưa thấy CD workflow/run | PARTIAL: cần CD build/tag image, deploy, safe migration, health/smoke và failure handling theo §7.3; branch protection chưa xác minh |
-| Production frontend/API/health, DB không public | [deployment §8/11](../deployment.md), mapping §4 | Chưa có origins, deploy IDs/SHA và DB Networking evidence | BLOCKED kiểm tra do thiếu input SCRUM-116; GET / là liveness, DB read kiểm tra riêng |
+| CI/CD chạy thành công | [CI workflow](../../.github/workflows/ci.yml), §3 E117-C2/C3 | CI success/failure có run/SHA; #27 mô tả Render auto-deploy; ảnh mới xác nhận Live02452f2 tại §14 | PARTIAL: cần CD build/tag image, deploy, safe migration, health/smoke và failure handling theo §7.3; branch protection chưa xác minh |
+| Production frontend/API/health, DB không public | [deployment §8/11](../deployment.md), mapping §4 | FE URL đã có; Vercel status có ID/SHA; backend origin và ảnh DB Networking đã có ở §14 | PARTIAL; backend HTTP/liveness/catalog VERIFIED snapshot §14; FE alias và actual Internal DB usage còn mở |
 | Release notes, README, rollback | [notes](release-notes-A2.md), [README](../../README.md), [runbook](../deployment.md#11-runbook-scrum-117--migration-seed-và-rollback) | Tài liệu nháp; A2-v1.0.0 chỉ đề xuất | Chưa tag/release; rollback cần actual tier/target/compatibility. Đề không yêu cầu rehearsal |
 | Video/demo và Sprint Retrospective; Sprint Review theo §7.4 | §5: script, mẫu ghi nhận và link evidence chờ điền | Chưa có video/biên bản cuối được cung cấp | NOT VERIFIED: phải demo luồng end-to-end thật và lưu Review/Retro; template không thay evidence |
 
-**Báo cáo LaTeX/PDF theo yêu cầu người dùng:** source chuẩn `docs/report/main.tex`, PDF đề xuất `docs/report/output/main.pdf`; chưa compile/render. Đề v1.0 không quy định tên/vị trí PDF tổng hợp hay đưa PDF này thành một mục riêng trong §9.1; không gọi vị trí đề xuất là quy định giảng viên. Deadline/portal, quy cách tên file và metadata GVHD/thành viên vẫn cần nhóm xác nhận nếu có hướng dẫn bổ sung. Học kỳ I 2026–2027 đã có nguồn từ bìa đề.
+**Báo cáo LaTeX/PDF theo yêu cầu người dùng:** source chuẩn `docs/report/main.tex`, PDF tại `docs/report/output/main.pdf` đã build/render 53 trang, QA tại §14; chưa commit/push. Đề v1.0 không quy định tên/vị trí PDF tổng hợp hay đưa PDF này thành một mục riêng trong §9.1; không gọi vị trí đề xuất là quy định giảng viên. Deadline/portal, quy cách tên file và thay đổi roster A2 (nếu có) cần nhóm xác nhận; GVHD/thành viên đã kế thừa có nguồn từ báo cáo A1, không gán ownership vận hành. Học kỳ I 2026–2027 đã có nguồn từ bìa đề.
 
 **Sai khác layout cần reviewer xem:** đề §9 minh họa root `.env.example` và `tests/`; repo hiện có env mẫu trong từng app/compose và tests trong app. Các path hiện hành được README/matrix dẫn đúng; chưa có quyết định yêu cầu di chuyển/tạo bản trùng. SCRUM-117 không sửa config hoặc test layout để tự coi tương đương.
 
-**Điều kiện người chấm ở §7.4:** clone repository, chạy hệ thống theo README, truy cập production. Chưa thực hiện clean-clone setup ở một môi trường mới trong lượt này; không lấy static script review làm bằng chứng tái tạo thành công. Khi có URL/quyền, browser riêng phải tải UI/asset, kiểm tra TLS/mixed content, FE→API menu đọc DB. Mở/phát video, mở PDF đúng phiên bản và đọc/download từng evidence; trang login/HTTP 200 không đủ. Hiện chưa có URL production/demo/PDF để chạy các bước đó.
+**Điều kiện người chấm ở §7.4:** clone repository, chạy hệ thống theo README, truy cập production. Chưa thực hiện clean-clone setup ở một môi trường mới trong lượt này; không lấy static script review làm bằng chứng tái tạo thành công. Khi có URL/quyền, browser riêng phải tải UI/asset, kiểm tra TLS/mixed content, FE→API menu đọc DB. Mở/phát video, mở PDF đúng phiên bản và đọc/download từng evidence; trang login/HTTP 200 không đủ. FE URL đã có và HTTP probe xem §13; browser/asset/mixed-content/quyền người chấm còn NOT VERIFIED do công cụ. Demo cuối chưa có; PDF local đã build/render, chưa xác minh quyền người chấm trên bản remote.
 
 ## 8. Trình tự còn lại và điều kiện thực hiện
 
 1. Giữ 8 AC tại §2 và đề A2 v1.0 đã tìm được tại §1/7. Leader bổ sung chỉ dẫn giảng viên mới hơn nếu có, roster tiếp nhận và URLs/evidence; xác nhận scope/contract/payment demo và hosting/tier, không yêu cầu lại nguồn đã có.
 2. SCRUM-114/115/116 cung cấp PR/merge SHA, test/migration/CD/deploy evidence. Leader triage status-route gap và QueryDR E2E; SCRUM-117 không sửa ứng dụng/CD.
-3. Reviewer review docs diff và report; cài/chọn toolchain SGU được duyệt, build PDF hai lượt, kiểm tra từng trang/TOC/bảng/hình/link/reference; bổ sung kết quả thực. Xác nhận metadata nhóm/GVHD từ nguồn thật.
-4. Sau người dùng cho phép riêng: commit/push branch, mở PR vào dev; CI/review bắt buộc đạt rồi mới xin/thi hành merge theo quy trình. Chưa thực hiện các bước này.
+3. Reviewer đọc diff và PDF đã build/render theo §14. Rebuild bằng toolchain đã cài nếu source thay đổi; cập nhật checksum và kết quả QA. Metadata nhóm/GVHD đã có nguồn A1.
+4. Sau người dùng cho phép riêng: stage/commit/push cập nhật branch và **PR17 đã có vào dev**, không mở trùng; CI/review phải đạt rồi mới xin/thi hành merge theo quy trình. Lượt này chưa thực hiện các bước đó.
 5. Theo workflow repo đã được Leader xác nhận, chọn commit phát hành trên nhánh release (`main` là nhánh stable; không tự tạo nhánh release mới/merge). CI/CD phải gắn với **commit phát hành thực**, không chỉ SHA feature; kiểm tra cả FE/BE, migrations và rollback compatibility.
 6. Chỉ khi được cấp quyền riêng: release executor chạy deploy/CD/migration theo SCRUM-116; QA thu production smoke và Sandbox E2E được phép. Trong lượt này chỉ chuẩn bị quy trình và kiểm tra read-only nếu có URL.
-7. Chốt mapping §4, demo/Review/Retro thực, PDF/bộ nộp đúng checklist được cung cấp; thử quyền người chấm và người tiếp nhận. Xác nhận version khôi phục/compatibility; rehearsal khuyến nghị ở môi trường riêng được phép, không tự làm gate nếu chưa có quy định áp dụng.
+7. Chốt mapping §4, demo/Review/Retro thực, PDF/bộ nộp đúng checklist được cung cấp; thử quyền người chấm; kiểm tra quyền thành viên khi nhóm thực sự chuyển người quản lý. Xác nhận version khôi phục/compatibility; rehearsal khuyến nghị ở môi trường riêng được phép, không tự làm gate nếu chưa có quy định áp dụng.
 8. Sau nghiệm thu/release approval: người được phân công tạo/push tag A2 theo quy ước đã chốt, publish release và gắn notes/evidence đúng SHA. Không tag commit chưa nghiệm thu; A1-final giữ provenance. Reviewer/Leader quyết định Jira Done cuối cùng.
+
+> **Lưu ý lịch sử cho §9–12:** giữ nguyên kết quả/ngày/SHA và mô tả index/PR tại thời điểm ghi; hiện trạng 13/11 dùng §2–4/13.
 
 ## 9. Kết quả kiểm tra tài liệu SCRUM-117
 
@@ -408,3 +405,115 @@ AC ở §2 vẫn chưa đủ evidence nghiệm thu. Source hiện tại đã ở
 không diff app/workflow/archive A1. Giao tập ba file remote và 10 docs là rỗng.
 Không chạy lại app tests/compile PDF hoặc production smoke; CI đã dẫn là kết
 quả GitHub được đọc lại, không phải test local SCRUM-117 vừa chạy.
+
+## 13. Audit hiện hành ngày 13/11/2026
+
+### Git, PR và CI
+
+- Đã đọc diff origin/dev...HEAD và đối chiếu hai tree app/config: chỉ 10 file tài liệu; source #18–23/#25/#27 **đã có trong checkout**, không phải code chỉ ở remote. origin/main 02452f2 là merge promotion #28 trên remote; không checkout main hoặc thay SHA evidence cũ bằng SHA main.
+- Index fingerprint đầu lượt (git ls-files -s | git hash-object --stdin): `1f0b18c9612ec41f7977c4d9c514406afa7c8e06`; không stage/reset/stash. Fetch đã thực hiện ở lượt trước; lượt này chỉ đọc refs và API, không pull/merge/rebase/switch/copy worktree.
+- PR17 remote có đúng 10 docs; body null, review list []; draft=false. Nội dung cập nhật đề xuất ở notes, chưa gửi lên GitHub. PR26/27 review APPROVED bởi KhaiHoang275 cho commit 2216b7a/7dbad80; không gán người này làm release/DB owner hoặc nghiệm thu SCRUM-117.
+- Đã truy call sites payment-status: helper có request API-03 nhưng PaymentPageView và Order Confirmation hiện refetch orders/me/auth/me. Nhận định lịch sử “Return UI không đọc được authoritative state do thiếu status route” cần thu hẹp như §3; không giữ kết luận tác động rộng đó làm hiện trạng. Đây là static call-flow audit, chưa browser test.
+- Actions collection 36 runs trả về (per_page=100), đều CI; API CI/Web CI của run 43392423041 success với install/Prisma generate/lint/unit/build. Không có step deploy/migration/post-deploy smoke. #27 chỉ sửa apps/api/README.md, không workflow. Render integration ngoài Actions có thể tồn tại; README config là assertion, cần observed deployment record.
+
+### Evidence mới đọc lại từ PR/diff
+
+| Evidence | Commit / thời điểm gốc UTC / môi trường | Nội dung xác minh và giới hạn |
+|---|---|---|
+| N18 — PR18 | 6e004d764ca9027290f100c0f010d7e5c33824ac; merged 2026-11-11T08:20:50Z / source | Thêm guarded Render demo seed, internal policy, dist-seed build/runtime artifact và tests; không chứng minh đã chạy trên cloud |
+| N19 — PR19 | 63b9195c64b8f4c58c674bbe0ecad5eb8d8d55d0; 11-11T09:24:36Z / source | Sanitized seed diagnostic codes; giữ execution policy, không coi lỗi đã được giải quyết ở production chỉ từ patch |
+| N20 — PR20 | f674897d7f9c02c537fcc84828d73f54e3a9bfbe; 11-11T09:57:19Z / source | Catalog-drift diagnostics và tests; không tự sửa dữ liệu DB |
+| N21 — PR21 | 3d412b45cf53a282e5594994b343402e14826f55; 11-11T11:34:37Z / source | Align bakery category fixture theo Render; fixture/test thay đổi, không phải approval toàn catalog |
+| N22 — PR22 | af31196125e93243b2b89a02b33134a764eeddc9; 12-11T12:02:33Z / source | Migration thứ 10 seed_executions, schema model, one-shot marker + Serializable/advisory lock, integration opt-in, runbook. Không chạy migration/test DB ở SCRUM-117 |
+| N23 — PR23 | 95906b56c1a2842eb04cdbd7bf60a267ef98fbf9; 12-11T13:19:22Z / source | Prisma Pool Internal exact target/TLS exception và unit specs; direct/default mode giữ khác. Không chứng minh DB external policy |
+| N24 — PR24 | 1b394f1dae75fd0a11c1b1b3f4390a588dedf18f; 12-11T13:49:00Z / Render theo body | Báo 10 migrations applied, seed một marker, API products/detail 200; không có raw log/runner ID/deployed SHA/time từng phép kiểm tra |
+| N25 — PR25 | 2216b7a246b21491cf81cd2f2196f907c0aa7a98; 13-11T05:32:30Z / tests theo body | 38 focused PASS, Vitest 479 PASS + 6 PostgreSQL opt-in skipped; TypeScript/build PASS. Diagnostics không sửa QueryDR network timeout; environment/time run chưa ghi |
+| N26 — PR26 | head 2216b7a; merge 03668e36b85a9958d5a6e1cd2b468295fdb0fb2d, 13-11T07:26:17Z / Render/Vercel + VNPay Sandbox theo body | Payment success được báo cáo; IPN và QueryDR riêng chưa có trace; một giao dịch còn manual reconciliation. Comments chỉ bot Preview, không có dữ liệu đối soát thêm |
+| N27 — PR27 | head 7dbad80602fb936b35e375beafe9f99739b0fb33; merge 0e43bcb80f64d6a5fa558cd80f71a199029535d0, 13-11T08:20:11Z / source | README mô tả main/Render/After CI Checks Pass và **sẽ** bổ sung verification; không phải đã quan sát CD. CI head 43390995680 + push 43392423041 success |
+| N28 — main/Vercel status | 02452f228712c3501c8d27f0f1ae737ad206785d; status updated 13-11T08:38:39Z / GitHub Vercel integration | success + deployment link tại §4; chưa bind domain người dùng hoặc backend cùng SHA |
+
+Các số PR trong bảng dẫn trực tiếp theo mẫu https://github.com/brewlite-project/brewlite-a2/pull/18 (thay số tương ứng); evidence được đọc 13/11 khoảng 14:03–14:20Z. Không phải test ứng dụng do SCRUM-117 vừa chạy.
+
+### Production read-only và giới hạn
+
+- URL FE https://brewlite-a2-three.vercel.app/ do người dùng cung cấp. Browser host unavailable; fallback Edge bị Computer Use dừng vì không xác định URL đủ tin cậy. **Browser smoke NOT VERIFIED**, không tiếp tục Computer Use và không ghi là website fail.
+- HTTP GET bằng PowerShell ở sandbox, batch bắt đầu 2026-11-13T14:12:17Z, không kết nối được; đó là môi trường probe, chưa kết luận production down. Lặp read-only ngoài sandbox được phép, batch bắt đầu 14:13:16Z: FE / trả **200**, Content-Type text/html; charset=utf-8, 100359 bytes. TLS mặc định không bypass certificate. Đây là HTTP reachability, không render/menu/assets/mixed-content hay quyền người chấm. Timestamp là lúc bắt đầu batch, không phải thời điểm hoàn tất từng request; không đo latency riêng.
+- GET proxy https://brewlite-a2-three.vercel.app/api/backend/products trong cùng batch trả **200**, application/json; charset=utf-8, 2767 bytes, body có items với id/name/basePriceVnd/category. Không suy dữ liệu từ HTML/UI; chưa có upstream request log/current deployment mapping để khẳng định dữ liệu DB production trực tiếp. Backend public origin chưa tìm được trong repo, PR bodies/comments và status metadata được đọc; không đoán hostname hoặc hỏi connection string. Direct liveness/DB readiness NOT VERIFIED, dependency SCRUM-116.
+- Không đăng ký, tạo đơn, thanh toán, gọi callback/QueryDR hay sửa dữ liệu. Không port-scan DB. Policy DB external access chưa có nên AC3 chưa verified.
+
+### Báo cáo, dependency và kết luận
+
+Đã đọc text báo cáo A1 từ Google Docs và đề A2 v1.0 ngày 13/11; roster 6 người/GVHD/mã học phần kế thừa ghi ở main/report README. Không chỉnh Docs hoặc upload. Đọc lại SGU preamble và log: pdfTeX/format pdflatex TeX Live 2024 là build template lịch sử, không phải báo cáo mới. Chưa tìm thấy pdfLaTeX/render tool trong PATH; chưa có PDF mới, nguồn portable giữ pdfLaTeX + VnTeX. Quyền cài MiKTeX user + MuPDF portable đã hỏi, chưa tự cài.
+
+Đầu vào thực sự còn thiếu: (1) SCRUM-114/Leader xác nhận scope/giới hạn/payment demo và gap status; (2) SCRUM-115/QA report integration + menu→confirmation, IPN/QueryDR và kết quả giao dịch cần đối soát đã che dữ liệu; (3) SCRUM-116 backend origin, current deploy IDs/SHA/CI event mapping, runner/log migrations, image version, provider/tier/network/backup/rollback targets; (4) nhóm cung cấp video/Review/Retro thật, quyền người chấm, người tiếp nhận và release decision; (5) toolchain được phép để build/render PDF. Chưa xác nhận cá nhân chịu trách nhiệm các mục này; không xin password/token/connection string.
+
+Hồ sơ đủ để **review cập nhật PR17**, chưa sẵn sàng review nghiệm thu release cuối. PR17 đang open thường, không gọi là Draft đã tồn tại; chuyển Draft chỉ khi được cho phép. Không commit/push/update PR, tag/release/deploy hoặc Jira Done.
+
+### Kết quả kiểm tra mới — 13/11/2026, khoảng 14:27–14:32Z
+
+| Kiểm tra | Kết quả thực | Giới hạn |
+|---|---|---|
+| Phạm vi/index | Chỉ 10 docs tracked được sửa unstaged; staged diff rỗng; index fingerprint cuối khớp 1f0b18c9612ec41f7977c4d9c514406afa7c8e06 đầu lượt | HEAD/branch không đổi; không stage/commit/push/update PR; không sửa app/schema/pipeline/archive |
+| Whitespace | git diff --check và git diff --cached --check PASS | Cảnh báo LF→CRLF theo config Git không phải lỗi whitespace; không sửa Git config |
+| Markdown local paths/anchors | Node 22.18.0 kiểm tra 776 local references trong 10 file: PASS | Không kiểm tra quyền người chấm hoặc fetch mọi external link; source GitHub/Drive và official provider/Overleaf được đọc riêng |
+| TeX dependencies/references | 9 TeX files gồm main + 8 inputs, 15 graphics references ở nhánh IfFileExists được chọn theo repository root đều tồn tại; 23 labels kể cả LastPage do package cung cấp, 6 cite uses/5 bibitems không thiếu key; begin/end environments cân bằng | Static check không phải TeX compile hoặc visual QA; không đánh giá font/ngắt bảng/tràn/cắt/trang trống |
+| Requirement matrix | Đủ 48 FR + 49 NFR | Mapping coverage, không implementation/test coverage hoặc acceptance |
+| Conflict/sensitive patterns | Không match conflict markers/private-key/GitHub-AWS-token/JWT/credential URL/signed-query patterns được dò trong 10 docs; diff đã rà phạm vi | Scan có giới hạn, không chứng minh “không có mọi secret”; không đọc env thật hoặc audit toàn bộ CI/provider logs |
+| Runtime tests/build | Không chạy app tests/build/migration/seed/Compose; chỉ HTTP GET read-only và kiểm tra docs/source | CI/PR test claims là evidence thu lại/kế thừa, không ghi thành test local mới |
+| PDF | Chưa build/render vì toolchain không tìm thấy, quyền cài đang chờ trả lời | Nguồn portable/hướng dẫn đã có; không tạo ZIP/PDF giả hoặc upload dịch vụ ngoài |
+
+Checker đầu tiên đếm cả fallback graphics không được chọn nên báo missing paths; đã sửa checker hiểu IfFileExists và whitespace trước graphics argument, chạy lại PASS. Một lệnh Node inline bị lỗi quoting PowerShell trước khi ghi file; đã dùng patch trực tiếp và kiểm tra lại. Không coi các lần lỗi công cụ đó là build PDF/app fail. Script kiểm tra/chỉnh sửa tạm đã được loại khỏi bộ PR; danh sách PR vẫn đúng 10 docs tại release notes.
+
+## 14. Evidence Render, backup và PDF — cập nhật 14/11/2026
+
+Git trước tiếp tục PDF: HEAD91e6f99/dev0e43bcb không đổi; 10 docs unstaged và 5 ảnh evidence mới giữ nguyên. Fetch ở lượt13/11 xác nhận remote dev0e43bcb/main02452f228712c3501c8d27f0f1ae737ad206785d. PR17 vẫn open/draft=false/head3543a55/base dev, chưa cập nhật. Index fingerprint1f0b18c9612ec41f7977c4d9c514406afa7c8e06.
+
+### Evidence và thời điểm
+
+| ID / nguồn | Version / thời điểm / môi trường | Kết quả và giới hạn |
+|---|---|---|
+| B117-H1: kết quả phiên trợ lý trước do người dùng cung cấp | Backend public; GET /2026-11-13T16:12:30.8778669Z; /products16:12:31.6476271Z | Kế thừa HTTP200 Hello World!/JSON products. SHA tiến trình chưa xác minh trực tiếp; không đổi thành kiểm tra vừa chạy |
+| B117-N1: GET mới PowerShell | / bắt đầu16:24:58.7373521Z, kết thúc16:24:59.1098808Z; /products bắt đầu16:24:59.1644372Z, kết thúc16:24:59.4284827Z ngày13/11 | HTTP200 Hello World!, HTTP200 application/json9 items. HTTPS mặc định không bypass cert; không ghi dữ liệu |
+| R117-I1: [ảnh deploy](evidence/render-deploy-02452f2.png) do người dùng cung cấp | Render Live/Auto-Deploy source02452f2; deployed field15:39:19GMT+7 =08:39:19Z ngày13/11; duration39.4s | Nest started15:39:54, service live15:39:59GMT+7; URL backend khớp. Capture time ảnh chưa có. Không nhầm deploy time với GET16:24Z |
+| R117-I2: [ảnh DB expiry đã che](evidence/render-db-expiry-redacted.png) | Free/Available; expires December10/2026 | Che toàn popup External URL và serviceID không cần thiết; ảnhraw không lưu repo/PDF, bản sau che đã mở kiểm tra |
+| R117-I3: [ảnh plan](evidence/render-db-plan.png) | PostgreSQL18/Singapore/1GB, Available; ảnh do người dùng, đọc13/11 | Không suy web-service tier từ DB Free; autoscaling/pool disabled ở thời điểm ảnh |
+| R117-I4: [connections đã che](evidence/render-db-connections-redacted.png) | Dashboard có Internal/External fields | Không chứng minh env app thực dùng Internal. Che cả host/user/database/URL và command không cần thiết |
+| R117-I5: [network đã che IP](evidence/render-db-network-redacted.png) | DB3 /32, workspace/environment0.0.0.0/0 | Mô tả rules local migration/demo seed/current localIP/diagnostics; exact IP không đưa vào repo. Chưa có chủ/thời hạn/policy sign-off |
+| C117-N1: GitHub CI43394783298/jobs | main02452f228712c3501c8d27f0f1ae737ad206785d; API success08:38:47Z, Web success08:39:15Z | Auto-Deploy event08:39:19Z phù hợp README After CI Checks Pass. VERIFIED một lần CD backend; chưa full image tag/migration/failure/rollback chain |
+| V117-N1: GitHub status/checks/public deployments REST | Vercel success02452f2, updated08:38:39Z; deployment [AayabZWzjhJAquCMYXjoaDppJWsi](https://vercel.com/brewlite-a2/brewlite-a2/AayabZWzjhJAquCMYXjoaDppJWsi) | Public deployments REST trả[]; checks chỉ API/Web CI; bot comments là Preview. Production URL người dùng chưa có alias→deployment binding. Không suy GitHub không records là chưa deploy |
+| U117-H1: đính chính của người dùng ngày 14/11/2026 | Người dùng xác nhận Leader chưa kiểm tra | Thay thông tin PASS thuật lại trước đó. Chưa có Leader review/acceptance SCRUM-117. Yêu cầu bỏ Edge/Computer Use tiếp tục áp dụng |
+
+### Liveness, DB và AC3
+
+Backend origin hiện có: https://brewlite-a2-api-hntn.onrender.com/. Source AppController→getHello không query DB. ProductsController→ProductsService.findAll→Prisma product.findMany (products.service.ts:21–43). HTTP catalog cùng source/deploy evidence hỗ trợ khả năng đọc dữ liệu qua ứng dụng; chưa phải direct DB inspection, chưa chứng minh identity/Internal transport hay readiness liên tục. Cần manager xác nhận mode/target-match/region/service association bằng metadata không có secret, không gửi DATABASE_URL.
+
+Theo [Render Combining IP rules](https://render.com/docs/inbound-ip-rules#combining-ip-rules), IP external phải được mọi cấp áp dụng cho phép; cấp trên0.0.0.0/0 không làm union thêm IP ngoài3 /32. Rules public không áp private networking. Kết luận external restricted, chưa private-only; chưa chạy thử connect/deny từ nhiềuIP. Cần xác nhận rules đã lưu và quyết định AC3 có chấp nhận admin external có hạn hay phải private-only. Đổi policy chỉ sau phê duyệt riêng, không làm trong lượt này. Ảnh#2 nguồn có credential một phần: bản raw không đưa repo; nhóm cần đánh giá exposure/rotation qua quy trình riêng, không gửi secret vào hồ sơ.
+
+DB expiry **10/12/2026 theo dashboard**; không tính lại từ created3daysago. Trước đó chọn nâng tier hoặc export/restore sang đích phù hợp; grace sau expiry không phải thời gian demo khả dụng. Chưa có backup/restore verified. Runbook mới tại [deployment §11.5](../deployment.md#115-backuprestore-postgresql18-và-hết-hạn-db). pg_dump/pg_restore18.6 đã có, chỉ chạy --version, không kết nối DB.
+
+### Các quyết định còn thiếu
+
+SCRUM116/manager: FE production alias/SHA, FE/web tier, Internal config thực và migration runner/log/status, image version/rollback eligible targets. DB owner/Leader: policy3 /32, kế hoạch trước10/12, backup retention/restore evidence/người vận hành/tiếp nhận. SCRUM114/115: scope Mock/status/QueryDR, kết quả giao dịch còn đối soát, integration/menu→confirmation và IPN/QueryDR đúng SHA/environment. Nhóm: review thực tế, video/Review/Retro, release/tag/acceptance PR17. Phân công người quản lý tài nguyên là việc tổ chức nội bộ theo §6. Không có PR mới sau#28 hoặc ceremony evidence mới tìm thấy; templates §5 giữ chưa điền.
+
+
+### Kết quả build/render trước hiệu chỉnh Leader — 14/11/2026
+
+- Fetch origin lúc khoảng07:42 GMT+7 ngày14/11 thành công; HEAD91e6f99, origin/dev0e43bcb và origin/main02452f2 không đổi. Không pull/merge/đổi branch; các bằng chứng GET ngày13/11 không được đổi thành probe ngày14/11.
+- MiKTeX26.5 user, pdfTeX1.40.29/pdfLaTeX + VnTeX; MuPDF portable1.28.5. Không đổi engine, không đổi PATH hệ thống. Lượt cuối pass9 exit0; aux/toc ổn định so với pass8. TeX log không có Overfull, LaTeX/Package warning, undefined reference/citation hoặc duplicate destination. Nhắc MiKTeX chưa check updates nằm ngoài TeX log, không phải compile failure.
+- [PDF local](../report/output/main.pdf): **53 trang, 3.175.225 bytes**, SHA256 **9B9D7837FE08DE39FB353AEFE580E747E95F9235D246895E21D202BB4957EC94**. PDF giữ DRAFT; chưa commit/push. Source layout bổ sung ngoài 10 docs đầu vào: context-and-scope, requirements-summary, sequence-diagram; thêm production-evidence.tex, 5 ảnh an toàn và PDF. Không sửa app/schema/pipeline/archive.
+- Render toàn53 trang100dpi; đã xem6 contact sheets toàn bộ và các trang chi tiết bìa/TOC/diagram/longtable/evidence/references. Kiểm tra lại trang41/46–48 sau chỉnh kiến trúc/header và trang47 sau sửa AC7. Tiếng Việt/font, bảng tiếp trang, hình landscape/captions/footer và nội dung không tràn/cắt qua kiểm tra trực quan. Sơ đồ overview dày cần zoom, đã có các hình pha chi tiết. Text bbox nằm trong kích thước trang; không trang trống theo ngưỡng30 ký tự, không replacement glyph U+FFFD. Kiểm tra tự động không thay visual QA.
+- MuPDF có Unicode bookmarks và internal destinations; font information có16 fonts. Không kiểm tra toàn bộ external link hoặc quyền người chấm. Chưa chạy lại app tests vì chỉ sửa tài liệu; CI/PR claims giữ nguyên nguồn, SHA và môi trường lịch sử.
+- Kiểm tra static14 file text thay đổi: local paths/anchors, 10 TeX files/9 inputs/18 graphics nhánh được chọn, 27 labels, 6 cite uses/5 bibitems, 48 FR +49 NFR; không thiếu reference. Conflict markers và các mẫu private key/token/JWT/credential URL/signed query được dò không có match; không khẳng định loại trừ mọi secret. Năm ảnh evidence an toàn đã xem sau che, ảnh raw có credential không được lưu repo/PDF.
+- Log/aux/toc/render PNG và scripts tạm không thuộc bộ PR. Index fingerprint vẫn1f0b18c9612ec41f7977c4d9c514406afa7c8e06; staged diff rỗng. git diff --check và git diff --cached --check kiểm tra riêng. Không stage/commit/push/update PR/tag/release/deploy hoặc đánh dấu Done. Hồ sơ sẵn sàng review cập nhật PR17; chưa đủ điều kiện nghiệm thu release.
+
+
+### Review hoàn thiện theo ủy quyền người dùng — 14/11/2026
+
+- Fetch origin xác nhận dev `0e43bcb80f64d6a5fa558cd80f71a199029535d0`, main `02452f228712c3501c8d27f0f1ae737ad206785d`; HEAD `91e6f99bfd02353616b2e481fe613b7ea91118af`. Diff source HEAD với dev chỉ gồm tài liệu SCRUM-117. PR17 open, draft=false, head remote3543a55; comments/reviews REST đều trả rỗng. Releases REST trả rỗng, PR collection vẫn đến #28.
+- GitHub status của main02452f2 tiếp tục success, deployment Vercel AayabZWzjhJAquCMYXjoaDppJWsi. Trang overview public trả200 với tiêu đề deployment nhưng phần HTML nhận được không có domain brewlite-a2-three.vercel.app; deployments REST trả[]. Chưa đủ bằng chứng bind alias. Không suy alias sai hoặc production thất bại.
+- Người dùng đính chính **Leader chưa kiểm tra/nghiệm thu**. §2, §14 và các bản Markdown/LaTeX hiện hành đã đồng bộ. Phương án tài liệu tại §6 là nhóm tiếp tục quản lý, chưa gán tên cá nhân. Người tiếp nhận riêng/ký nhận riêng và rehearsal là khuyến nghị, không bổ sung AC.
+- Sửa checklist §7 đã lỗi thời về backend origin/network; sửa nhận định CD ở bảng gap theo ảnh Live02452f2. Giữ phần migration runner/Internal usage còn thiếu bằng chứng thực.
+- PDF hiện hành 53 trang, 3175123 bytes, SHA256 `F796B94AA56D2D80F341F182627E21FB64F58F6B705843911EBD05C35E5B9CCB`. Ba lượt build cuối exit0. MuPDF render 53 trang, đã xem sáu contact sheets và chi tiết trang47/49. Không có Overfull/undefined references-citations/LaTeX-Package Warning. Có Underfull hbox do căn đều, không thấy cắt/chồng chữ khi xem các trang vừa sửa. Hai lần công cụ gặp giới hạn quyền/path đã xử lý; thư mục build nhầm trong workspace đã được dọn, build cuối ở TEMP.
+- Các kết quả GET ngày13/11 giữ nguyên timestamp, không có production probe mới trong lượt này. Review tài liệu không thay review/acceptance của nhóm.
+
+- Bộ hồ sơ quyết định dùng `A2-v1.0.0` làm tên đề xuất cho release đầu A2; source đích là commit stable sau khi hồ sơ và phạm vi release được review/merge. Main02452f2 hiện là bản ứng dụng đã có deployment evidence, chưa chứa bộ báo cáo mới. Candidate rollback backend2216b7a giữ trạng thái đề xuất vì chưa có retained deployment ID; runbook đã nêu cách chọn artifact tương thích.

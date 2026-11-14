@@ -1,147 +1,254 @@
-% SCRUM-117. Canonical: docs/deployment.md and docs/delivery/*.md.
-\section{Deployment, release và bàn giao}
-\label{sec:deployment-release-delivery}
-\noindent\textbf{Trạng thái: DRAFT -- chưa phát hành, chưa nghiệm thu.}\par
-\noindent Snapshot lịch sử 10/11/2026: source \texttt{dev / 7dfc7ca}; checkout hiện tại là branch \texttt{SCRUM-117-production-release-delivery} tại \texttt{5021743}.
-Nội dung sau thống nhất với sổ readiness Markdown; không thay evidence thực.
+% SCRUM-117. Canonical sources: deployment.md and delivery dossier, audit 13/11/2026.
+\section{Hiện thực và kiểm thử Assignment 2}
+\label{sec:a2-implementation-tests}
+\subsection{Cấu trúc và luồng xử lý thực tế}
+Repository có \path{apps/web}, \path{apps/api}, \path{docs}; mỗi app có
+package-lock riêng, không có npm workspace ở root. Next.js phục vụ UI mobile-first,
+Route Handler \path{apps/web/app/api/backend/[[...path]]/route.ts} forward request
+tới backend server-side; NestJS tổ chức Controller, DTO/Guard và Service,
+Prisma truy cập PostgreSQL. API Contract/SRS quyết định shape và business rules,
+không suy từ UI hoặc sơ đồ rằng runtime đã nghiệm thu.
 
-\noindent\textbf{Source hiện tại đã tích hợp:}
-\texttt{5021743e99d73c2ce795df72ee5aaa90b04bb0da}, head PR \#16
-\texttt{e8b1498ab0fe70a1bacd0f2b221492c46796643f}. Next lên 16.4.6
-lọc response headers/message lỗi chung; HEAD hiện tại là merge SHA 5021743.
-migrations/CI workflow/report không đổi. Payment-status vẫn thiếu theo inventory
-source mới; chưa có QueryDR Sandbox evidence hoặc production URLs/CD được xác
-nhận. PR ghi deployment/CD/smoke là follow-up, không nghiệm thu toàn SCRUM-116.
-PR CI 42845148086 và push CI 42846397766 success trên hai SHA tương ứng,
-chỉ lint/unit/build. Mapping/version chi tiết ở delivery §12; các run/SHA cũ
-trong phần dưới giữ provenance lịch sử, không được thay bằng SHA mới.
+Với catalog, Products Controller gọi Service rồi Prisma đọc sản phẩm/topping.
+Với thao tác của Customer, JWT được xác minh server-side; ownership phải dựa vào
+identity đã xác thực. Backend quyết định giá/discount và transaction giữ tài
+nguyên khi tạo Order. Thanh toán có idempotency và shared finalization để cập
+nhật Payment, Order, stock, coupon và loyalty nhất quán. Return URL phục vụ UI,
+không phải bằng chứng thanh toán; IPN và QueryDR là hai nguồn/luồng khác nhau.
+Các quy tắc chi tiết và giới hạn acceptance giữ theo SRS/API v4, không thay
+đổi trong task tài liệu này.
 
-\subsection{Readiness và ranh giới bằng chứng}
-Tám AC SCRUM-117 đã được người dùng cung cấp và xác nhận, là nguồn readiness;
-đề A2 v1.0 đã được đọc qua Drive, checklist §9.1 được ánh xạ tại delivery §7.
-Số 1--8 dưới đây là thứ tự đối chiếu,
-không tự đặt mã AC Jira. Không suy Jira Done thành merge/test hoặc CI thành CD.
-\begin{longtable}{p{0.28\linewidth}p{0.61\linewidth}}
+CI dùng Node 24; Dockerfiles dùng Node 26. Lockfile ứng dụng được giữ nguyên;
+chạy npm ci trong từng app. PR \#16 cập nhật Next.js 16.4.6 và lọc response
+headers/message lỗi proxy. PR \#18--23 bổ sung seed Render, diagnostics,
+one-shot marker/migration và Internal Prisma TLS profile. PR \#25 bổ sung
+QueryDR diagnostics, không đổi state transition/signature/retry hoặc sửa
+nguyên nhân network timeout. Tất cả đã có trong checkout \texttt{91e6f99},
+app/config trùng \texttt{dev/0e43bcb}; diff task chỉ mười tài liệu.
+
+\subsection{Bằng chứng kiểm thử và phạm vi kết luận}
+\begin{longtable}{p{0.23\linewidth}p{0.67\linewidth}}
 \toprule
-Acceptance Criterion & Trạng thái và căn cứ \\
+Nguồn & Kết quả và giới hạn \\
 \midrule
-1. Frontend HTTPS & BLOCKED: chưa có URL/deploy ID để kiểm tra TLS/UI. \\
-2. API và health truy cập & BLOCKED: source có GET / và GET /products; chưa có origin deployed. \\
-3. PostgreSQL production phù hợp, không public & BLOCKED: chưa có tier/region/network policy; internal URL không chứng minh external access tắt. \\
-4. Release/tag, notes, rollback guide & NOT VERIFIED: notes và hướng dẫn candidate đã chuẩn bị, chưa tag/release A2 hoặc rollback target binding. Rehearsal chỉ khuyến nghị. \\
-5. README và bàn giao đầy đủ & NOT VERIFIED toàn AC: hồ sơ draft đã viết/static review; runtime metadata và ownership chưa có. \\
-6. Demo và Review/Retro evidence & NOT VERIFIED: report/ảnh SCRUM-112 là local lịch sử, agenda chưa phải biên bản cuối. \\
-7. Tạo phẩm bắt buộc trên repo & NOT VERIFIED: checklist đã có nguồn và requirement matrix đã bổ sung; source SCRUM-117 chưa commit, CD/production/demo chưa đủ evidence. PDF mới chưa build. \\
-8. PR review và nghiệm thu & NOT VERIFIED: PR body đã chuẩn bị, chưa tạo PR theo ranh giới lượt này; chưa acceptance record. \\
+\endfirsthead
+\toprule Nguồn & Kết quả và giới hạn (tiếp) \\
+\midrule \endhead
+SCRUM-112 / PR15 & Report local source \texttt{34cbbc0}, commit report vòng 1
+\texttt{ffbaeeb}; có menu/mobile và Products E2E theo report. Giữ thời điểm/môi
+trường nguồn, không chạy lại và không chuyển thành release smoke. \\
+CI hiện tại & Run \texttt{43392423041} trên dev \texttt{0e43bcb},
+2026-11-13T08:20:14Z, API CI/Web CI success; install, Prisma generate cho API,
+lint, unit, build. Không có deploy/migrate/post-deploy smoke steps. \\
+PR25 tests theo body & Source \texttt{2216b7a}, merge 13/11/2026 05:32:30Z:
+focused 38/38, Vitest 479 PASS, 6 PostgreSQL opt-in skipped, TypeScript/build
+PASS. Body chưa ghi môi trường/thời điểm từng run; không coi PostgreSQL skipped là PASS. \\
+PR24 runtime theo body & Main merge \texttt{1b394f1}, 12/11/2026 13:49:00Z:
+10 migrations applied, seed một completion marker, products 200 với 9 sản phẩm,
+detail/toppings 200 trên Render. Chưa có runner/deploy ID/log hoặc SHA deployed
+để chuyển claim sang merge SHA. \\
+PR26 Sandbox theo body & Backend Render Live \texttt{2216b7a}, FE Vercel Live;
+payment success, Order PAID, Payment SUCCESS, Loyalty +10 qua Order History.
+Đây là PASS được báo cáo cho một scenario, chưa có event trace/FE SHA/time giao dịch. \\
+Kiểm tra SCRUM-117 mới & Git/source/docs/CI metadata và HTTP GET read-only;
+không chạy lại app tests, không ghi DB, tạo account/order/payment hoặc QueryDR. \\
 \bottomrule
 \end{longtable}
 
-Backend \texttt{GET /} trả \texttt{Hello World!} chỉ là liveness;
-\texttt{GET /products} đọc DB phải kiểm tra riêng qua backend và frontend proxy.
-Chưa có URL nên không chạy production request. Source payment-status còn gap
-theo API v4 §5 và SRS FR-34; ảnh hưởng scenario Return UI đọc trạng thái server,
-không tự chặn chứng minh HTTPS/GET root/menu. ADR APPROVED ngày 03/11/2026 §2.2
-chỉ chấp nhận giới hạn QueryDR trong A1 và chuyển Sandbox E2E/lost-IPN sang
-A2/SCRUM-95; SRS FR-38 giữ requirement. Chưa có quyết định A2 chấp nhận giới hạn
-hoặc cửa nghiệm thu release lần này; cần Leader/QA xác nhận scope và tác động.
-Không tự miễn yêu cầu hoặc mặc định hai gap chặn mọi AC. Source/tác động chi
-tiết ở delivery §3; SCRUM-117 không sửa app/CD.
+\subsection{Giới hạn thanh toán và quyết định phạm vi}
+Tại source hiện tại, helper fetchPaymentStatusApi gọi
+GET /payments/:paymentId/status theo API v4 mục 5 nhưng backend chưa có route.
+Helper được re-export, chưa thấy component gọi; PaymentPageView và trang
+Order Confirmation hiện polling GET /orders/me cùng auth/me. Vì vậy không
+suy toàn bộ Return UI mất server truth từ gap API-03. Order History success
+không đóng gap endpoint theo contract. Leader/API owner cần quyết định task
+sửa hoặc giới hạn A2 được chấp nhận; static call-flow chưa thay browser test.
 
-Push CI \href{https://github.com/brewlite-project/brewlite-a2/actions/runs/42782530478}{42782530478}
-đã success trên 7dfc7ca, ngày 10/11/2026 08:25:31Z--08:27:13Z;
-API CI/Web CI chỉ lint/unit/build, không CD hay production smoke. PR CI
-42780158363 chạy e942cbe khác source runtime 34cbbc0 trong báo cáo SCRUM-112.
+Payment success theo PR26 không đủ xác nhận riêng IPN HMAC/ACK/duplicate
+handling, QueryDR Sandbox thành công hoặc lost-IPN recovery. PR25 chỉ thêm
+observability, còn timeout thực cần runtime diagnosis. ADR A1 ngày 03/11/2026
+chấp nhận phạm vi A1 và chuyển QueryDR E2E sang A2/SCRUM-95; không miễn A2.
 
-\subsection{Đối chiếu đề và tạo phẩm bổ sung}
-Đề v1.0 §8.1 chỉ định \path{docs/traceability-matrix.md}; file đã được bổ sung
-với 48 FR và 49 NFR từ SRS, truy tới US/UC, design/code/API và test inventory.
-Đây là mapping tĩnh, không phải test coverage hoặc nghiệm thu. Ma trận task/PR
-\path{docs/TRACEABILITY.md} giữ vai trò riêng. Checklist §9.1 đã được ánh xạ
-theo từng mục tại delivery §7, không còn là checklist chỉ dựa planning.
+PR26 còn ghi một giao dịch Sandbox trước cần manual financial reconciliation.
+Chưa có ID đã lọc, thời điểm, gateway outcome/internal state, người nhận xử lý
+hay quyết định resolved/refunded; không suy nguyên nhân hoặc tự finalize/retry.
+Nhóm cần đối soát và chốt tác động release. Đề A2 yêu cầu Ví/Thẻ mô phỏng nhưng
+Mock bị chặn ở NODE\_ENV=production; cần môi trường demo hợp lệ và quyết định
+scope Mock/Sandbox, không bật Mock production trong task này.
 
-Đề §7.1 yêu cầu thanh toán Ví/Thẻ mô phỏng, trong khi policy/source chặn Mock
-ở production. Leader cần xác nhận environment/phạm vi demo và cách kết hợp
-VNPay Sandbox có nguồn riêng; SCRUM-117 không tự bật Mock hay miễn yêu cầu.
-Đề §7.3 yêu cầu image tag SHA/semantic version; registry push chỉ khi provider
-yêu cầu. Hướng dẫn SCRUM-116 và deployment thực phải được đối chiếu theo đó.
-Đề §7.4 yêu cầu người ngoài nhóm clone/chạy theo README và truy cập production;
-static source review chưa thay kiểm chứng tái tạo trên môi trường mới.
+\section{Deployment, release và bàn giao}
+\label{sec:deployment-release-delivery}
+\noindent\textbf{DRAFT -- hồ sơ sẵn sàng review tài liệu, chưa nghiệm thu release.}
+Nguồn readiness là đúng tám AC người dùng cung cấp, đối chiếu đề v1.0
+\cite{a2brief}; không tự tạo gate hoặc đánh đồng missing evidence với test failure.
 
-\subsection{Vận hành, migration và seed}
-Candidate target là Vercel Hobby, Render Web Service và Render PostgreSQL;
-ADR-005 chưa Accepted. Environment chỉ ghi tên/mục đích, không giá trị secret:
-\texttt{DATABASE\_URL}, \texttt{JWT\_SECRET}, \texttt{INTERNAL\_SECRET},
-VNPay server-side và reconciliation config nằm backend; web có public API
-origin và server proxy target. Internal DB URL không chứng minh external DB
-access đã tắt; cần dashboard policy và network evidence thực.
+\subsection{Readiness theo tám Acceptance Criteria}
+\begin{longtable}{p{0.31\linewidth}p{0.59\linewidth}}
+\toprule
+Acceptance Criterion & Trạng thái, căn cứ và bước tiếp theo \\
+\midrule
+\endfirsthead
+\toprule Acceptance Criterion & Trạng thái và căn cứ (tiếp) \\
+\midrule \endhead
+1. Frontend HTTPS hoạt động & NOT VERIFIED toàn AC. FE URL đã có, HTTP 200
+và Vercel status success; browser tool bị dừng. Cần bind domain/deployment SHA,
+kiểm tra UI/assets/menu và quyền người chấm. \\
+2. API và health truy cập & VERIFIED phạm vi HTTP tại thời điểm probe:
+backend GET / 200 Hello World! và /products 200 với 9 items. Render Auto-Deploy
+Live 02452f2 có ảnh; GET không xuất process SHA, không chứng minh readiness liên tục. \\
+3. PostgreSQL phù hợp, không public & PARTIAL/NOT VERIFIED. DB Free18/Singapore/1GB,
+expiry 10/12/2026 và 3 external /32 có ảnh. External restricted, chưa private-only;
+Internal app usage/backup và quyết định AC3 cần manager xác nhận. \\
+4. Release/tag, notes, rollback guide & NOT VERIFIED. Notes/runbook có;
+release API rỗng, tag A2 chưa xác nhận, rollback target/tier/compatibility còn thiếu.
+Rehearsal chỉ khuyến nghị. \\
+5. README và bàn giao đầy đủ & NOT VERIFIED toàn AC; mười docs và report source
+đã chuẩn bị, chờ metadata vận hành còn thiếu và review. \\
+6. Demo và Review/Retro evidence & NOT VERIFIED. Có payment claim và report local,
+chưa video/biên bản cuối; agenda không thay họp thực. \\
+7. Tạo phẩm bắt buộc trên repo & NOT VERIFIED toàn bộ. SRS/diagrams/code/CI/matrix
+có; PDF đã build/render, chưa commit. CD/smoke/demo cuối còn thiếu; checklist tại dossier mục 7. \\
+8. PR review và nghiệm thu & NOT VERIFIED. PR17 open, draft=false, review list
+rỗng; approval PR26/27 không thay acceptance SCRUM-117. \\
+\bottomrule
+\end{longtable}
 
-Source có 9 migrations. \texttt{db:migrate} là migrate deploy, không tạo migration.
-Docker target migrate giữ Prisma CLI/schema/config; runtime đã bỏ CLI.
-Runner production private chưa xác minh. Chỉ runner được duyệt chạy
-status, deploy, status trên đúng release SHA; không reset/migrate dev hoặc
-bypass guard/đưa DB production vào CI unit tests.
-Catalog seed upsert 9 demo products, thay metadata/giá và giữ stock hiện có;
-không xóa order, từ chối product ngoài catalog. Chỉ DB seed riêng hoặc Compose
-đúng allowlist; không seed production. User/coupon helpers là opt-in riêng.
+\subsection{Topology, HTTPS và kiểm tra không phá hủy}
+FE URL người dùng cung cấp:
+\url{https://brewlite-a2-three.vercel.app/}. Probe PowerShell ngoài sandbox
+lúc 2026-11-13T14:13:16Z trả GET / 200 HTML và
+GET /api/backend/products 200 JSON có items. Đây là HTTP/proxy response;
+không suy DB readiness hoặc upstream/deployment SHA chỉ từ JSON/UI có sản phẩm.
+Lần sandbox trước không kết nối được là giới hạn môi trường probe, không
+phải kết luận production thất bại.
 
-Giới hạn hosting và ngày đối chiếu nằm ở deployment Markdown §11.1, theo
-\href{https://render.com/docs/free}{Render Free},
-\href{https://render.com/docs/deploys}{Render deploys} và
-\href{https://vercel.com/docs/plans/hobby}{Vercel Hobby}, đọc lại 10/11/2026.
-Chưa xác nhận plan thật; cold start/sleep, scheduler, quota, DB expiry và backup
-phải được chốt trước demo. Không tuyên bố Free có shell/pre-deploy/managed
-backup hay scheduler chạy khi backend ngủ.
+Browser host unavailable ở lượt trước. Người dùng yêu cầu bỏ Edge/Computer Use;
+Người dùng đính chính ngày 14/11/2026: Leader chưa kiểm tra/nghiệm thu
+SCRUM-117. Mixed-content/assets/menu và
+quyền người chấm chưa có verification độc lập trong lượt này.
+Backend origin đã được người dùng cung cấp:
+\url{https://brewlite-a2-api-hntn.onrender.com/}. GET kế thừa phiên trợ lý trước
+ngày 13/11/2026 tại 16:12:30.8778669Z và 16:12:31.6476271Z lần lượt / và
+/products đều 200. GET mới kết thúc 16:24:59.1098808Z và 16:24:59.4284827Z,
+/ trả Hello World!, /products JSON có 9 items. Không trộn thời điểm GET với deploy.
+Source GET / trả Hello World! chỉ là liveness; Prisma connect lúc startup
+không chứng minh DB đọc được ở mọi request. Không mặc định endpoint /health.
 
-\subsection{Rollback và truy vết release}
-Runbook phân biệt khôi phục FE deployment, BE deployment/image với phục hồi DB.
-Revert Git không đảo schema. Trước rollback phải có trigger, người quyết định/
-executor đã xác nhận, version cũ tương thích schema và env, backup/restore point
-nếu cần. Sau rollback kiểm tra HTTPS, liveness, direct/proxy DB read, migration
-status, scheduler và smoke được phép. Không có backup usable/compatibility thì
-dừng và chuyển Leader quyết định; không tự down migration/reset DB.
-Hướng dẫn candidate: Vercel Production Deployment/Instant Rollback, Hobby chỉ
-deployment production liền trước; Render Deploys/Rollback, Free giới hạn hai
-deploy trước và cần artifact còn giữ. Các nguồn chính thức, env/auto-deploy
-caveats và bước kiểm tra ở deployment §11.3. Chưa có project/tier/target thật
-nên chưa xác minh thực thi; không coi mô tả là rollback đã thành công.
-Rehearsal chưa thực hiện và hiện là khuyến nghị: 8 AC yêu cầu hướng dẫn,
-chưa thấy quy trình được duyệt/đề/SCRUM-116 làm rehearsal bắt buộc. SRS
-AC-OPS-07 liên quan còn DRAFT cần xác nhận cửa áp dụng, không tự thêm gate.
+Provider evidence cho thấy Vercel/Render, trong khi ADR-005 vẫn Proposed trong
+nguồn thiết kế. Ảnh mới xác nhận DB Free18/Singapore/1GB/Available và expiry
+10/12/2026. PostgreSQL chỉ cho 3 external /32; workspace/environment 0.0.0.0/0
+không làm nới DB rules vì IP phải được mọi cấp áp dụng cho phép. External vẫn
+restricted, chưa tắt hoàn toàn. Internal fields không chứng minh env app thực;
+backup/restore và policy acceptance chưa có. Diagram vẫn là target design,
+được đối chiếu bằng evidence bổ sung, không dùng thay dashboard/runtime.
 
-Tag đề xuất \texttt{A2-v1.0.0} chưa được nhóm chốt và chưa tạo. Source release
-chờ review/CI/dependency và workflow stable. Bảng mapping chuẩn ở delivery §4:
-release/tag $\rightarrow$ source SHA $\rightarrow$ FE artifact/deployment
-$\rightarrow$ BE image/deployment $\rightarrow$ CI/CD run $\rightarrow$ smoke.
-Mọi khác biệt FE/BE/test SHA phải ghi lý do và được reviewer chấp nhận.
-\texttt{A1-final / 1951dc1} chỉ dùng provenance.
+\subsection{CI/CD và truy vết phiên bản}
+PR27 chỉ sửa \path{apps/api/README.md}, mô tả Render production branch main,
+root apps/api, Dockerfile và Auto-Deploy After CI Checks Pass. Câu cuối ghi sẽ
+bổ sung evidence khi quan sát thành công. Ảnh mới đã có Render Auto-Deploy/Live
+source 02452f2, deployed field 08:39:19Z (15:39:19 GMT+7), duration39.4s.
+CI main cùng SHA có API end08:38:47Z và Web end08:39:15Z success; chuỗi thời
+gian phù hợp After CI Checks Pass. Đây là một lần CD backend có evidence,
+chưa full image tag/migration runner/failure/rollback chain \cite{renderdeploy}.
 
-\subsection{Demo, quyền tiếp nhận và bộ nộp}
-Kịch bản demo dự kiến: HTTPS/menu, cấu hình món/giỏ, auth/tạo đơn, Sandbox được
-cho phép, authoritative outcome/lịch sử, CI/CD và runbook. Chưa chạy demo cuối;
-không dùng Return query hoặc Mock/synthetic làm Sandbox PASS. Agenda Review/
-Retro chỉ là chuẩn bị, chưa có ngày họp, thành viên, feedback hay approval.
+\begin{longtable}{p{0.24\linewidth}p{0.66\linewidth}}
+\toprule
+Mốc & Mapping và sai khác cần giữ \\
+\midrule
+\endfirsthead
+\toprule Mốc & Mapping và sai khác (tiếp) \\
+\midrule \endhead
+PR26 trước merge & Source/backend Live \texttt{2216b7a} theo body;
+FE Live chưa SHA. CI \texttt{43372690322} success. Payment success không tự
+gắn vào merge main \texttt{03668e3}. Một giao dịch còn đối soát. \\
+Dev PR27 & \texttt{0e43bcb}; CI \texttt{43392423041} success;
+head PR \texttt{7dbad80}, Preview Vercel Ready, không production domain proof. \\
+Main PR28 & \texttt{02452f2}; CI \texttt{43394783298} success;
+Vercel status success 2026-11-13T08:38:39Z với deployment
+\texttt{AayabZWzjhJAquCMYXjoaDppJWsi}. Production FE alias chưa bind;
+Render Auto-Deploy/Live cùng source02452f2, deployed field08:39:19Z có ảnh. \\
+SCRUM-117 local & HEAD \texttt{91e6f99}, app/config trùng dev \texttt{0e43bcb};
+PR17 remote còn \texttt{3543a55}. Docs cập nhật chưa stage/push, không có deploy mới. \\
+Release/tag & A2-v1.0.0 chỉ đề xuất. Release API trả rỗng, local tag chỉ A1-final
+\texttt{1951dc1} dùng provenance; chưa chọn source release cuối. \\
+\bottomrule
+\end{longtable}
 
-Người phụ trách/người tiếp nhận hosting, DB và release chưa được nhóm xác nhận.
-Cần cấp quyền theo role/tài khoản riêng ở provider/repo và secret store được
-duyệt, không đưa credential vào hồ sơ. Bản nộp dự kiến gồm source/tag, README,
-requirements/modeling/architecture, report PDF, deployment/runbook, release
-notes, test/demo/Scrum evidence. Checklist có nguồn đề §9.1; đề không quy định
-tên/vị trí PDF tổng hợp riêng. Report PDF là phần người dùng yêu cầu; vị trí
-\path{docs/report/output/main.pdf} là đề xuất chưa có PDF mới được build.
-Delivery §5/6 có mẫu ghi nhận demo/Review/Retro/ký nhận chưa điền, không phải
-hoạt động đã thực hiện. Người phụ trách demo/report cũng chờ xác nhận.
+Mapping đầy đủ ở dossier mục 4/13: release/tag $\rightarrow$ source SHA
+$\rightarrow$ FE deployment $\rightarrow$ BE deployment/image $\rightarrow$
+CI/CD runs $\rightarrow$ smoke. Mọi khác biệt FE/BE/test SHA phải được ghi,
+không che bằng nhãn latest. CI cũ trên 7dfc7ca/e942cbe và report 34cbbc0 giữ
+ngày/môi trường riêng. Chưa tự tạo tag/release hoặc xác nhận phát hành.
 
-Kiểm tra người chấm phải mở UI/API, phát video, mở đúng PDF và đọc/download
-evidence bằng quyền tương ứng; HTTP 200 trang login không đủ. Các bước này còn
-BLOCKED do thiếu URL/PDF/quyền. Hồ sơ sẵn sàng cho review tài liệu không đồng
-nghĩa release đã phát hành và nghiệm thu.
+\subsection{Migration, seed và cấu hình vận hành}
+Source hiện có 10 migrations; migration mới tạo seed\_executions.
+db:migrate là migrate deploy, áp dụng migration có sẵn và có thể đổi cấu trúc
+DB, không sinh migration file. Docker target migrate có CLI/schema/config;
+runtime có dist và dist-seed, đã loại Prisma CLI. Không giả định hosting tier
+có shell/pre-deploy để chạy migration. Cần runner có private DB access đúng
+release SHA, status--deploy--status và log an toàn; không migrate dev/reset.
+PR24 báo 10 migrations applied nhưng actual runner/log/current status chưa có.
 
-\subsection{Các bước còn lại}
-Leader bổ sung ownership, metadata và quyết định scope còn mở; chỉ dẫn
-giảng viên mới hơn v1.0 nếu có. Không yêu cầu lại 8 AC và bản đề đã tìm được.
-114/115/116 bổ sung merge/test/CD/deploy evidence;
-reviewer xử lý gates; build PDF và visual QA; xin quyền commit/push/PR/merge;
-chốt release SHA, thực hiện deploy/smoke theo quyền riêng; hoàn thiện mapping,
-demo/Review/Retro/bộ nộp và quyền người chấm. Chỉ sau approval mới tạo tag/publish
-release và đề nghị Jira Done. Không có các hành động phát hành trong SCRUM-117
-lượt chuẩn bị này.
+Local db:seed có guard DB demo, upsert catalog 9 sản phẩm/metadata/giá và giữ
+stock, không xóa order; không áp dụng tùy tiện cho production. Cloud seed
+Render riêng có dry-run mặc định, exact target/user, approval trước Apply,
+insert-only, không ghi users/orders/payments; giữ stock/quota/redemptions.
+Fixture gồm 4 categories, 5 toppings, 9 products, 13 product--topping links,
+5 coupons. Completion marker render-demo-v1 nằm cùng Serializable transaction
+với advisory lock. Marker có mà fixture drift thì dừng; không xóa marker/đổi
+key để ép reseed. Apply outcome unknown phải kiểm tra marker/dry-run trước.
+
+Runtime Internal Prisma TLS profile chỉ reachable khi mode/target/expected
+host/port/database/user exact khớp; TLS rejectUnauthorized=false cho self-signed
+Internal là giới hạn peer verification, không phải bằng chứng private-only.
+Source/config không đổi trong SCRUM-117. Không ghi credential hoặc lấy env
+thật vào báo cáo. DB, JWT/internal/VNPay secrets chỉ ở backend; FE proxy target
+là public backend HTTPS dù biến có tên INTERNAL.
+
+DB Free đã có ảnh; backend web tier/Vercel plan chưa xác nhận. Runbook ghi giới hạn web Free có điều kiện:
+sleep có thể dừng scheduler, không shell/one-off job, DB expiry/không backup;
+không áp chúng như cấu hình đã xác minh của nhóm. Pre-deploy/runner và quotas
+phải chốt theo tier thật, không giả định runtime image có CLI.
+
+\subsection{Rollback, phục hồi DB và bàn giao}
+Rollback app cần FE/BE target IDs còn artifact, schema/API/env compatibility,
+người quyết định/executor được xác nhận và smoke sau phục hồi. Vercel Instant
+Rollback phụ thuộc eligible production deployment/tier; Hobby chỉ target liền
+trước \cite{vercelrollback}. Render rollback phụ thuộc artifact retention,
+dashboard rollback tắt auto-deploy, API rollback không tắt \cite{renderdeploy}.
+Chưa có target/tier/quyền thực để xác nhận khả năng thực thi.
+
+Revert Git/app rollback không đảo migration hoặc dữ liệu. DB recovery phải
+có backup/restore point được kiểm chứng, đích cô lập, RPO/RTO được chốt và
+đối soát payment trước chuyển kết nối; không reset/down migration tùy tiện.
+Rehearsal là khuyến nghị hiện tại, không tự biến thành gate AC4; chưa thực hiện.
+
+Script demo dự kiến: HTTPS/menu, size/topping/giỏ, auth/order ở môi trường
+được phép, payment theo scope duyệt, authoritative outcome/history, CI/CD và
+runbook. Review dùng tám AC để ghi feedback/decision thực; Retro ghi quan sát,
+nguyên nhân/action/owner/hạn sau họp. Dossier mục 5/6 có mẫu chưa điền;
+không có ngày họp/thành viên/feedback/approval được bịa. Roster A1 không xác
+nhận người phụ trách hosting/DB/release. Nhóm tiếp tục quản lý dự án; mẫu
+chuyển quyền dùng khi đổi người quản lý, không tạo AC về người tiếp nhận riêng.
+
+Checklist đề v1.0 mục 9.1 đã được ánh xạ tới SRS/use-case/matrix 48 FR + 49 NFR,
+diagrams/source/exports, app/migrations/tests, CI/CD, production và demo/Scrum
+evidence. Tồn tại source không thay acceptance. Chưa clean-clone runtime hoặc
+kiểm tra quyền người chấm. Báo cáo PDF tổng hợp là yêu cầu người dùng; vị trí
+\path{docs/report/output/main.pdf} là đề xuất, không tên file do đề quy định.
+
+\subsection{Việc còn lại và trạng thái báo cáo}
+SCRUM-114/Leader xác nhận scope/gap/payment demo; SCRUM-115/QA bổ sung
+integration menu--confirmation, IPN, QueryDR và financial reconciliation đúng
+SHA và environment; SCRUM-116 bổ sung FE production alias, image version,
+runner/log migration, Internal usage/web tier/backup/rollback targets. Nhóm
+bổ sung video/Review/Retro thật, quyền người chấm và quyết định phát hành.
+Tên người phụ trách tài nguyên cần ghi theo phân công thực tế của nhóm.
+
+Compiler vẫn pdfLaTeX + VnTeX theo preamble/log SGU; MiKTeX user và MuPDF portable
+đã cài với quyền người dùng. Kết quả build/render và giới hạn QA được ghi tại
+report README theo lần thực hiện, không dùng template log làm build mới.
+Nguồn portable và hướng dẫn local/Overleaf vẫn có, không upload.
+Hồ sơ có thể review cập nhật PR17,
+chưa đủ căn cứ nghiệm thu release hoặc Jira Done. Source và PDF được chuẩn bị
+trong bộ thay đổi PR17; trạng thái phát hành theo evidence trên PR.
