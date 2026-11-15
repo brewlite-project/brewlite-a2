@@ -1,8 +1,24 @@
 \section{Phân công nhiệm vụ toàn đồ án}
 \label{sec:task-allocation}
-Nguồn phân công là export Jira104 issue, đối chiếu họ tên bằng task trùng trong báo cáo nhóm \cite{a1report}. Các nhiệm vụ được nhóm theo chuyên môn để thể hiện trách nhiệm trong sản phẩm BrewLite. Mỗi issue chỉ xuất hiện một lần; Epic và Subtask chưa phân công được ghi riêng. Sprint, giai đoạn và tiêu đề nguyên bản được giữ trong \path{docs/planning/BrewLite_Task_Allocation.md}. Phân công phản ánh người được giao, không phải tỷ lệ đóng góp hoặc tuyên bố một người thực hiện toàn bộ nhiệm vụ.
+\subsection*{Tổng hợp tỷ lệ đóng góp đề xuất}
+Bảng dưới tổng hợp tỷ lệ đóng góp đề xuất và các nhóm công việc chính của sáu thành viên. Tỷ lệ này không được tính trực tiếp từ số lượng task; các nhiệm vụ cụ thể và nguồn phân công được trình bày ở các mục tiếp theo.
 
-Cột tạo phẩm phân biệt đầu ra theo nhiệm vụ với đường dẫn tìm thấy trong nguồn. Kết quả kiểm thử được trình bày ở chương tương ứng.
+\begingroup\small
+\setlength{\tabcolsep}{4pt}\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.23\linewidth}>{\raggedright\arraybackslash}p{0.57\linewidth}>{\centering\arraybackslash}p{0.12\linewidth}}
+\caption{Tổng hợp tỷ lệ đóng góp đề xuất của các thành viên}\label{tab:contribution-proposal}\\
+\toprule Thành viên & Phần việc chính theo phân công & Tỷ lệ đề xuất \\ \midrule\endfirsthead
+\toprule Thành viên & Phần việc chính theo phân công (tiếp) & Tỷ lệ đề xuất \\ \midrule\endhead
+\bottomrule\endlastfoot
+Nguyễn Châu Hoàng Khang & API Contract, kiến trúc, tích hợp VNPay, kiểm thử tích hợp, CI/CD và điều phối kỹ thuật & 22\% \\ \addlinespace[4pt]
+Nguyễn Khải Hoàng & Phân tích yêu cầu, backend xác thực/thanh toán/coupon, kiểm thử đồng thời, Docker backend, báo cáo và bàn giao & 19\% \\ \addlinespace[4pt]
+Nguyễn Đăng Thụy & User Stories/Use Case, database và migrations, dữ liệu mẫu, scheduler đối soát, chuẩn hóa tài liệu & 16\% \\ \addlinespace[4pt]
+Hoàng Văn Lập & Sơ đồ nghiệp vụ, frontend chi tiết sản phẩm/auth/checkout/payment, tích hợp và kiểm thử E2E & 13\% \\ \addlinespace[4pt]
+Cao Nguyễn Quốc Khánh & Menu, giỏ hàng, lịch sử đơn, frontend VNPay/coupon, hoàn thiện và kiểm chứng MVP & 15\% \\ \addlinespace[4pt]
+Lâm Chí Khang & ERD/domain/deployment, backend tạo đơn, trạng thái đơn, kiểm soát tồn kho, hết hạn và thanh toán 0 đồng & 15\% \\
+\midrule \textbf{Tổng} & & \textbf{100\%} \\
+\end{longtable}\endgroup
+\clearpage
 
 \subsection{Nguyễn Châu Hoàng Khang}
 \begingroup\small
