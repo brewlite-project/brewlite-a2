@@ -1,8 +1,8 @@
 # BrewLite A2 — Release notes nháp
 
-**DRAFT, cập nhật14/11/2026. Hồ sơ chưa nghiệm thu; SCRUM-117 không tạo tag/release hoặc deploy. Main đã có promotion #24/#26/#28 của nhóm, không đồng nghĩa A2 release/tag đã phát hành.**
+**DRAFT, cập nhật15/11/2026. Hồ sơ chưa nghiệm thu; SCRUM-117 không tạo tag/release hoặc deploy. Main đã có promotion #24/#26/#28 của nhóm, không đồng nghĩa A2 release/tag đã phát hành.**
 
-Đối chiếu mới khoảng10:31 UTC ngày14/11: PR17/head6ee4199, dev0e43bcb và main02452f2 không đổi; CI head hiện tại success, reviews rỗng, bodyPR còn trống. Remote chỉ tagA1-final, Releases API[]. GET frontend/backend/proxy catalog đều200, hai catalog có9sản phẩm. Bản65trang/22file vẫn local, không thuộc CI này. Chi tiết và giới hạn ở [delivery§16](SCRUM-117-delivery.md#16-đối-chiếu-git-và-khả-năng-hoàn-thiện-ngày14112026); không thay evidence lịch sử hoặc nâng trạng thái AC.
+**Snapshot lịch sử trước push21749cc:** đối chiếu khoảng10:31 UTC ngày14/11: PR17/head6ee4199, dev0e43bcb và main02452f2 không đổi; CI head hiện tại success, reviews rỗng, bodyPR còn trống. Remote chỉ tagA1-final, Releases API[]. GET frontend/backend/proxy catalog đều200, hai catalog có9sản phẩm. Bản65trang/22file vẫn local, không thuộc CI này. Chi tiết và giới hạn ở [delivery§16](SCRUM-117-delivery.md#16-đối-chiếu-git-và-khả-năng-hoàn-thiện-ngày14112026); không thay evidence lịch sử hoặc nâng trạng thái AC.
 
 ## Phiên bản và nguồn
 
@@ -53,11 +53,11 @@ Các giới hạn không tự waive requirement A2 hoặc mặc định chặn m
 
 Xem [delivery §8](SCRUM-117-delivery.md#8-trình-tự-còn-lại-và-điều-kiện-thực-hiện). Chốt source SHA sau merge/release workflow, thu CI/CD + deploy IDs + smoke đúng SHA, hoàn thiện PDF/bộ nộp và quyền người chấm, ghi cách nhóm tiếp tục quản lý tài nguyên, rồi chốt bước tạo/push tag và publish theo quyền được cấp. Mỗi bước ngoài lượt tài liệu này cần quyền theo AGENTS.md; không thay đổi Jira Approved/Done tự động.
 
-## Nội dung cập nhật PR #17 vào dev — báo cáo toàn đồ án, chưa gửi
+## Snapshot body PR17 trước bổ sung phân công — không dùng làm body hiện hành
 
 **Title:** `docs(SCRUM-117): complete whole-project report and production delivery evidence`
 
-**Body hoàn chỉnh:**
+**Body trước bổ sung phân công (lịch sử):**
 
 Bản báo cáo trước đã có yêu cầu/use case/sơ đồ nhưng mô tả dữ liệu/API, hiện thực toàn hệ thống, kiểm thử, Scrum và đánh giá còn mỏng. PR hoàn thiện **báo cáo toàn đồ án BrewLite từ A1 đến A2**, đồng thời chuẩn hóa production delivery evidence; không chỉ trình bày deployment/release.
 
@@ -72,7 +72,7 @@ Bản báo cáo trước đã có yêu cầu/use case/sơ đồ nhưng mô tả 
 
 ## Baseline và evidence production
 
-- Baseline kiểm tra: PR17/head `6ee4199acaab709471144295adc98ac34e9f11c3`, base dev `0e43bcb80f64d6a5fa558cd80f71a199029535d0`; remote main `02452f228712c3501c8d27f0f1ae737ad206785d`. Bản tổng hợp mới chưa commit, chưa có CI riêng.
+- Baseline hiện tại: HEAD/PR17 `21749cce2ff536a5f1f99a74cf951bc4fc78dce6`, base dev `0e43bcb80f64d6a5fa558cd80f71a199029535d0`. Báo cáo65 trang/E3A8956E… đã commit/push tại21749cc; [CI43587629629](https://github.com/brewlite-project/brewlite-a2/actions/runs/43587629629) API CI/Web CI SUCCESS cho commit đó. CI ứng dụng không build/render LaTeX. Các bổ sung lịch sử A1–Phase2–A2/phân công trong lượt này chưa commit và chưa có CI riêng; Leader chưa review/nghiệm thu.
 - Render Auto-Deploy Live02452f2 theo ảnh, deployed field13/11/2026 08:39:19Z; CI main43394783298 cùng SHA success. Không dùng GET để xác định processSHA.
 - HTTP GET mới14/11: frontend/200 lúc09:47:56Z; backend/200 Hello World! và/products200 JSON9items lúc09:48:20Z. FEproxy timeout20s rồi retry200/9items lúc09:53:38Z; nguyên nhân chưa xác minh. Browser smoke NOT VERIFIED, không dùng Computer Use. GET/deployment13/11 giữ timestamp riêng ở dossier.
 - DB ảnh Render Free/PostgreSQL18/Singapore/1GB, expiry10/12/2026;3 external /32 restricted, chưa private-only. Actual Internal app usage không được suy từ Internal URL. Chưa có actual backup/restore mới.
@@ -82,7 +82,7 @@ Audit kế thừa§16 ngày14/11 lúc10:31 UTC đã được tích hợp vào La
 
 ## Validation và giới hạn
 
-- PDF hiện hành tại docs/report/output/main.pdf: 65 trang/3932356 bytes, SHA256 `E3A8956E269950261286A22CB6DBD46862E4F8C3E207FDBEBCDF090CE676B59F`. Checksum B11CE… là PDF53 trang có logo tại6ee4199; F796… và pass9 là các bản lịch sử.
+- Snapshot PDF đã push21749cc tại docs/report/output/main.pdf khi đó: 65 trang/3932356 bytes, SHA256 `E3A8956E269950261286A22CB6DBD46862E4F8C3E207FDBEBCDF090CE676B59F`. Checksum B11CE… là PDF53 trang có logo tại6ee4199; F796… và pass9 là các bản lịch sử.
 - pdfLaTeX cuối exit0, aux/TOC/LoF/LoT/out ổn định; không Overfull/undefined refs/citations/LaTeX-Package warnings cuối.14 Underfull hbox đã kiểm tra trực quan. MuPDF render toàn65 trang; xem toàn bộ contact sheets và các trang nội dung mới/ảnh/bảng, không thấy tràn/cắt hoặc trang trống bất thường.
 - Static local links/anchors, TeX inputs/graphics/labels/citations,48FR/49NFR, whitespace working/staged riêng, conflict/sensitive patterns được kiểm tra; số liệu/giới hạn tại dossier§15. Không khẳng định loại trừ mọi secret; ảnh UI/Render dùng source có provenance và đã kiểm tra an toàn.
 - [CI43543439775](https://github.com/brewlite-project/brewlite-a2/actions/runs/43543439775) **API CI và Web CI SUCCESS** cho head đã commit6ee4199 (14/11 01:57:00Z); không đại diện thay đổi mới. CI không build LaTeX hoặc chứng minh PostgreSQL integration/production Sandbox E2E. Không chạy lại toàn suite app cho lượt docs.
@@ -110,7 +110,7 @@ Nội dung bổ sung dùng kèm body cập nhật PR17: thêm Render evidence đ
 Người dùng xác nhận Leader chưa kiểm tra/nghiệm thu. Bỏ các nhận định Leader PASS, dùng phương án nhóm tiếp tục quản lý tài nguyên và giữ mẫu chuyển quyền là khuyến nghị. Sửa checklist/backend/CD đã lỗi thời. PDF53 trang được build/render lại; checksum hiện hành ở report README. Ba lượt build cuối exit0; log không có Overfull/undefined refs/citations/LaTeX-Package Warning, có Underfull hbox đã kiểm tra trực quan. GitHub/Vercel đã được tra lại, còn thiếu alias binding và nguồn runtime Internal DB usage.
 
 
-## File đề nghị commit sau review lượt tổng hợp toàn đồ án
+## Danh sách22 file ở lượt tổng hợp đã commit21749cc (lịch sử)
 
 - `README.md`
 - `docs/README.md`
@@ -135,7 +135,189 @@ Người dùng xác nhận Leader chưa kiểm tra/nghiệm thu. Bỏ các nhậ
 - `docs/report/sections/sequence-diagram.tex`
 - `docs/traceability-matrix.md`
 
-Chỉ là danh sách đề nghị, chưa stage/commit/push. Log/render/checker ở TEMP không đưa vào PR. Không cập nhật PR trong lượt này. Khi được cho phép và có quyền: mở PR17 → Edit → dán Title/Body ở mục hiện hành trên; không tạo PR trùng. Lỗi connector403 trước đây là giới hạn quyền integration, không đọc token/credential để vượt quyền.
+Danh sách22 file trên thuộc lượt trước, đã commit/push21749cc; không phải danh sách thay đổi mới. Log/render/checker ở TEMP không đưa vào PR. Không cập nhật PR trong lượt này. Khi được cho phép và có quyền: mở PR17 → Edit → dán Title/Body ở mục hiện hành trên; không tạo PR trùng. Lỗi connector403 trước đây là giới hạn quyền integration, không đọc token/credential để vượt quyền.
 
 
-Tích hợp audit16 vào PDF thực tế đã hoàn tất; metadata/QA hiện hành ở [report README](../report/README.md#pdf-tích-hợp-audit16), log tích hợp ở [dossier§17](SCRUM-117-delivery.md#17-tích-hợp-audit16-vào-báo-cáo-và-pdf). Title/body chỉ được chuẩn bị, chưa gửi hoặc cập nhật PR. Giữ nguyên8AC và các quyết định còn mở.
+Tích hợp audit16 vào PDF thực tế đã hoàn tất; metadata/QA snapshot65 trang ở [report README](../report/README.md#bản-pdf-hiện-hành), log tích hợp ở [dossier§17](SCRUM-117-delivery.md#17-tích-hợp-audit16-vào-báo-cáo-và-pdf). Title/body chỉ được chuẩn bị, chưa gửi hoặc cập nhật PR. Giữ nguyên8AC và các quyết định còn mở.
+
+
+## Snapshot body PR17 — trước điều chỉnh cách trình bày sản phẩm
+
+Title: `docs(SCRUM-117): complete BrewLite A1–Phase2–A2 report and delivery evidence`
+
+Body dưới đây dùng cho lượt bổ sung hiện tại; metadata PDF cuối và danh sách file ở cuối tài liệu. Các body/QA phía trên là snapshot lịch sử, không dùng thay cho bản này.
+
+BrewLite cần một báo cáo tổng hợp từ bài toán/yêu cầu, phân tích/thiết kế, hiện thực, kiểm thử tới vận hành và bàn giao. PR này kế thừa nguồn A1 có provenance, phân biệt Phase2 với Assignment2; chuẩn hóa README hiện tại và tích hợp nội dung hệ thống, diagrams, traceability, report LaTeX/PDF có logo SGU, nhãn DRAFT.
+
+Bổ sung phụ lục phân công104 issue theo Jira (102 Task,1 Subtask,1 Epic), đủ A1/Sprint0–3, Phase2/Sprint4 và A2; mapping sáu thành viên bằng mã task trong bảng A1. Không dùng Jira Done làm test hoặc acceptance. Runbook có migration/seed, rollback ứng dụng/khôi phục DB, backup PostgreSQL18 và bàn giao quyền; chưa thực hiện production changes.
+
+Render Live02452f228712c3501c8d27f0f1ae737ad206785d ngày13/11 và HTTP frontend/backend/proxy200 ngày14/11 là evidence riêng; GET không xác định serving SHA, browser smoke hoặc Internal DB usage. Lịch sử proxy timeout được giữ cùng snapshot thành công về sau.
+
+Bản65 trang/E3A8956E… đã commit21749cc và CI43587629629 API/Web SUCCESS. PDF/validation mới của lượt bổ sung có metadata ở report README; chưa commit nên chưa có CI riêng. CI ứng dụng không build/render PDF. Không chạy lại app suite cho thay đổi docs.
+
+Leader cần review tính đầy đủ toàn đồ án, provenance/phân công và mức chứng minh8AC. Vẫn mở FE production alias→deployment/SHA, actual Internal DB, migration runner/log/policy/rollback target và bảo toàn DB trước10/12; payment-status/rounding/QueryDR và giao dịch đối soát; demo/Review/Retro, release/tag và nghiệm thu. Leader chưa review/nghiệm thu SCRUM-117. Hồ sơ sẵn sàng review không đồng nghĩa release đã Accepted/Released.
+
+Chỉ chuẩn bị nội dung; không cập nhật PR trong lượt này. Khi được phép, sửa PR17 hiện có vào dev, không tạo trùng; nếu connector403, người dùng dán body thủ công, không trích credential.
+
+
+Validation cho body hiện hành: PDF DRAFT mới **79 trang/3979222 bytes**, SHA256 `DBB676AE9E3507D9C2A2178BC86260C3685E32C8CD994F4256B1336DB6ED78E0`; pdfLaTeX+VnTeX/MiKTeX, MuPDF render toàn bộ và QA bảng nhiều trang, references ổn định. Kiểm đủ104 issue trong Markdown/TeX/PDF và roster6 người; local links/anchors/TeX/whitespace/conflict/sensitive-pattern checks có kết quả ở dossier§18/report README. Source/PDF mới chưa commit, không lấy CI21749cc thay cho CI mới. Bộ thay đổi của snapshot trước điều chỉnh cấu trúc là14 file theo git status khi đó, khác danh sách22 file lịch sử ở trên.
+
+## File đề nghị commit sau review lượt bổ sung phân công
+
+- `README.md`
+- `docs/README.md`
+- `docs/TRACEABILITY.md`
+- `docs/traceability-matrix.md`
+- `docs/delivery/SCRUM-117-delivery.md`
+- `docs/delivery/release-notes-A2.md`
+- `docs/planning/BrewLite_Task_Allocation.md` (mới; nguồn đối chiếu tối thiểu, không có CSV all-fields)
+- `docs/report/README.md`
+- `docs/report/main.tex`
+- `docs/report/output/main.pdf`
+- `docs/report/sections/deployment-release-delivery.tex`
+- `docs/report/sections/project-evaluation.tex`
+- `docs/report/sections/release-readiness.tex`
+- `docs/report/sections/task-allocation.tex` (mới; phụ lục đủ104 issue)
+
+Chưa stage/commit/push/cập nhật PR. File tạm/log/render không thuộc danh sách này. Chỉ dùng PR17 hiện có vào dev khi người dùng cho phép bước tiếp theo.
+
+
+## Snapshot body PR17 — trước hoàn thiện findings diagram/UI
+
+Title: `docs(SCRUM-117): complete BrewLite system report and delivery evidence`
+
+Báo cáo trình bày BrewLite như một đồ án phần mềm hoàn chỉnh: bài toán/phạm vi, yêu cầu, mô hình và thiết kế, database/kiến trúc/API, hiện thực frontend/backend và nghiệp vụ, kiểm thử, triển khai/vận hành/bảo trì/bàn giao, quản lý dự án và kết luận. README ưu tiên chức năng và setup hiện hành; nguồn gốc repository được giữ ngắn gọn. Các sơ đồ, đặc tả và evidence lịch sử được bảo toàn; provenance và bảng đối chiếu phiên bản nằm ở phụ lục, không dùng tiến trình A1/Phase2/A2 làm trục trình bày.
+
+Bảng PDF giữ đủ104 issue, nhóm theo thành viên/chuyên môn với năm cột: Thành viên, Nhóm công việc, Mã task, Nhiệm vụ cụ thể, Tạo phẩm phụ trách. Assignee/mã/ý nghĩa task không đổi; Epic98 và Subtask4 chưa phân công ghi riêng. Markdown chuẩn giữ tiêu đề nguyên bản cùng Sprint/giai đoạn gốc. Không suy đóng góp hay acceptance từ số task/Jira Done.
+
+Runbook, release notes, traceability và production evidence vẫn giữ giới hạn: Render Live02452f2 ngày13/11 riêng với HTTP snapshots14/11; chưa bind mọi serving SHA hoặc FE production alias. Vẫn mở Internal DB usage, runner/log/policy/rollback target và bảo toàn DB; payment-status/rounding/QueryDR/đối soát; demo/Review/Retro, release/tag và nghiệm thu. Leader chưa review/nghiệm thu SCRUM-117.
+
+PDF DRAFT dùng pdfLaTeX+VnTeX và logo SGU; số trang/checksum/QA mới tại report README. CI43587629629 API/Web SUCCESS chỉ cho21749cc đã commit, không thay CI của chỉnh sửa mới hoặc PDF QA. Chưa stage/commit/push/update PR; hồ sơ sẵn sàng review không đồng nghĩa release đã Accepted/Released.
+
+
+Validation bản trình bày hệ thống hiện hành: PDF DRAFT 81 trang vật lý, 3987564 bytes; SHA256 `DC8CD6867C32345D2AC545AC929F894A1EF89C238AF0637E98B493C4E8CAF8AA`; pdfLaTeX+VnTeX/MiKTeX, MuPDF render toàn bộ và QA bảng nhiều trang, mục lục/references ổn định. Không dùng checksum79 trang hoặc CI21749cc thay cho PDF/CI mới. [QA chi tiết](../report/README.md#bản-pdf-hiện-hành).
+
+## File đề nghị review sau điều chỉnh cấu trúc
+
+- `README.md`
+- `docs/README.md`
+- `docs/TRACEABILITY.md`
+- `docs/delivery/SCRUM-117-delivery.md`
+- `docs/delivery/release-notes-A2.md`
+- `docs/planning/BrewLite_Task_Allocation.md`
+- `docs/report/README.md`
+- `docs/report/main.tex`
+- `docs/report/output/main.pdf`
+- `docs/report/sections/activity-diagram.tex`
+- `docs/report/sections/checkout-use-case.tex`
+- `docs/report/sections/context-and-scope.tex`
+- `docs/report/sections/data-api-implementation.tex`
+- `docs/report/sections/deployment-release-delivery.tex`
+- `docs/report/sections/production-evidence.tex`
+- `docs/report/sections/project-evaluation.tex`
+- `docs/report/sections/release-readiness.tex`
+- `docs/report/sections/requirements-summary.tex`
+- `docs/report/sections/sequence-diagram.tex`
+- `docs/report/sections/task-allocation.tex`
+- `docs/traceability-matrix.md`
+
+21 file gồm cả thay đổi đầu vào được bảo toàn và chỉnh sửa cấu trúc mới; danh sách14/22 file ở các snapshot trên là lịch sử. File helper/log/render ở TEMP, không đưa vào PR. Dừng trước stage/commit/push/update PR17.
+
+
+## Snapshot body PR17 — trước biên tập bản trình nộp
+
+Title: `docs(SCRUM-117): complete BrewLite report diagrams and delivery evidence`
+
+Báo cáo BrewLite cần thể hiện đầy đủ hệ thống và bằng chứng có nguồn, thay vì chỉ link sơ đồ hoặc mô tả theo task. PR hoàn thiện cấu trúc bài toán/yêu cầu/thiết kế/hiện thực/kiểm thử/vận hành/quản lý dự án/kết luận, đồng thời giữ provenance và các giới hạn nghiệm thu.
+
+Chèn Use Case tổng quát vector (4 actor/14 UC/17 association), ERD storage theo Prisma/SQL (13 bảng/15 FK, PK/FK/cardinality), bổ sung6 bước hành trình UI và ảnh local modal-bottom/404 có nguồn; dọn wording/review IDs khỏi phần chính; ghép Subtask4 chưa phân công và Epic98, giữ đủ104 issue và mapping CSV. Lưu generator/SVG/PDF và hướng dẫn build/portable trong A2; không sửa app/schema/pipeline/archive/A1 hoặc production.
+
+Validation: PDF DRAFT 87 trang vật lý, 4982132 bytes, 22 hình/31 bảng; SHA256 `CE0868B8DF0D3D24F5ED10A1B493211F7E9622C7740C8AC37F48315A012CDED6`; pdfLaTeX+VnTeX ổn định references, MuPDF render toàn bộ từ PDF cuối và QA các hình/bảng mới. CSV hash/mapping104 issue,15 FK/3 partial indexes, SVG idempotence, local links/anchors/TeX/whitespace/conflict/sensitive-pattern checks đã thực hiện; không chạy lại app suite cho thay đổi docs.
+
+Ảnh thực cho auth/cart/checkout/payment/confirmation/history còn thiếu; phần mô tả lấy từ source, không dùng mockup hoặc tự tạo giao dịch. Production vẫn giữ evidence Render02452f2/HTTP snapshots lịch sử; còn FE alias/source, Internal DB/migration/rollback/backup, payment-status/rounding/QueryDR/đối soát, demo/Review/Retro, release/tag và review/nghiệm thu. Leader chưa review/nghiệm thu SCRUM-117. CI43587629629 API/Web SUCCESS chỉ cho21749cc đã commit, không cho thay đổi mới hoặc PDF QA.
+
+Hồ sơ sẵn sàng review tài liệu không đồng nghĩa release Accepted/Released. Chưa stage/commit/push/update PR17; không merge/deploy/tag/release/Done.
+
+## File đề nghị review sau hoàn thiện findings
+
+- `README.md`
+- `docs/README.md`
+- `docs/TRACEABILITY.md`
+- `docs/delivery/SCRUM-117-delivery.md`
+- `docs/delivery/release-notes-A2.md`
+- `docs/diagrams/README.md`
+- `docs/diagrams/brewlite-database-erd.svg`
+- `docs/diagrams/render_report_diagrams.cjs`
+- `docs/planning/BrewLite_Task_Allocation.md`
+- `docs/report/README.md`
+- `docs/report/assets/database-erd.pdf`
+- `docs/report/assets/use-case-overview.pdf`
+- `docs/report/main.tex`
+- `docs/report/output/main.pdf`
+- `docs/report/sections/activity-diagram.tex`
+- `docs/report/sections/checkout-use-case.tex`
+- `docs/report/sections/context-and-scope.tex`
+- `docs/report/sections/data-api-implementation.tex`
+- `docs/report/sections/deployment-release-delivery.tex`
+- `docs/report/sections/production-evidence.tex`
+- `docs/report/sections/project-evaluation.tex`
+- `docs/report/sections/release-readiness.tex`
+- `docs/report/sections/requirements-summary.tex`
+- `docs/report/sections/sequence-diagram.tex`
+- `docs/report/sections/task-allocation.tex`
+- `docs/requirements/diagrams/use-case-overview-report.svg`
+- `docs/traceability-matrix.md`
+
+Tổng27 file gồm thay đổi đầu vào được bảo toàn và source/assets mới. Các danh sách14/21/22 file trước là snapshot lịch sử. Log/render/helper giữ TEMP, không thuộc bộ PR.
+
+
+## Body PR17 hiện hành — bản trình nộp BrewLite
+
+Title: `docs(SCRUM-117): prepare BrewLite project report for submission`
+
+Báo cáo đã có nội dung toàn hệ thống nhưng còn trình bày nhiều checklist và nhật ký tác nghiệp. PR biên tập thành Báo cáo đồ án BrewLite: bài toán/yêu cầu, mô hình use case/activity/sequence, kiến trúc/domain/database/API, hiện thực, kiểm thử, vận hành, quản lý dự án/phân công và kết luận.
+
+Bỏ DRAFT khỏi bìa/footer/metadata và banner domain trong bản trình bày; chuyển checklist8AC, lịch sử Git/CI/checksum/audit sang dossier. Giữ nguồn canonical, provenance kiểm thử/ảnh local, giới hạn thực chất tại mục Hạn chế và đầy đủ104 issue theo CSV (102 Task,1 Epic,1 Subtask). Không suy task được giao là đã hoàn thành hoặc một người thực hiện toàn bộ.
+
+PDF: 70 trang vật lý, 19 hình, 24 bảng, 4,589,955 bytes; SHA256 `006997E90EE869B8AFBABC68B40AC0BEF87E7C3151404DCF5C1D8F77A784C574`. pdfLaTeX+VnTeX ổn định references, MuPDF render toàn bộ bản cuối; đã xem tất cả contact sheets và các trang liên quan. Đối chiếu104 issue/roster/MSSV, ERD13 bảng/15FK, local links/anchors/TeX, whitespace và mẫu nhạy cảm trong phạm vi tài liệu. Không chạy lại app tests hoặc production checks; CI43587629629 chỉ cho21749cc lịch sử.
+
+README hướng dẫn hệ thống hiện tại; source/assets/build portable nằm trong repo A2, không sửa A1/archive/app/schema/pipeline. Production/HTTP/CI kế thừa giữ nguồn và giới hạn; các gap payment-status/rounding/QueryDR, vận hành DB/deployment, demo/Review/Retro và quyết định release vẫn ở dossier. Hình thức trình nộp không công bố Leader/giảng viên đã review/nghiệm thu hoặc mọi yêu cầu đều đạt.
+
+Phạm vi Leader review: tính chính xác mô tả hệ thống, kết quả và giới hạn, phân công Jira, tạo phẩm nộp và các quyết định kỹ thuật còn mở. Chưa stage/commit/push/update PR17 theo ranh giới lượt này.
+
+### Bộ file hiện có để review
+
+- `README.md`
+- `docs/README.md`
+- `docs/TRACEABILITY.md`
+- `docs/delivery/SCRUM-117-delivery.md`
+- `docs/delivery/release-notes-A2.md`
+- `docs/diagrams/README.md`
+- `docs/diagrams/brewlite-database-erd.svg`
+- `docs/diagrams/deployment-figure.tex`
+- `docs/diagrams/domain-class-figure.tex`
+- `docs/diagrams/render_report_diagrams.cjs`
+- `docs/planning/BrewLite_Task_Allocation.md`
+- `docs/report/README.md`
+- `docs/report/assets/database-erd.pdf`
+- `docs/report/assets/domain-class-report.svg`
+- `docs/report/assets/domain-model-report.pdf`
+- `docs/report/assets/domain-types-report.svg`
+- `docs/report/assets/use-case-overview.pdf`
+- `docs/report/main.tex`
+- `docs/report/output/main.pdf`
+- `docs/report/sections/activity-diagram.tex`
+- `docs/report/sections/checkout-use-case.tex`
+- `docs/report/sections/context-and-scope.tex`
+- `docs/report/sections/data-api-implementation.tex`
+- `docs/report/sections/deployment-release-delivery.tex`
+- `docs/report/sections/production-evidence.tex`
+- `docs/report/sections/project-evaluation.tex`
+- `docs/report/sections/release-readiness.tex`
+- `docs/report/sections/requirements-summary.tex`
+- `docs/report/sections/sequence-diagram.tex`
+- `docs/report/sections/task-allocation.tex`
+- `docs/requirements/diagrams/use-case-overview-report.svg`
+- `docs/traceability-matrix.md`
+
+Tổng32 file gồm công việc đã có được bảo toàn và phần biên tập mới. Log/render/helper chỉ ở TEMP.

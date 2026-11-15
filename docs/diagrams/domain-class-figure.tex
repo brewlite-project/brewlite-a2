@@ -5,12 +5,13 @@
 % From docs/report/: define \newcommand{\BrewLiteDiagramDir}{../diagrams}
 % before \input{../diagrams/domain-class-figure.tex}.
 \providecommand{\BrewLiteDiagramDir}{docs/diagrams}
+\providecommand{\BrewLiteDomainReportPdf}{docs/diagrams/brewlite-domain-class.pdf}
 
 \begin{landscape}
 \begin{figure}[p]
   \centering
   \includegraphics[page=1,width=\linewidth,height=0.94\textheight,keepaspectratio]
-    {\BrewLiteDiagramDir/brewlite-domain-class.pdf}
+    {\BrewLiteDomainReportPdf}
   \caption[Domain classes và các quan hệ]{Domain Class Diagram của BrewLite; Promotion ánh xạ Coupon,
     LoyaltyTransaction suy ra. Retry VNPay xem chú thích hình.}
   \label{fig:brewlite-domain-class}
@@ -21,7 +22,7 @@
 \begin{figure}[p]
   \centering
   \includegraphics[page=2,width=\linewidth,height=0.94\textheight,keepaspectratio]
-    {\BrewLiteDiagramDir/brewlite-domain-class.pdf}
+    {\BrewLiteDomainReportPdf}
   \caption[Domain enums và types]{Enum nghiệp vụ BrewLite: tách OrderStatus, PaymentStatus
     và PaymentReconciliationState.}
   \label{fig:brewlite-domain-types}

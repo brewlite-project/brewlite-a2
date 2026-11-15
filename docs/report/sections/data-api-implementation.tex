@@ -1,13 +1,37 @@
 % Whole-project synthesis. Source snapshot 6ee4199; application equals dev0e43bcb.
-\section{Thiết kế dữ liệu và hợp đồng API}
+\section{Thiết kế database và API}
 \label{sec:data-api}
 \subsection{Từ domain model đến mô hình quan hệ thực tế}
 Domain Class Diagram ở chương trước diễn tả khái niệm nghiệp vụ; mô hình lưu
 trữ thực tế được đối chiếu từ \path{apps/api/prisma/schema.prisma} và SQL
 trong \path{apps/api/prisma/migrations}. Snapshot ứng dụng có 13 Prisma models,
 12 enum và 10 migrations. Các ghi chú đề xuất cũ trong header schema hoặc DBML
-không thay thế trạng thái của các migration đã có. Đó là bằng chứng source
-\textbf{Implemented}, chưa xác nhận migration state của database production.
+không thay thế mô hình lưu trữ được định nghĩa bởi Prisma và SQL migrations.
+
+\subsection{ERD của mô hình lưu trữ hiện hành}
+Hình\ref{fig:database-erd} thể hiện13 bảng và15 FK từ Prisma schema:
+khóa chính, khóa ngoại, nullability và cardinality theo FK/unique. Đây là
+ERD lưu trữ, khác mô hình khái niệm Domain Class Diagram. Hình chỉ hiển thị
+khóa liên kết; thuộc tính nghiệp vụ đầy đủ tiếp tục lấy từ schema, không
+chèn Promotion hoặc LoyaltyTransaction thành bảng đã triển khai.
+Nguồn chỉnh sửa/layout ở \path{docs/diagrams/render_report_diagrams.cjs};
+SVG ở \path{docs/diagrams/brewlite-database-erd.svg}. Không truy cập DB
+hoặc khẳng định migration production đã áp dụng khi tạo hình.
+DBML lịch sử tại \path{database/schema.dbml} còn có inventory\_movements,
+nhưng thiếu payment\_gateway\_events và seed\_executions so với schema này;
+vì vậy không dùng bản DBML đó làm ERD hiện trạng. Các CHECK và partial
+indexes vẫn phải đọc từ SQL migration, không lấy comment đề xuất làm kết quả thực thi.
+
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth,height=0.86\textheight,keepaspectratio]{docs/report/assets/database-erd.pdf}
+\caption[ERD lưu trữ theo schema hiện hành]{ERD lưu trữ BrewLite theo app baseline0e43bcb:13 bảng/15 FK.
+PK/FK/UQ và dấu ? biểu diễn khóa và nullability; đường nối ghi cardinality theo DB.
+CHECK/partial indexes trong SQL được mô tả ở phần ràng buộc, không suy từ Prisma.}\label{tab:auto-data-api-implementation-1}
+\label{fig:database-erd}
+\end{figure}
+\end{landscape}
 
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.27\linewidth}>{\raggedright\arraybackslash}p{0.63\linewidth}}
 \caption[Mô hình quan hệ từ schema thực tế]{Mô hình quan hệ từ schema thực tế}\label{tab:relational-model}\\
@@ -39,8 +63,11 @@ lineTotal = unitPrice $\times$ quantity, discount không vượt subtotal và
 total = subtotal $-$ discount. Unique email, coupon code và các khóa liên kết
 chặn trùng ở DB, bổ sung cho validation ở API.
 
-Hai partial unique indexes quan trọng giới hạn một active order/user
-(PENDING hoặc PAYMENT\_FAILED) và một payment SUCCESS/order. Payment có unique
+Các partial unique indexes giới hạn một active order/user
+(PENDING hoặc PAYMENT\_FAILED), một payment SUCCESS/order và một VNPay
+PENDING/order. Index sau nằm trong migration
+\path{apps/api/prisma/migrations/20261031190100_scrum76_payment_gateway_delta/migration.sql}; không phải
+UNIQUE(orderId) áp dụng cho mọi attempt. Payment có unique
 (userId, idempotencyKey); gateway event có unique (paymentId, source,
 eventIdentity). Đây là lớp bảo vệ cuối khi request hoặc callback chạy đồng
 thời. Transaction và locking trong service vẫn cần thiết; có index không
@@ -54,10 +81,7 @@ bảng đã triển khai hoặc suy ra đã có ledger đầy đủ (xem FR-29/F
 \subsection{API boundary, phiên bản và phân quyền}
 API REST/JSON nối UI với nghiệp vụ server. Contract v1 là baseline catalog
 lịch sử; v3/v4 và các addendum trong archive cung cấp quy tắc mở rộng.
-V4 có caveat tổng thể NOT APPROVED/external dependencies open dù ghi riêng
-API design baseline đã xác nhận trong Scope. Vì vậy dùng quy tắc normative
-đã ghi cùng SRS/decision, không gọi toàn bộ contract hoặc implementation là
-Approved. Danh mục dưới là inventory controller hiện có, không phải API mới.
+API Contract v4.0 và các addendum mô tả quy tắc giao tiếp; bảng dưới thống kê các controller trong source hiện hành.
 
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.37\linewidth}>{\raggedright\arraybackslash}p{0.53\linewidth}}
 \caption[Các API chính và trust boundary]{Các API chính và trust boundary trong source}\label{tab:api-inventory}\\
@@ -72,7 +96,7 @@ GET /auth/me & JwtAuthGuard, lấy identity từ token được xác minh. \\
 POST /orders; GET /orders/me & JWT; service kiểm ownership, tính lại giá và
 điều phối tài nguyên; history chỉ thuộc Customer hiện tại. \\
 POST /coupons/preview & JWT; preview không giữ quota, validation tạo order vẫn
-là bước có thẩm quyền. Scope acceptance FR-43 cần quyết định riêng. \\
+là bước có thẩm quyền. Kết quả preview không thay validation khi tạo đơn. \\
 POST /payments; POST /payments/vnpay/initiate & JWT, ownership, idempotency;
 Mock còn chịu environment/access guard, không bật cho production. \\
 GET /payments/vnpay/ipn & Callback gateway không dùng Customer JWT; xác minh
@@ -106,8 +130,7 @@ quantity và giỏ. Checkout dùng catalog preview để hỗ trợ người dù
 server tính giá cuối. Auth state/token được lưu localStorage theo source
 hiện hành; Bearer JWT được gửi tới API. Cách này đơn giản cho client nhưng
 token chịu rủi ro khi có XSS, không phải HttpOnly-cookie authentication.
-Responsive breakpoints có trong code; chưa có manifest/service worker hoặc
-bằng chứng installability để ghi PWA đã Verified.
+Responsive breakpoints có trong code; giao diện được thiết kế responsive; giới hạn PWA được tổng hợp ở chương kết luận.
 
 \begin{figure}[htbp]
 \centering
@@ -116,21 +139,68 @@ bằng chứng installability để ghi PWA đã Verified.
 \includegraphics[height=0.48\textheight]{docs/A2_TestReport/evidence/modal_320x640_top.png}
 \caption[Giao diện local lịch sử SCRUM-112]{Ảnh local lịch sử SCRUM-112: đầu trang menu 375x812 và phần trên modal
 320x640. Nguồn report kiểm source34cbbc0; không phải ảnh production hiện tại.
-Modal là viewport có cuộn, không biểu diễn toàn bộ form trong một ảnh.}
+Modal là viewport có cuộn, không biểu diễn toàn bộ form trong một ảnh.}\label{tab:auto-data-api-implementation-2}
 \label{fig:historical-ui}
 \end{figure}
 
-Các ảnh trên minh họa tạo phẩm UI thực đã tồn tại; không thay một demo toàn
-luồng từ menu tới confirmation. Ảnh không có credential và được mở kiểm tra
-trước khi tích hợp. Những điều kiện validation/trạng thái cụ thể tiếp tục
-truy về SRS/use case và test inventory, không suy từ một màn hình đẹp.
+Các ảnh minh họa menu và cấu hình sản phẩm trong môi trường local của báo cáo kiểm thử nguồn; trạng thái loading, lỗi và validation được mô tả cùng hành trình dưới đây.
+
+\subsubsection{Màn hình và hành trình sử dụng}
+Các bước sau mô tả implementation hiện hành, không phải kết quả browser
+smoke hoặc bộ ảnh production. Ảnh trong Hình\ref{fig:historical-ui} và
+Hình\ref{fig:ui-detail-validation} là local dev lịch sử; thời điểm chụp
+riêng không được report nguồn ghi rõ.
+\begin{enumerate}
+\item \textbf{Đăng ký và đăng nhập.} Customer nhập email, mật khẩu và tên
+(khi đăng ký). \path{apps/web/components/AuthCard.tsx} kiểm định dạng trước
+submit, không trim mật khẩu; đăng ký thành công chuyển sang đăng nhập, không
+tự tạo phiên. Đăng nhập thành công dùng auth state và chuyển về trang đích.
+UI phân biệt lỗi validation400, sai thông tin401, email trùng409 và lỗi mạng/
+server. Backend vẫn là nơi xác thực có thẩm quyền.
+\item \textbf{Menu và chi tiết.} Guest/Customer chọn sản phẩm, size, tối đa
+3 topping và quantity1--10 rồi thêm vào giỏ. Modal có phần cuộn để đọc hết
+form; ảnh bổ sung thể hiện phần dưới cùng và nút thêm. Menu có loading/empty/
+error; chi tiết trả400/404 hiển thị lỗi và đường quay lại menu. Giá trên UI
+là preview; sai khác rounding với backend đã nêu ở phần bảo mật/giới hạn.
+\item \textbf{Giỏ hàng và checkout.} \path{apps/web/components/CartDrawer.tsx}
+cho sửa/xóa dòng, kiểm giỏ và nhập coupon. Customer phải đăng nhập trước
+request tạo Order. Backend kiểm giá, tồn, coupon và active Order; nếu coupon
+hết hiệu lực, UI bỏ discount cũ và yêu cầu áp lại hoặc bỏ mã, thay vì giữ
+preview đã lỗi thời. Không xóa giỏ chỉ vì request hoặc redirect đã gửi đi.
+\item \textbf{Thanh toán.} \path{apps/web/components/PaymentPageView.tsx}
+điều phối chọn provider và submit/retry theo idempotency. VNPay initiation
+trả URL để redirect; Mock chịu mode/guard riêng, không mặc định được bật
+production. Đơn0 VND dùng luồng ZERO\_AMOUNT; chỉ xác nhận hoàn tất khi
+backend trả SUCCESS và Order PAID. Unknown/timeout còn chờ đối soát, không
+tự hiện thất bại tài chính cuối.
+\item \textbf{Xác nhận.} Trang \path{apps/web/app/order-confirmation/page.tsx}
+và service tương ứng đọc lại, bounded-poll GET /orders/me. UI phân biệt
+Order.status, Payment.status và thông tin reconciliation; Return query không
+là bằng chứng PAID. Chỉ cho retry nếu trạng thái server và policy cho phép.
+\item \textbf{Lịch sử đơn.} \path{apps/web/components/OrderHistoryView.tsx}
+hiển thị dữ liệu của Customer đã đăng nhập, hỗ trợ lọc/tìm kiếm và xem trạng
+thái/snapshot. Kết quả mong đợi là lịch sử từ API đúng owner, không suy từ
+cart local; trạng thái tải/rỗng/lỗi phải được phân biệt.
+\end{enumerate}
+\clearpage
+\begin{figure}[htbp]
+\centering
+\includegraphics[height=0.43\textheight]{docs/A2_TestReport/evidence/modal_320x640_bottom.png}
+\hspace{8mm}
+\includegraphics[height=0.43\textheight]{docs/A2_TestReport/evidence/error_404_320x640.png}
+\caption[Chi tiết sản phẩm và trạng thái404 ở local]{Phần dưới modal: size/topping/quantity và nút thêm vào giỏ;
+trạng thái sản phẩm404 với nút quay lại menu. Ảnh local dev320x640, source
+34cbbc0 theo SCRUM-112, Next localhost:3000/API127.0.0.1:3001;
+không phải production hoặc ảnh vừa chụp, không chứng minh các luồng auth/payment.}\label{tab:auto-data-api-implementation-3}
+\label{fig:ui-detail-validation}
+\end{figure}
 
 \subsection{Backend, transaction và các luồng chính}
 AppModule hiện import Products, Auth, Orders, Payments và Coupons. Inventory,
 promotion/loyalty và reconciliation là các trách nhiệm domain được điều phối
 trong modular monolith, không phải mỗi khái niệm đều có service deploy riêng.
-Mô tả A1 cũ nói Orders/Payments chưa nằm trong AppModule đã lỗi thời khi áp
-dụng cho A2; báo cáo này cập nhật từ source6ee4199/app baseline0e43bcb.
+Danh mục module và trách nhiệm được đối chiếu với app baseline0e43bcb;
+source và mốc phiên bản được ghi ở phụ lục nguồn.
 
 Luồng tạo đơn bắt đầu bằng JWT/validation, đọc lựa chọn catalog, tính giá
 server-side, khóa/kiểm tài nguyên, giữ stock và coupon trong transaction rồi
@@ -155,7 +225,7 @@ JWT HS256/expiry và UUID sub được kiểm phía server; service kiểm owner
 Auth dùng Argon2id, DTO validation theo endpoint; internal order advancement
 cần internal key. Không đồng nhất cơ chế internal key với quyền Customer.
 Secrets JWT/VNPay/DB ở environment backend; ảnh và log sử dụng evidence đã lọc.
-SCRUM-117 không đọc giá trị environment thật để suy ra cấu hình production.
+
 
 Một sai khác đã được MVP report nêu và còn trong source: FE
 \path{apps/web/services/api.service.ts} tính size price bằng floor, trong khi

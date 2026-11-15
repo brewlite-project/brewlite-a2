@@ -7,9 +7,9 @@
 \subsection{Mục tiêu và phạm vi}
 Use Case \texttt{UC-A2-CHECKOUT-001} (mã đề xuất) mô tả quy trình Customer
 xác nhận giỏ, tạo Order và thanh toán đến khi nhận được kết quả đáng tin cậy,
-hoặc đến trạng thái chờ đối soát/hết hạn. Phạm vi kế thừa UC-ORD-001 và
-UC-PAY-001 của BrewLite A1, nhưng sử dụng các quy tắc Phase~2 từ Requirements
-v3.1 và API Contract v4.0. Tài liệu này không thay đổi API hay schema.
+hoặc đến trạng thái chờ đối soát/hết hạn. Đặc tả liên kết UC-ORD-001 và
+UC-PAY-001, sử dụng quy tắc trong Requirements v3.1 và API Contract v4.0.
+Các khác biệt giữa đặc tả và implementation được ghi riêng bên dưới.
 
 \subsection{Actor, Trigger và điều kiện}
 \begin{description}
@@ -47,7 +47,7 @@ kết quả; chỉ xóa giỏ khi đã xác nhận PAID.
 \begin{itemize}
 \item Zero amount: dùng ZERO\_AMOUNT nội bộ, không gọi VNPay, pointsEarned=0.
 \item Mock: chỉ khi được bật trong non-production và không có VNPay PENDING.
-\item Verified FAILED: Order PAYMENT\_FAILED khi còn hạn; retry chỉ với attempt
+\item Kết quả FAILED đã xác minh: Order PAYMENT\_FAILED khi còn hạn; retry chỉ với attempt
 mới sau xác nhận terminal failed.
 \item TTL/Grace: không initiation từ expiresAt; VNPay PENDING có grace 5 phút
 để đối soát thanh toán đã phát sinh đúng hạn. Hết grace còn unknown thì
@@ -61,33 +61,26 @@ late financial SUCCESS sau CANCELLED lưu evidence, không hồi sinh Order.
 \subsection{Traceability và giới hạn xác minh}
 Chi tiết mọi nhánh, mã lỗi và traceability nằm trong tệp
 \texttt{docs/requirements/}\allowbreak\texttt{A2\_T1.3\_Checkout\_}\allowbreak\texttt{Use\_Case\_Specification.md}.
-Danh mục FR/NFR Checkout đã được đối chiếu với SRS SCRUM-102; các endpoint được đối chiếu tĩnh với source hiện có. Đối chiếu tĩnh không đồng nghĩa kiểm thử runtime đã PASS; chi tiết tại R-02 và R-03.
+Danh mục FR/NFR Checkout được liên kết với SRS và các endpoint được đối chiếu tĩnh với source. Các bảng dưới mô tả coverage yêu cầu và hiện thực, không đồng nghĩa kiểm thử runtime đã PASS.
 
 
 % R-01 — Include editable original from docs/requirements/diagrams/checkout-use-case.drawio.
 % Place this fragment in docs/report/sections/checkout-use-case.tex;
 % place the companion PDF in docs/report/assets/checkout-use-case.pdf.
 % Main report preamble must load graphicx: \usepackage{graphicx}.
-\subsection{Use Case Diagram Checkout (R-01)}
+\subsection{Use Case Diagram Checkout}
 \begin{figure}[htbp]
 \centering
-\IfFileExists{docs/report/assets/checkout-use-case.pdf}{%
-  \includegraphics[width=\linewidth]{docs/report/assets/checkout-use-case.pdf}%
-}{%
-  \fbox{\parbox{0.85\linewidth}{\centering
-  Sơ đồ Checkout nằm tại \texttt{docs/requirements/diagrams/checkout-use-case.drawio}.\\
-  Xuất PDF vào \texttt{docs/report/assets/checkout-use-case.pdf} để hiển thị.}}%
-}
-\caption[Use Case Diagram Checkout]{Use Case Diagram Checkout --- Customer và VNPay Sandbox là actor ngoài; các service nội bộ không phải UML actor.}
+\includegraphics[width=\linewidth]{docs/report/assets/checkout-use-case.pdf}
+\caption[Use Case Diagram Checkout]{Use Case Diagram Checkout --- Customer và VNPay Sandbox là actor ngoài; các service nội bộ không phải UML actor.}\label{tab:auto-checkout-use-case-1}
 \label{fig:a2-checkout-use-case}
 \end{figure}
 
-\subsection{Đối chiếu FR/NFR A2 Task 1.2 (R-02)}
-\textbf{SOURCE MAPPED --- REVIEW PENDING.} Đã đối chiếu danh mục
-\texttt{docs/requirements/srs.md} (SCRUM-102/A2-T1.2, origin/dev ngày
-08/11/2026). SRS vẫn ở trạng thái DRAFT; mapping không có nghĩa AC PASS.
+\subsection{Liên kết yêu cầu Checkout}
+Bảng liên kết Checkout với danh mục \path{docs/requirements/srs.md}; nguồn
+được lưu trong đặc tả SRS và ma trận truy vết.
 \begin{longtable}{|p{0.21\linewidth}|p{0.31\linewidth}|p{0.31\linewidth}|}
-\caption{Checkout: mapping FR/NFR}\\
+\caption{Checkout: mapping FR/NFR}\label{tab:auto-checkout-use-case-2}\\
 \hline
 \textbf{Nhóm Checkout} & \textbf{FR A2} & \textbf{NFR A2} \\ \hline
 JWT / ownership & FR-03, FR-05--07 & NFR-01, 02, 05, 09 \\ \hline
@@ -101,32 +94,33 @@ Testing / logging / perf & FR-19, 30, 31 & NFR-20, 21, 33--36, 42 \\ \hline
 \end{longtable}
 FR-23 (hủy chủ động) và FR-43 (coupon preview) vẫn SHOULD/Deferred;
 FR-29 inventory movement là SHOULD. Nhãn MUST* của NFR trong SRS
-là ưu tiên suy luận chờ reviewer xác nhận. AC-A2 liên quan và mapping
-đến từng bước nằm trong bảng R-02 của tệp Markdown Task 1.3.
+biểu thị phân loại ưu tiên đề xuất trong đặc tả. AC-A2 liên quan và mapping
+đến từng bước nằm trong tài liệu Use Case chuẩn được dẫn ở trên.
 
-\subsection{Kiểm tra API và implementation (R-03)}
-\textbf{STATIC SOURCE CHECK --- NOT RUNTIME ACCEPTANCE.} Đã đối chiếu
-API Contract v4.0 với controller/service ở \texttt{origin/dev};
-không chạy lại tests hoặc VNPay Sandbox E2E.
+\subsection{API và hiện thực Checkout}
+Bảng đối chiếu API Contract v4.0 với inventory controller/service, app
+baseline0e43bcb. Đây là kiểm tra source, không là nghiệm thu runtime hoặc
+VNPay Sandbox E2E.
 \begin{longtable}{|p{0.34\linewidth}|p{0.24\linewidth}|p{0.25\linewidth}|}
-\caption{Checkout: API và implementation inventory}\\
+\caption{Checkout: API và implementation inventory}\label{tab:auto-checkout-use-case-3}\\
 \hline
 \textbf{Contract route} & \textbf{Kết quả} & \textbf{Source} \\ \hline
-\texttt{POST /orders} & ROUTE PRESENT & \texttt{orders.controller.ts} \\ \hline
-\texttt{POST /payments/vnpay/initiate} & ROUTE PRESENT & \texttt{payments.controller.ts} \\ \hline
-\texttt{GET /payments/vnpay/ipn} & ROUTE PRESENT & \texttt{vnpay-ipn.controller.ts} \\ \hline
-\texttt{GET /payments/:paymentId/status} & GAP: NO BACKEND ROUTE & \texttt{payments.controller.ts} \\ \hline
-\texttt{POST /payments/zero-amount} & ROUTE PRESENT & \texttt{zero-amount-}\newline\texttt{payment.controller.ts} \\ \hline
-\texttt{POST /payments} (Mock) & ROUTE PRESENT & \texttt{payments.controller.ts} \\ \hline
-\texttt{GET /orders/me} & ROUTE PRESENT & \texttt{orders.controller.ts} \\ \hline
-Internal QueryDR & SERVICE PRESENT & \texttt{vnpay-querydr.service.ts} \\ \hline
+\texttt{POST /orders} & Có route & \texttt{orders.controller.ts} \\ \hline
+\texttt{POST /payments/vnpay/initiate} & Có route & \texttt{payments.controller.ts} \\ \hline
+\texttt{GET /payments/vnpay/ipn} & Có route & \texttt{vnpay-ipn.controller.ts} \\ \hline
+\texttt{GET /payments/:paymentId/status} & Chưa có route & \texttt{payments.controller.ts} \\ \hline
+\texttt{POST /payments/zero-amount} & Có route & \texttt{zero-amount-}\newline\texttt{payment.controller.ts} \\ \hline
+\texttt{POST /payments} (Mock) & Có route & \texttt{payments.controller.ts} \\ \hline
+\texttt{GET /orders/me} & Có route & \texttt{orders.controller.ts} \\ \hline
+Internal QueryDR & Có service & \texttt{vnpay-querydr.service.ts} \\ \hline
 \end{longtable}
 Đường dẫn đầy đủ đến source/test và scope kiểm chứng được ghi ở bảng
-R-03 trong tệp Markdown. Route Payment Status còn thiếu trong backend,
-frontend có consumer; phải giao cho task triển khai riêng. Source presence
+inventory trong tài liệu Use Case chuẩn. Route Payment Status còn thiếu trong
+backend; helper frontend tham chiếu route, còn UI hiện polling GET /orders/me.
+Quyết định khép gap cần được xử lý theo phạm vi được duyệt. Source presence
 không chứng minh behavior, integration tests hoặc Sandbox E2E đã PASS.
 
-\subsection{Phân biệt trạng thái đối soát (R-04)}
+\subsection{Phân biệt trạng thái đối soát}
 \texttt{REQUIRES\_REVIEW} là thông tin \emph{reconciliation} hoặc
 \emph{resolution} cho UI; không phải trạng thái mới của Order hay
 \texttt{Payment.status}. Trong tình huống sau Grace, Order có thể

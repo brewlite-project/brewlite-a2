@@ -1,6 +1,6 @@
 # BrewLite A2 — Repository Traceability Matrix
 
-> **Trạng thái SCRUM-117 (13/11/2026):** HEAD `91e6f99bfd02353616b2e481fe613b7ea91118af`, origin/dev `0e43bcb80f64d6a5fa558cd80f71a199029535d0`, branch SCRUM-117-production-release-delivery tại workspace chính. App/config trùng dev; chỉ 10 docs là delta task. PR17 open, draft=false, remote head 3543a55; cập nhật local chưa stage/push. §1–7 phía dưới là lịch sử theo SHA/ngày riêng; xem §8 cho hiện trạng.
+> **Snapshot lịch sử SCRUM-117 (13/11/2026):** HEAD `91e6f99bfd02353616b2e481fe613b7ea91118af`, origin/dev `0e43bcb80f64d6a5fa558cd80f71a199029535d0`, branch SCRUM-117-production-release-delivery tại workspace chính. App/config trùng dev; chỉ 10 docs là delta task. PR17 open, draft=false, remote head 3543a55; cập nhật local chưa stage/push. §1–7 phía dưới là lịch sử theo SHA/ngày riêng; xem §8 cho hiện trạng.
 
 
 
@@ -189,12 +189,32 @@ Ngày/giờ gốc và mapping CI/deploy/smoke ở [delivery §4/13](delivery/SCR
 
 **Cập nhật tiếp 14/11/2026:** HEAD91e6f99/dev0e43bcb giữ nguyên, 10 docs unstaged đầu vào được bảo toàn. Backend https://brewlite-a2-api-hntn.onrender.com/ có ảnh Render Auto-Deploy Live02452f2 (fullSHA02452f228712c3501c8d27f0f1ae737ad206785d), deployed field13/11/2026 08:39:19Z. GET mới / và /products200 lúc16:24:59Z ngày13/11, catalog9 items; GET không xuất processSHA. DB Free18/Singapore/1GB/Available, expiry10/12/2026; external3 /32 restricted, chưa private-only. Bỏ Edge/Computer Use theo yêu cầu; Người dùng đính chính ngày 14/11/2026: Leader chưa kiểm tra/nghiệm thu SCRUM-117. Evidence và các giới hạn tại dossier §14.
 
-[PDF báo cáo](report/output/main.pdf), [build/QA](report/README.md#kết-quả-build-và-qa-ngày-14112026), [dossier §14](delivery/SCRUM-117-delivery.md#14-evidence-render-backup-và-pdf--cập-nhật-14112026). AC2 VERIFIED snapshot HTTP/liveness/catalog; AC3 PARTIAL vì external còn3 /32 và Internal app usage chưa xác nhận. Requirement mapping không tự nâng thành acceptance; payment-status/QueryDR và manual reconciliation giữ mở.
+[PDF báo cáo](report/output/main.pdf), [build/QA](report/README.md#bản-pdf-hiện-hành), [dossier §14](delivery/SCRUM-117-delivery.md#14-evidence-render-backup-và-pdf--cập-nhật-14112026). AC2 VERIFIED snapshot HTTP/liveness/catalog; AC3 PARTIAL vì external còn3 /32 và Internal app usage chưa xác nhận. Requirement mapping không tự nâng thành acceptance; payment-status/QueryDR và manual reconciliation giữ mở.
 
 
 ## Báo cáo toàn đồ án A1 đến A2 — cập nhật14/11
 
-Bản tích hợp mới bổ sung dữ liệu/API/hiện thực, chiến lược test, Scrum theo mốc PR và đánh giá; giữ các section yêu cầu/sơ đồ có sẵn, chuyển8 AC/ảnh production sang phụ lục. [Nội dung đề → report](report/README.md#đối-chiếu-báo-cáo-toàn-đồ-án-với-đề-a2-v10); [baseline/evidence mới](delivery/SCRUM-117-delivery.md#15-tổng-hợp-toàn-đồ-án--baseline-mới-ngày14112026). HEAD/PR17 6ee4199, app dev0e43bcb; CI43543439775 là cho head đã commit, không cho thay đổi mới. Backend14/11 / và/products200; FEproxy timeout20s rồi retry200, không browser smoke. Leader chưa nghiệm thu.
+Bản tích hợp mới bổ sung dữ liệu/API/hiện thực, chiến lược test, Scrum theo mốc PR và đánh giá; giữ các section yêu cầu/sơ đồ có sẵn, chuyển8 AC/ảnh production sang phụ lục. [Nội dung đề → report](report/README.md#bản-pdf-hiện-hành); [baseline/evidence mới](delivery/SCRUM-117-delivery.md#15-tổng-hợp-toàn-đồ-án--baseline-mới-ngày14112026). Snapshot trước push: HEAD/PR17 6ee4199, app dev0e43bcb; CI43543439775 cho snapshot đó. Bản65 trang đã push21749cc/CI43587629629 SUCCESS; bổ sung hiện tại chưa có CI riêng. Backend14/11 / và/products200; FEproxy timeout20s rồi retry200, không browser smoke. Leader chưa nghiệm thu.
 
 
-Báo cáo/PDF đã tích hợp snapshot kế thừa audit§16 (14/11 10:31 UTC), giữ timeout trước và phân biệt HTTP với browser/DB/SHA verification; không nâng8AC. [PDF metadata và QA mới](report/README.md#pdf-tích-hợp-audit16); [nhật ký tích hợp](delivery/SCRUM-117-delivery.md#17-tích-hợp-audit16-vào-báo-cáo-và-pdf). CI6ee4199 chỉ cho bản đã commit.
+Báo cáo/PDF đã tích hợp snapshot kế thừa audit§16 (14/11 10:31 UTC), giữ timeout trước và phân biệt HTTP với browser/DB/SHA verification; không nâng8AC. [PDF metadata và QA mới](report/README.md#bản-pdf-hiện-hành); [nhật ký tích hợp](delivery/SCRUM-117-delivery.md#17-tích-hợp-audit16-vào-báo-cáo-và-pdf). CI6ee4199 là lịch sử53 trang; CI21749cc/43587629629 cho bản65 trang đã push.
+
+
+### Phân công A1–Phase2–A2
+
+[Bảng chuẩn104 issue](planning/BrewLite_Task_Allocation.md) và [phụ lục report](report/sections/task-allocation.tex) nối task với thành viên và tạo phẩm theo Jira/nguồn A1. Tổng102 Task/1 Subtask/1 Epic; không dùng Done hoặc số lượng task để suy test PASS, tỷ lệ đóng góp hay nghiệm thu. Không đổi coverage48FR/49NFR.
+
+
+### Cách trình bày theo hệ thống
+
+[Report hiện hành](report/README.md#bản-pdf-hiện-hành) tổ chức theo yêu cầu, thiết kế, hiện thực, kiểm thử, vận hành và quản lý dự án. Bảng phân công PDF dùng nhóm công việc; [nguồn104 issue](planning/BrewLite_Task_Allocation.md) giữ title/Sprint/giai đoạn gốc. Chỉ đổi cách trình bày, không thay mapping48FR/49NFR, kết quả test, SHA hoặc mức chứng minh8AC.
+
+
+### Use Case, ERD và minh họa giao diện trong PDF
+
+[Use Case tổng quát vector](report/assets/use-case-overview.pdf) giữ14 UC/4 actor/17 association; [ERD hiện hành](report/assets/database-erd.pdf) giữ13 bảng/15 FK từ schema. [Source/layout](diagrams/render_report_diagrams.cjs) và [provenance](diagrams/README.md#erd-lưu-trữ-và-use-case-tổng-quát-trong-báo-cáo) phục vụ đối chiếu yêu cầu/thiết kế, không là test runtime hoặc xác nhận DB production. Ảnh modal-bottom/404 local source34cbbc0 và mô tả hành trình UI bổ sung minh họa, không nâng coverage48FR/49NFR hay8AC.
+
+
+## Bản báo cáo trình nộp
+
+[PDF và nguồn/build](report/README.md#bản-pdf-hiện-hành) được biên tập theo hệ thống, không chứa checklist tám AC hoặc nhật ký tác nghiệp. Dossier giữ các kết luận kỹ thuật và trạng thái nghiệm thu; thay đổi hình thức PDF không nâng trạng thái requirement hoặc bằng chứng.
