@@ -1,5 +1,28 @@
 # Domain Class Diagram của BrewLite
 
+## ERD lưu trữ và Use Case tổng quát trong báo cáo
+
+Báo cáo dùng [ERD hiện hành dạng SVG](brewlite-database-erd.svg) và [PDF vector](../report/assets/database-erd.pdf), khác Domain Class Diagram bên dưới. ERD sinh từ `apps/api/prisma/schema.prisma` ở app baseline `0e43bcb80f64d6a5fa558cd80f71a199029535d0`: **13 bảng, 15 FK**; schema SHA256 `688B0B1512BC6AB1BEAA821CD16DB5E5090638DD82FEDE622201BF6B98E16799`. Hình hiển thị PK/FK, composite PK, nullable FK, unique FK và cardinality theo cấu trúc DB; không phải danh sách đầy đủ mọi cột hoặc kiểm tra database production. Một Order có thể có 0..1 CouponRedemption theo unique order_id; coupon_id của Order nullable. FK không tự buộc một Order phải có ít nhất một item; quy tắc tạo đơn nằm trong service/transaction.
+
+Các CHECK và partial unique indexes được đối chiếu SQL migrations, đặc biệt `20261021153059_extend_user_order_orderitem`, migration Payment và `20261031190100_scrum76_payment_gateway_delta`: một active Order/user, một SUCCESS Payment/order và một VNPAY PENDING/order; unique idempotency, TxnRef và gateway-event identity có phạm vi riêng. Không suy toàn bộ constraint từ Prisma hoặc biến Promotion/LoyaltyTransaction thành bảng đã có. SeedExecution là bảng marker độc lập.
+
+Đã đọc `database/schema.dbml`: bản đó có12 bảng, còn `inventory_movements` nhưng thiếu `payment_gateway_events`/`seed_executions` so với Prisma hiện hành; phần Payment cũng là thiết kế cũ. DBML delta trong archive ghi Proposed Design/chưa migrate tại thời điểm soạn. Các nguồn này giữ provenance và không bị sửa; không dùng chúng làm ERD hiện trạng hoặc kết quả DB đã triển khai.
+
+[Use Case report layout SVG](../requirements/diagrams/use-case-overview-report.svg) và [PDF vector](../report/assets/use-case-overview.pdf) giữ đúng **4 actor, 14 UC, 17 association** của [PlantUML chuẩn](../requirements/diagrams/use-case-overview.puml), SHA256 `58002CFAFDFF0F532AFDEBC67BDA3959AAA9AEA30BDA3E04469EC530C42DA136`. Chỉ đổi bố cục để đọc trên A4, không đổi actor/quan hệ hoặc mở Customer Cancel. Bản trình nộp dùng chú thích mô hình gọn; phạm vi coupon/QueryDR và các kết luận kỹ thuật giữ trong SRS/dossier, không nâng mức hoàn thành.
+
+Nguồn có thể chỉnh sửa: [render_report_diagrams.cjs](render_report_diagrams.cjs), chỉ dùng Node built-ins, không truy cập network/DB. Từ repository root:
+
+```powershell
+node docs/diagrams/render_report_diagrams.cjs
+# Chọn mutool đã cài/portable trên máy; không cần đưa executable vào repo.
+mutool convert -F pdf -o docs/report/assets/use-case-overview.pdf docs/requirements/diagrams/use-case-overview-report.svg
+mutool convert -F pdf -o docs/report/assets/database-erd.pdf docs/diagrams/brewlite-database-erd.svg
+```
+
+SVG yêu cầu Arial/sans-serif; MuPDF1.28.5 xuất text/đường vector và nhúng Helvetica/Helvetica-Bold cùng Noto Serif để phủ ký tự tiếng Việt. `mutool info -F -I` xác nhận fonts và không có image objects trong hai PDF diagram; không raster hóa sơ đồ. Nếu `mutool` chưa nằm PATH, gọi đường dẫn executable riêng của máy. LaTeX chỉ cần hai PDF đã lưu trong repo, không phụ thuộc Downloads, repo A1 hoặc phải chạy lại generator. Khi schema/PUML đổi, review layout và cardinality trước khi cập nhật exports; generator dừng nếu topology13/15 hoặc4/14/17 đổi. Kết quả QA bản report thực tế nằm ở [report README](../report/README.md#bản-pdf-hiện-hành).
+
+## Domain Class Diagram — nguồn và tạo phẩm
+
 | Thuộc tính | Giá trị |
 | --- | --- |
 | Task | SCRUM-105 / A2-T2.3 |
@@ -192,3 +215,15 @@ Fixture tự chọn đường dẫn tương đối; bản xuất kiểm chứng 
 - Kiểm chứng fragment LaTeX bằng fixture A4 và render PDF tích hợp; kết quả chi tiết tại bản xử lý review §4. Việc import/chỉnh sửa qua UI Draw.io và ghép template báo cáo cuối vẫn cần reviewer kiểm tra trong môi trường của nhóm.
 
 **Trước nghiệm thu:** reviewer kiểm tra bản xử lý vòng 1, xác nhận nguồn/hình và bản ghép LaTeX. PR #5 đã mở với base `dev`; thay đổi follow-up cần commit/push sau khi người dùng cho phép, rồi review lại trước merge. Không tự ghi Jira Done hoặc tạo bằng chứng approval/merge.
+
+
+## Hình mô hình miền dùng cho bản trình nộp
+
+Generator Node tạo hai bản SVG trình bày từ source domain hiện có: `docs/report/assets/domain-class-report.svg`, `domain-types-report.svg`, chỉ thay banner DRAFT/pending review bằng tên mô hình. Lớp, thuộc tính, quan hệ và chú thích nghiệp vụ không đổi; SVG/PDF canonical phía trên giữ nguyên làm provenance. Hai trang vector được ghép vào `docs/report/assets/domain-model-report.pdf`, dùng qua macro BrewLiteDomainReportPdf của main.tex.
+
+```powershell
+node docs/diagrams/render_report_diagrams.cjs
+mutool convert -F pdf -o docs/report/assets/domain-model-report.pdf docs/report/assets/domain-class-report.svg docs/report/assets/domain-types-report.svg
+```
+
+Bỏ nhãn tác nghiệp trong bản trình nộp không thay quyết định review hoặc nghiệm thu của nguồn thiết kế.

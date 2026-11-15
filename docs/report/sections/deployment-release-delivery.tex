@@ -1,0 +1,148 @@
+% SCRUM-117. Canonical sources: deployment.md and delivery dossier, audit 13/11/2026.
+\section{Chiến lược và kết quả kiểm thử}
+\label{sec:a2-implementation-tests}
+\subsection{Mục tiêu, mức kiểm thử và môi trường}
+Chiến lược kiểm thử tập trung vào rủi ro tài chính và toàn vẹn: tính giá,
+ownership, idempotency, stock/coupon concurrency, payment finalization và
+callback trùng/trễ. Unit test kiểm hàm/policy có cô lập; integration test kiểm
+tương tác service/API và transaction; E2E HTTP kiểm boundary request/response.
+E2E HTTP/JSDOM không tự thay browser end-to-end menu--confirmation hoặc giao
+dịch thật với Sandbox.
+
+API có scripts test:unit, test:integration, test:e2e tại apps/api; web có
+test:unit/test tại apps/web. CI Node24 chạy npm ci, lint, unit và build, API
+generate Prisma trước test; Docker dùng Node26. PostgreSQL opt-in phải dùng
+DB A2 cô lập theo hướng dẫn test, không production/A1. Seed có thể tái tạo fixture nhưng
+không chứng minh fresh-database setup đã được kiểm thử.
+
+Test inventory gồm auth/products/orders, inventory PostgreSQL, coupon,
+payment/idempotency/finalization concurrency, IPN--QueryDR và reconciliation;
+web có checkout/payment/history/confirmation UI suites. CI web test:unit
+không chứa payment-confirmation-flow.test.ts dù script test có file đó.
+Vì vậy tên Unit tests hoặc CI xanh không có nghĩa mọi test trong repo đều chạy.
+
+\subsection{Kết quả kiểm thử kế thừa theo source}
+Nguồn SCRUM94 trong archive, được PR143 đưa vào tag A1-final, ghi các lượt
+chạy06--07/11/2026 (Asia/Bangkok). Runtime/test source là
+\path{fb293e2ac35c0fe29fbe3573bf5edf81b7a586a0}, không phải SHA tag1951dc1.
+Môi trường host Windows/Node22.18/npm10.9.3, Docker Desktop4.97/Engine29.9.2/
+Compose5.6.1; test container Node26.13 và PostgreSQL18.
+
+API unit300 PASS; API E2E227 PASS; selected integration147 passed/10 skipped;
+concurrency83 PASS là lượt riêng, không cộng trùng suite. Frontend174/174
+PASS trong Docker DB-guard rerun; lượt host trước đó có172 passed/2 cancelled
+và exit1; kết quả rerun được ghi riêng với điều kiện thực thi của nó.
+
+Kiểm coupon/migrate tại \texttt{eef344c24fedd7480d06c085da3fff298def90d4}
+khác lượt runtime nói trên. Compose verifier post-sync tại checkout
+\texttt{304a7c6}, code/dev merge \texttt{dba36a5c31ea07e88b2201e3c8ffd6b345720afa},
+chạy isolated test profile với VNPay config synthetic, không gọi gateway.
+Default Compose từng bị chặn thiếu VNPAY\_TMN\_CODE; verifier PASS sau đó
+không chứng minh default/Sandbox đã hết lỗi. Các số liệu này là evidence
+kế thừa A1/Phase2, không phải kết quả chạy lại trên phiên bản mới.
+
+PR145 báo manual regression catalog9 sản phẩm, Auth7/7 và Order/VNPay Sandbox/
+History đạt trong phạm vi PR; QueryDR Sandbox E2E vẫn deferred, payment-status
+route còn gap và chưa public production tại mốc A1. ADR về IPN Sandbox có
+phạm vi/ngày riêng, không thay kiểm thử QueryDR lost-IPN.
+Nguồn đầy đủ: \path{docs/a1-archive/verification/SCRUM94_Verification_Evidence.md}
+và PR143/145 của repository A1 \cite{a1repo}.
+
+\subsection{Kết quả MVP Sprint1 và giao diện lịch sử}
+Report SCRUM-112 kiểm source
+\path{34cbbc088117d7a4908d07a66cfbd03b0c905dea}, report vòng1
+\path{ffbaeeb3afece5d491e25e494b099496e8234ccd}.
+Report ghi API unit325, Products HTTP E2E11 và web166, tổng502/502 PASS;
+Prisma validate/build PASS. API lint1 warning, web23 warnings.
+Môi trường browser local là localhost:3000/API127.0.0.1:3001,
+viewport320x640,375x812,768x1024; report không ghi thời điểm chạy và OS riêng.
+Các ảnh ở hình\ref{fig:historical-ui} thuộc report này.
+
+Báo cáo kiểm thử ghi nhận sai khác rounding dù các bài kiểm thử đã chạy đạt. Kết quả giao diện dùng Next.js16.3.8, khác bản16.4.6 trong source hiện hành; vì vậy số liệu được giữ theo môi trường gốc.
+
+\subsection{Tổng hợp kiểm thử tích hợp}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.24\linewidth}p{0.66\linewidth}}
+\caption{Kết quả kiểm thử theo phiên bản và môi trường}\label{tab:test-results}\\
+\toprule Nguồn và môi trường & Kết quả và phạm vi \\ \midrule\endfirsthead
+\toprule Nguồn và môi trường & Kết quả và phạm vi (tiếp) \\ \midrule\endhead
+PR25, source \texttt{2216b7a}, báo cáo ngày13/11/2026 & Bộ focused tests 38/38; Vitest 479 đạt, 6 bài PostgreSQL opt-in bỏ qua; TypeScript và build đạt. Nguồn chưa ghi thời điểm và môi trường riêng của mỗi lượt; các bài bỏ qua không được tính đạt. \\
+PR26, backend Render source \texttt{2216b7a}, frontend Vercel & Báo cáo giao dịch Sandbox cho thấy Order PAID, Payment SUCCESS và loyalty +10 qua Order History. Kết quả giới hạn ở kịch bản được báo cáo; không suy thành kiểm thử độc lập mọi nhánh IPN hoặc QueryDR. \\
+CI ứng dụng, source \texttt{0e43bcb}, 13/11/2026 & API và Web hoàn tất install, lint, unit test và build trên Node24. Pipeline không chạy browser E2E, migration production hoặc build báo cáo LaTeX. \\
+HTTP public, 14/11/2026, 10:31 UTC & Frontend, proxy catalog, backend liveness và catalog trả200; catalog có9 sản phẩm. Đây là kiểm tra khả năng truy cập và dữ liệu trả về, không phải luồng đặt hàng E2E. \\
+\bottomrule\end{longtable}
+
+Các kết quả trên được tổng hợp từ báo cáo kiểm thử và dữ liệu CI của dự án,
+không phải các lượt chạy mới trong quá trình biên tập tài liệu. Phạm vi unit,
+integration, HTTP E2E và Sandbox được phân biệt để tránh cộng trùng hoặc suy
+rộng kết quả. Các hạn chế còn ảnh hưởng đến kết luận được tổng hợp ở
+mục\ref{sec:limitations}.
+
+\section{Triển khai, vận hành và bảo trì}
+\label{sec:deployment-release-delivery}
+\subsection{Mô hình triển khai và khả năng truy cập}
+Frontend được cung cấp tại \url{https://brewlite-a2-three.vercel.app/}; backend
+tại \url{https://brewlite-a2-api-hntn.onrender.com/}. Next.js trên Vercel chuyển
+yêu cầu qua Route Handler tới NestJS trên Render. PostgreSQL được quản lý
+trên Render; mô hình mục tiêu sử dụng kết nối nội bộ giữa API và database.
+
+Ảnh triển khai ngày13/11/2026 ghi Render Auto-Deploy thành công, source
+\texttt{02452f228712c3501c8d27f0f1ae737ad206785d}, thời điểm15:39:19 GMT+7.
+Dashboard database tại mốc này ghi PostgreSQL18, Singapore, dung lượng1GB,
+gói Free và hạn sử dụng10/12/2026. Đây là thông tin tại thời điểm ghi nhận,
+không phải cam kết dịch vụ liên tục.
+
+Kiểm tra HTTP ngày14/11/2026 lúc10:31 UTC cho kết quả frontend, proxy
+\path{/api/backend/products}, backend \path{/} và \path{/products} đều trả200;
+catalog trả JSON gồm9 sản phẩm. Một lượt proxy trước đó bị timeout rồi lần
+kiểm tra sau thành công; chưa xác định nguyên nhân timeout. \path{GET /}
+trả Hello World! là liveness, không truy vấn database. \path{GET /products}
+đọc catalog qua ProductsService và Prisma. Hai phép kiểm tra có mục đích
+khác nhau và không thay kiểm thử hành trình trình duyệt.
+
+\subsection{Cấu hình và tích hợp liên tục}
+Ứng dụng tổ chức thành \path{apps/web} và \path{apps/api}, mỗi app có lockfile
+và scripts riêng. CI dùng Node24; Docker dùng Node26. Pipeline cài dependency
+bằng npm ci, lint, unit test và build; API generate Prisma trước khi chạy.
+Render có cấu hình Auto-Deploy sau CI theo hồ sơ triển khai. Việc triển khai
+cần lưu phiên bản ứng dụng và migration tương ứng để hỗ trợ truy vết sự cố.
+
+Secrets như DATABASE\_URL, JWT signing key và VNPay HashSecret được quản lý
+tại backend/platform, không lưu trong repository hoặc đưa vào frontend.
+Tên BACKEND\_INTERNAL\_URL chỉ là tên biến cấu hình proxy; không chứng minh
+đường truyền giữa Vercel và Render là mạng riêng.
+
+\subsection{Migration và dữ liệu khởi tạo}
+Source có10 migrations. Script db:migrate thực thi Prisma migrate deploy,
+áp dụng migration có sẵn, có thể thay cấu trúc database nhưng không sinh
+file migration mới. Docker target migrate chứa CLI, schema và config;
+runtime image chứa dist và dist-seed, không chứa Prisma CLI. Runner migration
+phải có kết nối database thích hợp và ghi log status--deploy--status.
+
+Seed local dùng database demo, upsert catalog9 sản phẩm cùng metadata/giá,
+giữ stock và không xóa order. Seed Render riêng mặc định dry-run, kiểm tra
+đúng target và yêu cầu bước Apply có kiểm soát. Fixture gồm4 categories,
+5 toppings,9 products,13 product--topping links và5 coupons. Marker
+\texttt{render-demo-v1} trong seed\_executions được ghi cùng transaction;
+nếu marker tồn tại mà dữ liệu sai lệch, quy trình dừng để đối chiếu thay vì
+xóa marker và chạy lại tùy tiện.
+
+\subsection{Sao lưu, phục hồi và rollback}
+Rollback ứng dụng cần một artifact cũ còn khả dụng và tương thích API,
+schema, biến môi trường. Vercel Instant Rollback phụ thuộc deployment đủ
+điều kiện; Render rollback phụ thuộc artifact được giữ lại và cấu hình
+Auto-Deploy \cite{renderdeploy,vercelrollback}. Sau rollback cần kiểm tra
+liveness, catalog và các luồng nghiệp vụ bị tác động.
+
+Rollback code không đảo migration hoặc phục hồi dữ liệu. Phục hồi database
+cần backup, đích cô lập và kiểm tra dữ liệu trước khi chuyển kết nối.
+Runbook mô tả pg\_dump/pg\_restore phù hợp PostgreSQL18, quản lý credential
+qua môi trường, tách backup đã tạo với backup đã thử phục hồi. Với database
+có thời hạn, dữ liệu cần được bảo toàn hoặc chuyển sang tài nguyên phù hợp
+trước ngày hết hạn; hướng dẫn không đồng nghĩa thao tác đó đã được thực hiện.
+
+\subsection{Bảo trì và bàn giao}
+Theo dõi liveness, catalog, lỗi API, expiry và reconciliation sau restart
+giúp phát hiện lỗi vận hành. Scheduler chạy trong NestJS process nên chịu
+ảnh hưởng khi service sleep hoặc ngừng hoạt động. Thay đổi cần kiểm tra
+tương thích API/schema, chạy CI và cập nhật runbook. Quyền vận hành được
+bàn giao qua membership của nền tảng; secrets dùng cơ chế quản lý riêng.

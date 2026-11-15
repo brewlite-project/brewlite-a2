@@ -1,0 +1,178 @@
+% !TeX program = pdflatex
+% Báo cáo đồ án BrewLite. Compile from repository root.
+% Layout adapted from SGU Assignment_report.tex; see docs/report/README.md.
+\pdfminorversion=7
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[utf8]{vntex}
+\usepackage[margin=22mm,headheight=30pt]{geometry}
+\usepackage{amsmath,amssymb,array,longtable,booktabs,tabularx}
+\usepackage{graphicx,pdflscape,fancyhdr,lastpage}
+\usepackage{seqsplit,xurl}
+\usepackage[expansion=false]{microtype}
+\SetProtrusion{encoding=T5,family=cmtt}{}
+\usepackage[unicode,hidelinks]{hyperref}
+\NewCommandCopy{\BrewLiteOriginalTexttt}{\texttt}
+\DeclareRobustCommand{\texttt}[1]{%
+  \ifnum\pdfmatch{^[ -~]*$}{\detokenize{#1}}=1\relax
+    \BrewLiteOriginalTexttt{\seqsplit{#1}}%
+  \else
+    \BrewLiteOriginalTexttt{#1}% Preserve multibyte Vietnamese characters.
+  \fi}
+\pdfstringdefDisableCommands{\def\texttt#1{#1}}
+\setlength{\emergencystretch}{3em}
+\setlength{\tabcolsep}{4pt}
+\hypersetup{pageanchor=false}
+\hypersetup{pdftitle={Báo cáo đồ án BrewLite},pdfauthor={BrewLite team}}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Trường Đại học Sài Gòn -- Khoa Công nghệ Thông tin}
+\fancyfoot[L]{\small Báo cáo đồ án BrewLite}
+\fancyfoot[R]{\small Trang \thepage/\pageref{LastPage}}
+\setcounter{tocdepth}{2}
+\newcommand{\BrewLiteDiagramDir}{docs/diagrams}
+\newcommand{\BrewLiteDomainReportPdf}{docs/report/assets/domain-model-report.pdf}
+\newcommand{\BrewLiteSeqDiagramDir}{docs/report/assets}
+\begin{document}
+\begin{titlepage}
+\begin{center}
+TRƯỜNG ĐẠI HỌC SÀI GÒN\\
+KHOA CÔNG NGHỆ THÔNG TIN
+\par\vspace{10mm}
+\includegraphics[width=3cm]{docs/report/assets/logoITSGU.png}
+\par\vspace{10mm}
+
+{\Large CÔNG NGHỆ PHẦN MỀM\par}
+\vspace{12mm}
+{\Huge\bfseries BrewLite\par}
+\vspace{8mm}
+{\Large Assignment 2\par}
+{\large Báo cáo đồ án BrewLite\par}
+\vspace{10mm}
+
+\begin{tabular}{ll}
+GVHD: & Từ Lãng Phiêu\\
+Học phần / Nhóm: & 841047 / 03\\
+Học kỳ: & I -- Năm học 2026--2027\\
+Nguyễn Châu Hoàng Khang & 3124410143\\
+Cao Nguyễn Quốc Khánh & 3124410149\\
+Nguyễn Khải Hoàng & 3124410106\\
+Nguyễn Đăng Thụy & 3124410352\\
+Hoàng Văn Lập & 3124410184\\
+Lâm Chí Khang & 3124410142\\
+Ngày cập nhật: & 15/11/2026\\
+
+\end{tabular}
+\end{center}
+\vfill
+\end{titlepage}
+\hypersetup{pageanchor=true}
+\section*{Tóm tắt đồ án}
+BrewLite là ứng dụng đặt đồ uống cho một cửa hàng, hỗ trợ hành trình menu,
+chọn size/topping, giỏ hàng, xác thực, tạo đơn, thanh toán và theo dõi đơn.
+Báo cáo trình bày BrewLite như một hệ thống phần mềm: bài toán/yêu cầu,
+mô hình hóa, kiến trúc và dữ liệu/API, hiện thực frontend--backend, kiểm thử,
+triển khai, quản lý Scrum và đánh giá. Hệ thống dùng Next.js, NestJS và
+PostgreSQL/Prisma; backend quyết định giá, ownership và kết quả thanh toán.
+
+Báo cáo sử dụng đặc tả yêu cầu, mô hình thiết kế, mã nguồn và kết quả kiểm thử để phân tích hệ thống. Kết quả được diễn giải trong phạm vi môi trường thực nghiệm; những hạn chế về tích hợp thanh toán, khả dụng và vận hành được tổng hợp trong chương kết luận.
+\clearpage
+\begingroup\small
+\tableofcontents
+\endgroup
+\clearpage
+\listoffigures
+\clearpage
+\listoftables
+\clearpage
+\input{docs/report/sections/context-and-scope.tex}
+\clearpage
+\input{docs/report/sections/requirements-summary.tex}
+\clearpage
+\input{docs/report/sections/checkout-use-case.tex}
+\clearpage
+\input{docs/report/sections/activity-diagram.tex}
+\clearpage
+\input{docs/report/sections/sequence-diagram.tex}
+\clearpage
+\section{Thiết kế kiến trúc và mô hình miền}
+Mô hình miền thể hiện cấu trúc và quan hệ nghiệp vụ. Sơ đồ triển khai mô tả kiến trúc mục tiêu; cấu hình và kết quả truy cập dịch vụ thực tế được trình bày trong chương vận hành.
+\subsection{Phân lớp, domain boundaries và quyết định kiến trúc}
+Theo Architecture Overview/SCRUM-107, một Next.js frontend giao tiếp REST/JSON
+với một NestJS modular monolith. Auth, Products, Orders, Payments và Coupons
+là các module trong cùng AppModule; không phải các microservice triển khai
+độc lập. Controller/DTO/Guard là HTTP boundary, Service điều phối nghiệp vụ,
+Prisma là persistence boundary chung. Expiration và reconciliation chạy trong
+NestJS process, vì vậy phụ thuộc availability của backend.
+
+Thiết kế giữ một transaction boundary PostgreSQL cho tạo đơn, inventory,
+coupon, payment finalization và loyalty. Đây là lựa chọn phù hợp quy mô hiện
+tại: giảm chi phí điều phối phân tán nhưng làm backend deployment/process trở
+thành availability boundary chung. Không suy ra khả năng scale nhiều instance
+hoặc scheduler luôn chạy chỉ từ cấu trúc module.
+
+\begin{longtable}{p{0.24\linewidth}p{0.65\linewidth}}
+\caption{Các quyết định kiến trúc ADR001–005}\label{tab:auto-main-1}\\
+\toprule
+ADR nguồn & Quyết định và giới hạn kế thừa \\
+\midrule
+001 & Modular monolith/domain modules, cùng process và DB transaction
+boundary. Tách microservices không được chọn cho scope hiện tại. \\
+002 & Prisma mô tả ORM; SQL migrations giữ physical schema và partial
+indexes/CHECK constraints. API Contract giữ vai trò hợp đồng giao tiếp HTTP. \\
+003 & Giữ shared payment finalization và tính nhất quán; Return URL
+không tự xác nhận thành công; uncertain outcome không đồng nghĩa FAILED. \\
+004 & Cô lập tài nguyên và cấu hình giữa các môi trường phát triển, kiểm thử và triển khai. \\
+005 & Kiến trúc mục tiêu sử dụng Vercel và Render; cấu hình thực tế được đối chiếu trong chương vận hành. \\
+\bottomrule
+\end{longtable}
+Nguồn thiết kế: \path{docs/architecture/architecture.md} và ADR001--005. Hình\ref{fig:brewlite-domain-class} mô tả miền nghiệp vụ; ERD ở Hình\ref{fig:database-erd} mô tả mô hình lưu trữ hiện hành. Hình\ref{fig:brewlite-deployment} biểu diễn topology mục tiêu.
+\input{docs/diagrams/domain-class-figure.tex}
+\input{docs/diagrams/deployment-figure.tex}
+\clearpage
+\input{docs/report/sections/data-api-implementation.tex}
+\clearpage
+\input{docs/report/sections/deployment-release-delivery.tex}
+\clearpage
+\input{docs/report/sections/project-evaluation.tex}
+\clearpage
+\appendix
+\section{Nguồn tài liệu và truy vết}
+\label{sec:report-provenance}
+Đặc tả yêu cầu và quy tắc nghiệp vụ được kế thừa từ bộ tài liệu BrewLite tại tag
+\texttt{A1-final}, commit \path{1951dc124c83359556f04adb6ba3f0ee9f22fce4}.
+Mô tả hiện thực đối chiếu source ứng dụng \texttt{0e43bcb}; kết quả kiểm thử giữ
+phiên bản và môi trường riêng trong chương kiểm thử. Không đồng nhất thời điểm
+thu thập tài liệu với thời điểm thực thi kiểm thử.
+
+Ma trận \path{docs/traceability-matrix.md} liên kết 48 dòng yêu cầu chức năng và
+49 dòng yêu cầu phi chức năng với use case, thiết kế, API, source và test inventory.
+Tài liệu vận hành ở \path{docs/deployment.md}; nhật ký kiểm chứng và lịch sử
+phiên bản ở \path{docs/delivery/SCRUM-117-delivery.md}. Các tài liệu nguồn được
+giữ trong repository để tra cứu; báo cáo tập trung trình bày hệ thống và kết quả.
+\clearpage
+\input{docs/report/sections/task-allocation.tex}
+\clearpage
+\begin{thebibliography}{9}
+\bibitem{a1repo} BrewLite, \emph{Repository A1/Phase2}, tag A1-final,
+\path{1951dc124c83359556f04adb6ba3f0ee9f22fce4}.
+\href{https://github.com/brewlite-project/brewlite/tree/1951dc124c83359556f04adb6ba3f0ee9f22fce4}{Nguồn GitHub bất biến};
+README, Phase2 report draft, SCRUM94 evidence và PR143/145 đọc ngày14/11/2026.
+\bibitem{a1report} Nhóm 03, \emph{BrewLite Assignment 1 -- Báo cáo giữa kỳ}.
+\href{https://docs.google.com/document/d/1A43E5hJ4HEl6do7-Z0BYhmbKJVVgQsMdBOhCl7INyoY/edit}{Google Docs nguồn A1},
+đọc text ngày 13/11/2026; dùng roster/nền tảng, không evidence nghiệm thu A2.
+\bibitem{a2brief} SGU, \emph{BrewLite Assignment 2 -- Requirements to Deployment}, v1.0.
+\href{https://drive.google.com/file/d/1CYVsexpTXZ6Uyg2FHMRE8lnJHSPkYQmi/view}{Đề A2 nguồn Drive},
+đọc lại ngày 14/11/2026, đặc biệt mục 7.2--7.4, 8.1, 9.1.
+\bibitem{a2repo} BrewLite, \emph{Repository A2},
+\url{https://github.com/brewlite-project/brewlite-a2}.
+Source ứng dụng đối chiếu tại \texttt{dev/0e43bcb}; evidence giữ SHA riêng.
+\bibitem{renderdeploy} Render, \emph{Deploys và Rollbacks},
+\url{https://render.com/docs/deploys},
+\url{https://render.com/docs/rollbacks}; đọc 13/11/2026, chưa xác minh tier/target thực.
+\bibitem{vercelrollback} Vercel, \emph{Instant Rollback},
+\url{https://vercel.com/docs/instant-rollback}; đọc 13/11/2026,
+chưa xác minh quyền/eligible target của project.
+\end{thebibliography}
+\end{document}

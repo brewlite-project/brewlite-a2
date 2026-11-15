@@ -1,0 +1,87 @@
+\section{Quản lý dự án và phân công nhiệm vụ}
+\label{sec:scrum}
+\subsection{Phương pháp tổ chức công việc}
+BrewLite sử dụng backlog để liên kết yêu cầu với các nhiệm vụ phân tích,
+thiết kế, frontend, backend, database, kiểm thử, triển khai và tài liệu.
+Mã task hỗ trợ truy vết tạo phẩm; branch và pull request quản lý thay đổi,
+CI cung cấp phản hồi sớm về lint, unit test và build. Tiêu chí chất lượng
+của increment bao gồm chức năng, test và tài liệu liên quan.
+
+\subsection{Phân công nhiệm vụ và đóng góp của các thành viên}
+Nguồn phân công là export Jira104 issue, đối chiếu họ tên qua task trong
+báo cáo nhóm \cite{a1report}. Bảng dưới tóm tắt phạm vi công việc của sáu thành viên;
+Phụ lục\ref{sec:task-allocation} liệt kê riêng từng issue và tạo phẩm. Nhóm công việc
+phục vụ trình bày, không thay assignee hoặc ý nghĩa nhiệm vụ và không đo tỷ lệ đóng góp.
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.31\linewidth}>{\raggedright\arraybackslash}p{0.51\linewidth}r}
+\caption{Phạm vi công việc theo thành viên}\label{tab:allocation-summary}\\
+\toprule Thành viên & Nhóm công việc được giao & Số Task \\ \midrule\endfirsthead
+\toprule Thành viên & Nhóm công việc được giao (tiếp) & Số Task \\ \midrule\endhead
+Nguyễn Châu Hoàng Khang & Yêu cầu, Thiết kế, Backend, Database, Kiểm thử, Triển khai, Tài liệu, Quản lý dự án & 26 \\
+Cao Nguyễn Quốc Khánh & Thiết kế, Frontend, Kiểm thử, Triển khai & 14 \\
+Nguyễn Khải Hoàng & Yêu cầu, Backend, Kiểm thử, Triển khai, Tài liệu & 17 \\
+Nguyễn Đăng Thụy & Yêu cầu, Backend, Database, Kiểm thử, Tài liệu & 18 \\
+Hoàng Văn Lập & Thiết kế, Frontend, Kiểm thử & 16 \\
+Lâm Chí Khang & Thiết kế, Backend, Database & 11 \\
+\midrule Tổng & &102\\\bottomrule\end{longtable}
+Ngoài102 Task còn Epic SCRUM-98 được giao Nguyễn Châu Hoàng Khang và
+Subtask SCRUM-4 chưa phân công; tổng104 issue duy nhất. Tên nhiệm vụ và
+Sprint/giai đoạn gốc được giữ trong bảng đối chiếu Markdown.
+
+\subsection{Phối hợp và kiểm soát chất lượng}
+Các thành viên phối hợp thông qua đặc tả API, mô hình dữ liệu và pull request.
+Thay đổi ở frontend và backend cần được đối chiếu cùng hợp đồng giao tiếp;
+thay đổi schema được quản lý bằng migration. Việc phân công trong Jira phản
+ánh trách nhiệm được giao, không khẳng định một người thực hiện toàn bộ
+công việc hoặc mọi nhiệm vụ đã hoàn tất. Không suy tỷ lệ đóng góp từ số issue.
+
+\section{Kết luận, hạn chế và hướng phát triển}
+\label{sec:evaluation}
+\subsection{Kết quả đạt được}
+BrewLite hình thành một hệ thống đặt đồ uống với các tạo phẩm liên kết từ
+đặc tả, mô hình hóa đến source, kiểm thử và hướng dẫn vận hành. Frontend hỗ trợ
+menu, cấu hình món, giỏ hàng, xác thực, thanh toán và lịch sử; backend xử lý
+giá, quyền sở hữu, transaction, tồn kho và trạng thái thanh toán. Prisma cùng
+SQL migrations mô tả dữ liệu và các ràng buộc toàn vẹn; unit/integration tests
+và CI hỗ trợ kiểm tra thay đổi.
+
+Các kết quả thực nghiệm cho thấy những bộ kiểm thử và kịch bản được ghi nhận
+có thể thực thi trong môi trường nguồn; dịch vụ public đã trả dữ liệu catalog
+ở thời điểm kiểm tra. Kết quả này có giá trị trong phạm vi đã mô tả, không
+suy thành mọi điều kiện vận hành hoặc mọi hành trình người dùng đều thành công.
+
+\subsection{Hạn chế}
+\label{sec:limitations}
+\begin{itemize}
+\item Hợp đồng payment-status có route chưa hiện thực ở backend; giao diện
+hiện lấy trạng thái qua GET /orders/me. Giá preview frontend và backend có
+sai khác rounding với một số giá lẻ. Coupon preview đã có source nhưng phạm
+vi sản phẩm còn khác nhau giữa các tài liệu đặc tả.
+\item Kết quả thanh toán Sandbox được ghi nhận cho một kịch bản. Chưa đủ
+kết quả riêng cho QueryDR Sandbox/lost-IPN, mọi nhánh IPN và luồng trình duyệt
+đầu-cuối; một giao dịch trong báo cáo nguồn còn cần đối soát tài chính.
+\item Giao diện responsive chưa cung cấp đầy đủ manifest/service worker
+để kết luận khả năng cài đặt PWA. Chưa có đo tải, độ sẵn sàng liên tục hoặc
+đánh giá bảo mật định lượng.
+\item Cấu hình database lịch sử giới hạn external access bằng3 IP /32,
+không phải private-only. Việc backend sử dụng kết nối Internal thực tế,
+chuỗi migration, backup đã thử phục hồi và rollback thực tế chưa có đủ
+kết quả để đánh giá toàn diện. Hạn database theo dashboard lịch sử là
+10/12/2026, đặt ra yêu cầu bảo toàn dữ liệu cho vận hành tiếp theo.
+\item Nguồn hiện có chưa cung cấp video demo toàn luồng và biên bản
+Sprint Review/Retrospective cuối. Vì vậy báo cáo không tính velocity hoặc
+tỷ lệ hoàn thành từ lịch Sprint dự kiến; không suy diễn feedback hay kết quả họp.
+\end{itemize}
+
+\subsection{Hướng phát triển}
+Ưu tiên hoàn thiện hợp đồng trạng thái thanh toán, thống nhất rounding và
+kiểm thử tích hợp gateway với tình huống mất thông báo hoặc timeout. Nâng
+độ tin cậy vận hành cần quản lý scheduler phù hợp mô hình hosting, kiểm tra
+phục hồi dữ liệu và đo hiệu năng trên workload xác định. Có thể phát triển
+PWA, tăng bảo vệ phiên đăng nhập và mở rộng khả năng quan sát sau khi đánh
+giá yêu cầu và chi phí. Các hướng này là đề xuất phát triển, không phải
+chức năng đã triển khai.
+
+Ma trận truy vết và nguồn ở phụ lục\ref{sec:report-provenance} hỗ trợ đối
+chiếu kết quả với yêu cầu. Báo cáo cung cấp cơ sở kỹ thuật để đánh giá và
+tiếp tục phát triển BrewLite trong phạm vi đồ án.
