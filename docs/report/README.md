@@ -51,7 +51,17 @@ Không đóng gói .env, credential, node_modules, .git, log/render hoặc CSV a
 
 ## Bản PDF hiện hành
 
-**[PDF cuối](output/main.pdf): 70 trang vật lý, 19 hình, 24 bảng, 4,589,955 bytes; SHA256 `006997E90EE869B8AFBABC68B40AC0BEF87E7C3151404DCF5C1D8F77A784C574`.**
+**[PDF hiện hành](output/main.pdf): 71 trang vật lý, 19 hình, 25 bảng, 4,592,744 bytes; SHA256 `23E1BD2631B4C5A879BFFF9D952D7E70B48F1C1977A8AAB9AA02D91A612B1BA8`.**
+
+Biên tập tiếp theo: bỏ hai đoạn dẫn nguồn/phân biệt tạo phẩm ở đầu phụ lục B theo yêu cầu người dùng; giữ bảng tỷ lệ và các bảng task. Build lại hai lượt exit 0, không cảnh báo tham chiếu hoặc Overfull; đã render và kiểm tra trang PDF 58 sau khi xóa. Nguồn phân công vẫn được lưu trong tài liệu Markdown.
+
+Bổ sung ngày 15/11/2026: Bảng 18 ở đầu phụ lục B, trang in 57 (trang PDF 58), tổng hợp phần việc và tỷ lệ đóng góp đề xuất theo bảng người dùng cung cấp: Nguyễn Châu Hoàng Khang 22%, Nguyễn Khải Hoàng 19%, Nguyễn Đăng Thụy 16%, Hoàng Văn Lập 13%, Cao Nguyễn Quốc Khánh 15%, Lâm Chí Khang 15%; tổng 100%. Đây là tỷ lệ đề xuất, không tính trực tiếp từ số task và không ghi nhận approval của nhóm. Giữ nguyên bảng chi tiết 104 issue.
+
+Build mới bằng pdfLaTeX + VnTeX, ba lượt exit 0; log cuối không có Overfull hoặc cảnh báo tham chiếu/rerun, còn 7 Underfull từ nội dung trước. MuPDF trích text toàn bộ và render các trang mục lục, bảng mới và phần chuyển tiếp để kiểm tra. Bảng mới nằm trọn một trang, tiếng Việt và các tỷ lệ rõ, không tràn/cắt. Không chạy lại app tests hoặc production checks. Log/render nằm ngoài repo tại TEMP/brewlite-contribution-report. PDF này chưa có CI riêng; kết quả QA bản trước dưới đây được giữ như lịch sử.
+
+### Snapshot QA trước khi bổ sung tỷ lệ đóng góp
+
+**PDF trước khi bổ sung: 70 trang vật lý, 19 hình, 24 bảng, 4,589,955 bytes; SHA256 `006997E90EE869B8AFBABC68B40AC0BEF87E7C3151404DCF5C1D8F77A784C574`. Bản này đã được thay bằng PDF hiện hành ở trên.**
 
 Build ngày15/11/2026 bằng pdfLaTeX + VnTeX/MiKTeX26.5 (pdfTeX1.40.29), từ repository root theo lệnh trên; lượt5 thay bố cục, lượt6 ổn định aux/TOC/LoF/LoT/out, exit0. Không còn Overfull, undefined references/citations hoặc LaTeX/Package Warning; 7 Underfull đã xem bố cục. MiKTeX nhắc kiểm tra updates ngoài log TeX, không phải lỗi build; không cài thêm toolchain.
 
