@@ -1,0 +1,318 @@
+\section{Evidence production bổ sung và kế hoạch phục hồi}
+\label{sec:production-evidence}
+Các ảnh Render do người dùng cung cấp, đã đọc trực tiếp ngày 13/11/2026.
+Capture time của ảnh chưa có; giờ event/deployed được giữ như hiển thị.
+Đây là evidence deployment ngày13/11, độc lập với các HTTP snapshot sau đó.
+Audit14/11 lúc10:31 UTC không cung cấp process SHA cho từng request; không
+gán source của ảnh Render cho mọi GET mới (xem mục\ref{sec:deployment-release-delivery}).
+Bản raw có credential/IP không đưa vào repository hoặc PDF. Các bản sao dùng
+opaque redaction cục bộ đã mở kiểm tra lại; không dùng ảnh để suy ra secret/config
+thực của backend. Full SHA source02452f2 được Git/GitHub xác nhận là
+\path{02452f228712c3501c8d27f0f1ae737ad206785d}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{docs/delivery/evidence/render-deploy-02452f2.png}
+\caption[Render Auto-Deploy Live02452f2]{Render Auto-Deploy succeeded/Live, source02452f2. Deployed field
+13/11/2026 15:39:19 GMT+7 (08:39:19Z); Nest started15:39:54 và service live15:39:59.
+Đây là deployment evidence, không phải timestamp của HTTP smoke.}
+\label{fig:render-live-evidence}
+\end{figure}
+
+\clearpage
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth,height=0.55\textheight,keepaspectratio]{docs/delivery/evidence/render-db-plan.png}
+\caption[Render PostgreSQL18 Free tại Singapore]{DB Available, PostgreSQL18, Singapore, Free1GB. Backend web tier và
+Vercel plan vẫn chưa xác nhận; không suy từ tier database.}
+\label{fig:render-db-plan-evidence}
+\end{figure}
+DB hết hạn \textbf{10/12/2026 theo dashboard}, xem ảnh expiry đã che trong
+\path{docs/delivery/evidence/render-db-expiry-redacted.png}. Trước mốc đó nhóm
+phải chọn nâng tier hoặc export/restore/migrate tới đích phù hợp. Chưa có người
+vận hành/tiếp nhận, lịch backup/retention hoặc RPO/RTO được chốt. Không dùng grace
+sau expiry làm thời gian đảm bảo demo. Free không có managed backup/PITR;
+runbook mới chuẩn bị không được ghi là backup đã có hoặc restore verified.
+
+\clearpage
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth,height=0.62\textheight,keepaspectratio]{docs/delivery/evidence/render-db-network-redacted.png}
+\caption[Render database external allowlist đã che IP]{Networking: workspace/environment allow-all và ba DB /32 đã che IP.
+Theo Render inbound rules, traffic external phải được mọi cấp áp dụng cho phép;
+DB đang restricted external, chưa private-only.}
+\label{fig:render-db-network-evidence}
+\end{figure}
+AC3 cần manager xác nhận rule đã lưu, chủ/mục đích/thời hạn và quyết định liệu
+admin external có hạn được chấp nhận hay phải private-only. Internal field
+trong dashboard không chứng minh DATABASE\_URL thực của app; xác nhận bằng
+mode/target-match/region association không có credential. Không đổi network
+policy, environment hoặc kết nối DB trong lượt tài liệu này.
+
+\subsection{Backup/restore và rollback có điều kiện}
+Tools pg\_dump/pg\_restore18.6 đã có; chỉ chạy version check. Runbook tại
+\path{docs/deployment.md}, mục11.5, dùng custom-format archive ở kho mã hóa
+ngoài repo, PG* và PGPASSFILE qua secret manager/user-only ACL, TLS phù hợp
+provider; không đặt credential trong lệnh/log. Kiểm tra TOC/hash chỉ là archive
+check, không thay restore test. Không backup production trong lượt này.
+
+Restore cần DB PostgreSQL18 mới rỗng/cô lập, manager xác nhận host/port/user/DB
+khác production trước lệnh. Không dùng clean/drop hoặc ghi đè DB đang phục vụ.
+Đối chiếu migrations/seed marker/constraints/counts và financial invariants;
+cô lập scheduler/gateway callbacks, không seed Apply. Sau actual restore/test,
+reviewer mới xác nhận usable backup. Cutover cần approval riêng và chấp nhận
+khoảng mất dữ liệu, không tự sửa environment hoặc redeploy.
+
+Candidate backend cũ2216b7a được PR26 báo Render Live/Sandbox payment success;
+chưa có deployID/artifact retention hoặc approval làm rollback target.
+Candidate này đã chứa migration10 additive seed\_executions. Giữ table/marker
+và migration history khi rollback app; không xóa marker để ép seed. DB restore
+trước10 có thể mất mọi ghi sau snapshot, không là rollback mặc định.
+Frontend Preview2216b7a không chứng minh từng production domain, chưa eligible;
+manager cần chọn target cũ phù hợp plan/schema/API/env/proxy.
+Sau rollback được phép phải ghi UTC/IDs/SHA, health/catalog/migration state,
+financial consistency/scheduler và smoke actual. Chưa thực hiện rehearsal.
+
+\clearpage
+\subsection{Nguồn tài liệu và các phiên bản báo cáo}
+\label{sec:report-provenance}
+Snapshot lịch sử \texttt{7dfc7ca} ngày 10/11/2026 và source runtime
+\texttt{34cbbc0} của báo cáo SCRUM-112 giữ nguyên provenance. Baseline soạn trước đây: \texttt{91e6f99}. Checkout kiểm tra ngày14/11 (sau bản báo cáo65 trang đã push):
+\path{21749cce2ff536a5f1f99a74cf951bc4fc78dce6}, branch
+\path{SCRUM-117-production-release-delivery}; app/config trùng origin/dev
+\path{0e43bcb80f64d6a5fa558cd80f71a199029535d0}.
+Snapshot trước cập nhật PR \#17: remote \texttt{3543a55}, open, chưa review.
+Snapshot trước là \texttt{6ee4199}/PDF53 trang, CI43543439775 success.\par
+Bản65 trang đã commit/push tại \texttt{21749cc}; CI43587629629 API/Web success.
+Bản report đang sửa chưa commit, nên CI đó không đại diện cho thay đổi mới.
+Main remote \texttt{02452f2} là merge promotion, không phải checkout/report release SHA.
+
+Bố cục A4, bìa, header/footer và mục lục thích nghi từ template SGU dùng
+VnTeX/pdfLaTeX; không lấy nội dung minh họa của mẫu. GVHD, mã học phần, nhóm
+và sáu thành viên/MSSV kế thừa bìa báo cáo A1 đã đọc 13/11/2026 \cite{a1report};
+chưa có nguồn lớp hoặc thay đổi roster A2. Vai trò A1 không tự trở thành
+người vận hành/tiếp nhận production A2. Không chuyển kết quả A1 thành test A2.
+
+Nguồn yêu cầu là đề A2 v1.0 \cite{a2brief}, SRS và API Contract theo thứ tự
+ưu tiên của dự án. Các section requirement/modeling bên dưới giữ trạng thái
+nguồn; không đổi DRAFT thành Accepted. Architecture tại \path{docs/architecture/architecture.md},
+runbook tại \path{docs/deployment.md}; readiness/mapping/evidence tại
+\path{docs/delivery/SCRUM-117-delivery.md}; notes/body PR17 tại
+\path{docs/delivery/release-notes-A2.md}. Nguồn SCRUM-117 đã có bản cũ ở commit
+\texttt{3543a55}; PDF53 trang có logo ở \texttt{6ee4199} là lịch sử; PDF65 trang đã lên PR17 tại
+\texttt{21749cc}. Nội dung bổ sung phân công/lịch sử trong lượt này chưa commit, chưa có CI riêng.
+
+
+
+
+\subsection{Mốc nguồn và quá trình hình thành tạo phẩm (lịch sử)}
+Các mốc dưới phục vụ provenance, không làm trục tổ chức nội dung hệ thống.
+Kết quả kiểm thử vẫn được gắn với source/môi trường riêng.
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.22\linewidth}>{\raggedright\arraybackslash}p{0.68\linewidth}}
+\caption{Mốc tạo phẩm có bằng chứng GitHub, không thay biên bản Scrum}\label{tab:milestones}\\
+\toprule Giai đoạn & Kết quả có nguồn và giới hạn \\ \midrule
+\endfirsthead
+\toprule Giai đoạn & Kết quả có nguồn và giới hạn (tiếp) \\ \midrule \endhead
+A1 kế thừa & Tag A1-final1951dc1, báo cáo A1/contract/ADR giữ provenance.
+Vai trò và test A1 không tự trở thành ownership hoặc acceptance A2. \\
+Yêu cầu/thiết kế A2 & PR1--9 ngày08--09/11 tạo planning, context/SRS/use case,
+activity/sequence/class, architecture/ADR và deployment target. PR merged
+chứng minh version history, không phê duyệt mọi gap trong tài liệu. \\
+Sprint1 theo Task4 & PR11--15 ngày09--10/11: monorepo, CI, navigation/traceability
+và MVP verification report. Report chạy source34cbbc0; không phải E2E production. \\
+Hoàn thiện theo Task5 & PR16,18--23,25 ngày10--13/11: proxy/dependency,
+Render seed/migration guard, Internal TLS và QueryDR diagnostics. Payment
+success claim ở PR26 có phạm vi riêng; không tự đóng SCRUM-114/115. \\
+Deployment và delivery & PR24/26/28 promote main; PR27 mô tả CD, ảnh Render
+02452f2 và GET bổ sung runtime evidence. PR17 đang chuẩn bị report/release
+dossier, Leader chưa review/nghiệm thu. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Tiến trình A1, Phase2 và Assignment2}
+A1 bắt đầu từ bài toán một cửa hàng: charter, requirements/stories/use case,
+wireframe, ERD và API contract; các Sprint tiếp theo hiện thực catalog, cart,
+auth, order, Mock payment và history. Phân công Sprint0--3 được giữ riêng với
+Phase2 trong phụ lục, không gom toàn bộ thành task deployment.
+
+Phase2 mở rộng vòng đời thanh toán: VNPay initiation/Return/IPN, QueryDR client,
+shared finalization, grace/reconciliation, ZERO\_AMOUNT và coupon; đồng thời
+đóng gói Docker và xác minh môi trường sạch. Đây là một giai đoạn kỹ thuật
+trong repo A1, không phải tên khác của Assignment2. API v4.0, change request,
+payment architecture và ERD/Prisma delta phản ánh thiết kế tại thời điểm đó.
+File schema proposed không tự chứng minh migration đã chạy.
+
+Mốc nguồn kế thừa là tag A1-final, commit
+\path{1951dc124c83359556f04adb6ba3f0ee9f22fce4} \cite{a1repo}.
+Tag đã bao gồm kết quả Phase2 và PR145; không gán nhầm mọi test cho ngày tạo tag.
+A1 có thư mục backend/frontend; A2 chuyển sang apps/api và apps/web qua PR11,
+chuẩn hóa requirements/modeling/ADR, traceability, CI và deployment evidence.
+Chuyển cấu trúc không tự tạo quy tắc nghiệp vụ mới hoặc đóng gap của A1.
+
+
+\subsection{Metadata và ghi chú tạo phẩm nguồn (lịch sử)}
+Các trích đoạn dưới giữ thời điểm, SHA, trạng thái nguồn và phạm vi task
+khi soạn; không phải mô tả trạng thái checkout hoặc nghiệm thu hiện tại.
+\subsubsection{context-and-scope -- metadata nguồn}
+\noindent\textbf{Task:} SCRUM-99 / A2-T1.1\par
+\noindent\textbf{Trạng thái:} DRAFT -- chờ review; chưa phải biên bản nghiệm thu\par
+\noindent\textbf{Ngày soạn:} 08/11/2026\par
+\noindent\textbf{Baseline nghiệp vụ:} A1-final -- 1951dc124c83359556f04adb6ba3f0ee9f22fce4\par
+\noindent\textbf{Repository đích:} brewlite-project/brewlite-a2; PR base: dev\par
+
+
+\subsubsection{requirements-summary -- metadata nguồn}
+\noindent\textbf{Task:} SCRUM-102 / A2-T1.2\par
+\noindent\textbf{Trạng thái:} DRAFT -- chờ review và xác nhận các gap; chưa phải biên bản nghiệm thu\par
+\noindent\textbf{Ngày soạn:} 08/11/2026\par
+\noindent\textbf{Baseline nghiệp vụ:} A1-final -- 1951dc124c83359556f04adb6ba3f0ee9f22fce4\par
+\noindent\textbf{Danh mục đầy đủ:} \texttt{docs/requirements/srs.md}\par
+
+
+\subsubsection{activity-diagram -- metadata nguồn}
+\noindent\textbf{Task:} SCRUM-103 / A2-T2.1\par
+\noindent\textbf{Trạng thái:} DRAFT -- đã cập nhật phản hồi Review vòng 3 của PR \#4 (\texttt{R-01}..\texttt{R-06}, \texttt{REG-01} \& tối ưu bố cục dọc cho trang báo cáo A4)\par
+\noindent\textbf{Ngày soạn:} 08/11/2026\par
+\noindent\textbf{Baseline đối chiếu:} \texttt{A1-final} (\texttt{1951dc124c83359556f04adb6ba3f0ee9f22fce4})\par
+\noindent\textbf{Tệp nguồn \& kết xuất:} \texttt{docs/diagrams/activity\_diagram/} (phân bổ theo các thư mục con \texttt{phase1/}, \texttt{phase2/}, \texttt{phase3/}, \texttt{overview/})\par
+
+
+\subsubsection{sequence-diagram -- metadata nguồn}
+\noindent\textbf{Task:} SCRUM-104 / A2-T2.2\par
+\noindent\textbf{Trạng thái:} READY FOR REVIEW -- đã cập nhật toàn diện theo phản hồi PR \#8 (Review vòng 1, 2 \& 3: \texttt{SD-R01}..\texttt{SD-R06})\par
+\noindent\textbf{Ngày cập nhật:} 09/11/2026\par
+\noindent\textbf{Baseline đối chiếu:} A1-final (\texttt{1951dc124c83359556f04adb6ba3f0ee9f22fce4}) \& \texttt{dev} (\texttt{f5b67a5})\par
+\noindent\textbf{Nguồn đặc tả \& PlantUML:} \texttt{docs/diagrams/sequence\_diagram/} (phân bổ theo các thư mục con \texttt{phase1/}, \texttt{phase2/}, \texttt{phase3/}, \texttt{overview/})\par
+
+
+\subsubsection{Ghi chú phạm vi task khi soạn nguồn ngày08/11 (lịch sử)}
+
+
+Tạo phẩm chuẩn: docs/requirements/context-and-scope.md. Phần báo cáo tương ứng: docs/report/sections/context-and-scope.tex; đây là fragment dùng trong mẫu SGU, không phải báo cáo A2 hoàn chỉnh.
+\par
+
+Công việc thuộc các task A2 khác: SRS chi tiết, UC, diagram, kiến trúc, CI/CD và deployment được thực hiện trong các task tương ứng, không triển khai trong SCRUM-99. Đây là giới hạn công việc của Task 1.1, không phải danh sách loại trừ của sản phẩm A2. Production/CI/CD là yêu cầu bàn giao A2 theo planning, chưa được ghi nhận là đã nghiệm thu. [S2; S4]
+\par
+
+Review cần kiểm tra bối cảnh/mục tiêu rõ; từng stakeholder có vai trò và nhu cầu; In Scope/Out of Scope nhất quán với A1-final; không mô tả chức năng chưa kiểm chứng như đã hoàn thành; nội dung Markdown và LaTeX thống nhất.
+\par
+
+Thay đổi cần được đưa lên nhánh riêng từ dev có mã SCRUM-99, tạo PR về dev và có review theo quy trình nhóm. Tài liệu này chưa xác nhận đã commit, push, mở PR, review hay merge; không tự đánh dấu Jira Done.
+\par
+
+
+\subsubsection{Nguồn hình Activity Diagram}
+Sơ đồ hoạt động (Activity Diagram) của Task~2.1 mô hình hóa luồng nghiệp vụ end-to-end cho Use Case trọng tâm \texttt{UC-A2-CHECKOUT-001} (\emph{Đặt hàng và thanh toán}), kế thừa bốn sơ đồ con trong bộ tạo phẩm Assignment~1 (\texttt{docs/diagram/Activity-Final.drawio.svg}: \texttt{AD-02} Quy trình đặt món tổng quan, \texttt{AD-03} Tạo đơn hàng, \texttt{AD-04} Thanh toán và \texttt{AD-06} Hủy đơn hàng quá 15 phút) và chuẩn hóa theo Requirements Specification v3.1 cùng API Contract v4.0.
+\par
+
+So với phiên bản A1 vốn chỉ chia hai phân vùng tổng quát (\emph{Người dùng} và \emph{Hệ thống}) và chỉ mô tả thanh toán giả lập (\texttt{CARD}/\texttt{WALLET}), sơ đồ chuẩn hóa ở Assignment~2 giải quyết trọn vẹn các yêu cầu của mục Task~2.1:
+
+\subsubsection{Ghi chú xuất hình Sequence Diagram (lịch sử)}
+\subsection{Giải pháp Tối ưu Độ đọc Thực tế trên Trang Báo cáo A4 (\texttt{SD-R02})}
+
+Nhằm khắc phục triệt để lỗi \textbf{\texttt{SD-R02}} (khi co các sơ đồ tuần tự quá dài vào khung hình A4, chữ bị thu nhỏ xuống mức 2--3 pt không thể đọc được bằng mắt thường khi nghiệm thu), bộ tạo phẩm Sequence Diagram Assignment 2 áp dụng chiến lược thiết kế phân rã hai cấp độ:
+\begin{enumerate}
+  \item \textbf{Phân rã thành 6 sơ đồ con tập trung (Hình~\ref{fig:seq-phase1a}--\ref{fig:seq-phase3b}):} Mỗi pha nghiệp vụ lớn được chia thành 2 sơ đồ con tương ứng với ranh giới trách nhiệm và transaction độc lập:
+  \begin{itemize}
+    \item \textbf{Pha 1A:} Xác thực JWT, Khóa tư vấn \& Dọn dẹp đơn cũ (15 thông điệp, chiều cao $2244\,\text{px}$).
+    \item \textbf{Pha 1B:} Giao dịch Tạo đơn hàng Nguyên tử tính giá chuẩn và trừ tồn kho (14 thông điệp, chiều cao $1814\,\text{px}$).
+    \item \textbf{Pha 2A:} Giao thức Idempotency \& Khóa tư vấn chống gửi trùng thanh toán (16 thông điệp, chiều cao $2591\,\text{px}$).
+    \item \textbf{Pha 2B:} Phân nhánh Thực thi Thanh toán ZERO\_AMOUNT, Mock \& VNPay Initiate (14 thông điệp, chiều cao $1898\,\text{px}$).
+    \item \textbf{Pha 3A:} Webhook Server-to-Server IPN \& Chốt giao dịch Shared Finalization (18 thông điệp, chiều cao $2539\,\text{px}$).
+    \item \textbf{Pha 3B:} Browser Return URL độc lập \& Background Scheduler Đối soát / Hết hạn (14 thông điệp, chiều cao $2275\,\text{px}$).
+  \end{itemize}
+  Nhờ giảm số lượng thông điệp và chiều cao mỗi hình xuống dưới $1800$--$2500\,\text{px}$ kết hợp cỡ chữ nguồn $13$--$14\,\text{pt}$, hệ số thu phóng trên trang A4 đạt $0.65$--$0.75$, tương ứng cỡ chữ hiển thị thực tế đạt \textbf{$8.5$--$9.5\,\text{pt}$} (tương đương văn bản in tiêu chuẩn của báo cáo kỹ thuật).
+  \item \textbf{Lưu trữ Sơ đồ Tổng thể End-to-End tại Phụ lục (Hình~\ref{fig:seq-checkout-overall}):} Sơ đồ tổng thể toàn cục 82 thông điệp được trình bày ở mục phụ lục cuối chương ở khổ trang riêng phục vụ tra cứu kiến trúc đầu-cuối.
+\end{enumerate}
+
+
+\subsection{Bảng đối chiếu và nguồn mô hình}
+Các bảng sau ghi lại provenance thiết kế và đối chiếu tại source được ghim;
+không phải kết quả thực thi mới hoặc mô tả mọi chi tiết hiện trạng production.
+\subsubsection{Nguồn khảo sát và phạm vi}
+
+Phiên bản nguồn [S1]--[S4] được cố định tại commit \path{8b4224a907091529ca954c8b0792406cb8a0d9f2} của repository \path{brewlite-project/brewlite-a2}, đọc ngày 08/11/2026. Đây là commit nguồn tài liệu A2; baseline nghiệp vụ A1-final vẫn là \path{1951dc124c83359556f04adb6ba3f0ee9f22fce4}.
+\par
+
+[S1] BrewLite Requirements Specification v3.1, cập nhật 30/10/2026. Nguồn tham chiếu chính: docs/BrewLite\_Requirements\_Specification\_v3.1.docx. Bản trong docs/docs\_Phase2/ có cùng nội dung tại commit nguồn được chốt bên dưới.
+\par
+
+[S2] docs/planning/A2\_Gap\_Analysis.md -- DRAFT, 08/11/2026.
+\par
+
+[S3] README.md -- tài liệu A1 kế thừa, không phải chứng nhận production A2.
+\par
+
+[S4] docs/planning/A2\_Implementation\_Plan.md -- PROPOSED / NOT APPROVED, 08/11/2026.
+\par
+
+\begin{itemize}
+\item \href{https://github.com/brewlite-project/brewlite-a2/blob/8b4224a907091529ca954c8b0792406cb8a0d9f2/docs/BrewLite_Requirements_Specification_v3.1.docx}{Requirements v3.1}
+\item \href{https://github.com/brewlite-project/brewlite-a2/blob/8b4224a907091529ca954c8b0792406cb8a0d9f2/docs/planning/A2_Gap_Analysis.md}{A2 Gap Analysis}
+\item \href{https://github.com/brewlite-project/brewlite-a2/blob/8b4224a907091529ca954c8b0792406cb8a0d9f2/README.md}{README}
+\item \href{https://github.com/brewlite-project/brewlite-a2/blob/8b4224a907091529ca954c8b0792406cb8a0d9f2/docs/planning/A2_Implementation_Plan.md}{A2 Implementation Plan}
+\end{itemize}
+
+\subsubsection{Đối chiếu mô hình Sequence với bộ sơ đồ nguồn}
+Mục này chuẩn hóa Sơ đồ Tuần tự (Sequence Diagram) cho Use Case trọng tâm \textbf{Checkout \& Payment (\texttt{UC-A2-CHECKOUT-001})}, kế thừa trực tiếp bộ Sequence Diagram của Assignment 1 (\texttt{SD-01}..\texttt{SD-06} trong \texttt{docs/diagram/Sequence/}) và đối chiếu nghiêm ngặt với mã nguồn thực tế tại baseline \texttt{A1-final} cùng \texttt{BrewLite API Contract v4.0}.
+
+\begingroup\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.11\linewidth}>{\raggedright\arraybackslash}p{0.27\linewidth}>{\raggedright\arraybackslash}p{0.54\linewidth}}
+\caption{Sequence: thay đổi so với mô hình A1}\\
+\hline
+\textbf{Mã A1} & \textbf{Tên sơ đồ gốc A1} & \textbf{Cách kế thừa và chuẩn hóa trong Assignment 2 (A2-T2.2)} \\ \hline
+\endfirsthead
+\hline
+\textbf{Mã A1} & \textbf{Tên sơ đồ gốc A1} & \textbf{Cách kế thừa và chuẩn hóa trong Assignment 2 (A2-T2.2)} \\ \hline
+\endhead
+\texttt{SD-01} & Tạo đơn hàng từ giỏ hàng & Kế thừa tại \textbf{Pha 1} (\texttt{POST /orders}): chuẩn hóa xác thực JWT 2 lớp, khối \texttt{alt} loại trừ lẫn nhau (\texttt{SD-R01}) giữa nhánh lỗi \texttt{409 PENDING\_ORDER\_EXISTS} và nhánh tạo đơn, đồng thời biểu diễn chính xác vòng lặp 2 pha \texttt{for (phase = 0; phase < 2; phase++)} của \texttt{OrdersService.create} (\texttt{SD-R05}): khi \texttt{COMMIT TX (phase = 0)} dọn đơn cũ thì khóa \texttt{pg\_advisory\_xact\_lock} tự động giải phóng, sau đó \texttt{phase = 1} mở \texttt{BEGIN TX} mới và lấy lại khóa \texttt{pg\_advisory\_xact\_lock} trước khi tạo đơn mới. \\ \hline
+\texttt{SD-02} & Thanh toán đơn hàng bằng Ví/Thẻ giả lập (Mock) & Kế thừa và mở rộng tại \textbf{Pha 2}: chuẩn hóa giao thức \texttt{Idempotency-Key} (\texttt{requestHash} SHA-256 theo từng provider, \texttt{Idempotency-Replayed: true}, \texttt{409 IDEMPOTENCY\_KEY\_CONFLICT}, \texttt{pg\_try\_advisory\_xact\_lock} $\rightarrow$ \texttt{409 PAYMENT\_IN\_PROGRESS}) cho cả 3 nhánh: \texttt{ZERO\_AMOUNT} (\texttt{0 VND}), \texttt{Mock} (có \texttt{MockPaymentGuard}), và luồng chính \texttt{VNPay Sandbox} (\texttt{POST /payments/vnpay/initiate}). \\ \hline
+\texttt{SD-04} & Đăng nhập bằng Email/Password & Tham chiếu qua khối \texttt{ref} tại đầu Pha 1 khi Customer chưa có hoặc hết hạn phiên \texttt{Bearer JWT} (\texttt{AF-01}). \\ \hline
+\texttt{SD-06} & Hủy đơn hàng và tự động hết hạn & \textbf{Phần A (Khách chủ động hủy đơn -- \texttt{FR-ORD-005})} đang ở trạng thái \textbf{Deferred} tại \texttt{A1-final} nên không đưa vào luồng chính. \textbf{Phần B (Tự động hết hạn)} được kế thừa tại \textbf{Pha 3} (\texttt{OrderExpirationService}), kết hợp với cửa sổ Grace 5 phút (\texttt{G = E + 5m}), chân trời \texttt{H = E + 65m}, phân biệt rõ \texttt{gatewayPaidAt <= E} với \texttt{clock.now < G} (\texttt{SD-R06}) và mô hình 3 transaction của \texttt{VnpayQueryDrService}. \\ \hline
+\texttt{SD-03}, \texttt{SD-05} & Đăng ký tài khoản \& Chuyển trạng thái nội bộ & Giữ nguyên phạm vi A1 (Out of Scope của luồng Checkout trực tiếp). \\ \hline
+\end{longtable}
+\endgroup
+
+
+\subsubsection{Đối chiếu implementation tại A1-final và contract (lịch sử)}
+
+Bảng dưới đây tổng hợp kết quả rà soát đối chiếu (\texttt{SD-R04}, \texttt{SD-R05}, \texttt{SD-R06}) giữa mã nguồn thực tế tại \texttt{A1-final} và tài liệu thiết kế/\texttt{API Contract v4.0}:
+
+\begingroup\small
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.22\linewidth}>{\raggedright\arraybackslash}p{0.38\linewidth}>{\raggedright\arraybackslash}p{0.32\linewidth}}
+\caption{Sequence: đối chiếu implementation lịch sử}\\
+\hline
+\textbf{Hạng mục kỹ thuật} & \textbf{Thực tế trong Codebase \texttt{A1-final}} & \textbf{Ghi chú đối chiếu \& Biểu diễn trên Sơ đồ} \\ \hline
+\endfirsthead
+\hline
+\textbf{Hạng mục kỹ thuật} & \textbf{Thực tế trong Codebase \texttt{A1-final}} & \textbf{Ghi chú đối chiếu \& Biểu diễn trên Sơ đồ} \\ \hline
+\endhead
+Vòng lặp 2 pha \& khóa \texttt{pg\_advisory\_xact\_lock} khi tạo đơn (\texttt{SD-R05}) & \texttt{orders.service.ts} (L163--175, L279--285): chạy \texttt{for (let phase = 0; phase < 2; phase++) runInventoryTransaction(createOrCleanup)}. Khi dọn đơn cũ quá hạn ở \texttt{phase = 0}, \texttt{COMMIT TX} tự động giải phóng \texttt{pg\_advisory\_xact\_lock}; vòng lặp sang \texttt{phase = 1} mở \texttt{BEGIN TX} mới và gọi lại \texttt{SELECT pg\_advisory\_xact\_lock('create-order:' || userId)}. & Bước \texttt{[P1A-18]}..\texttt{[P1A-25]} trên Pha 1A và \texttt{[16]}..\texttt{[19]} trên sơ đồ tổng thể thể hiện rõ \texttt{COMMIT TX (phase = 0)} giải phóng khóa cũ $\rightarrow$ \texttt{BEGIN TX (phase = 1)} lấy lại khóa tư vấn mới. \\ \hline
+Thời điểm thanh toán \texttt{gatewayPaidAt} vs thời điểm chốt \texttt{clock.now} (\texttt{SD-R06}) & \texttt{payment-finalization.service.ts} (L561--638): kiểm tra \texttt{gatewayPaidAt <= E} (\texttt{vnp\_PayDate} từ VNPay $\le$ \texttt{expires\_at}) \textbf{và} \texttt{clock.now < G = E + 5m}. Khi hợp lệ, lưu \texttt{Payment.verifiedPaidAt = gatewayPaidAt}, \texttt{Payment.finalizedAt = clock.now}, và gán \texttt{Order.paidAt = clock.now}. & Bước \texttt{[P3A-18]}, \texttt{[P3A-22]}, \texttt{[P3B-15]} trên Pha 3A/3B phân biệt rõ \texttt{gatewayPaidAt <= E}, \texttt{clock.now < G}, \texttt{Payment.verifiedPaidAt = gatewayPaidAt} và \texttt{Order.paidAt = clock.now}. \\ \hline
+Body lỗi \texttt{409 PENDING\_ORDER\_EXISTS} (\texttt{SD-R04}) & \texttt{orders.service.ts} (L29--35) ném \texttt{\{ code: 'PENDING\_ORDER\_EXISTS', message \}} \textbf{không kèm \texttt{activeOrderId}}; UI đồng bộ đơn đang mở qua \texttt{GET /orders/me}. & Bước \texttt{[P1A-16]}..\texttt{[P1A-17]} ghi rõ body không kèm \texttt{activeOrderId} và UI đồng bộ qua \texttt{GET /orders/me}. \\ \hline
+Trường \texttt{expiresAt} khi tạo đơn (\texttt{SD-R04}) & DB lưu \texttt{expiresAt = now + 15m}, nhưng \texttt{CreateOrderResponseDto} của \texttt{201 Created} chỉ trả \texttt{createdAt}; \texttt{expiresAt} được trả qua \texttt{GET /orders/me} và \texttt{POST /payments/vnpay/initiate}. & Bước \texttt{[P1B-17]} ghi lưu \texttt{expiresAt = E} vào DB; bước \texttt{[P1B-19]} chú thích rõ các trường trả về của \texttt{CreateOrderResponseDto}. \\ \hline
+Tồn kho \texttt{Product.stock} vs \texttt{Topping} \& giữ chỗ Coupon (\texttt{SD-R04}) & Chỉ \texttt{Product} có cột \texttt{stock} (\texttt{Topping} kiểm tra \texttt{isAvailable}); \texttt{reserveCoupon} tăng \texttt{Coupon.activeUsageCount} và tạo \texttt{CouponRedemption (HELD)}. Bảng \texttt{InventoryMovement} (\texttt{FR-INV-004}) là \texttt{SHOULD} (chưa có trong \texttt{schema.prisma}). & Sơ đồ chỉ trừ \texttt{Product.stock}, kiểm tra \texttt{Topping.isAvailable} và cập nhật \texttt{activeUsageCount} + \texttt{CouponRedemption}; không vẽ bảng \texttt{InventoryMovement}. \\ \hline
+Mã lỗi khi thanh toán đơn đã quá hạn \texttt{now >= E} (\texttt{SD-R04}) & \texttt{VnpayInitiationService} và \texttt{ZeroAmountPaymentService} trả \texttt{409 ORDER\_EXPIRED}; \texttt{PaymentsService} (Mock) trả \texttt{409 INVALID\_TRANSITION}. & Bước \texttt{[P2A-29]} ghi rõ cả hai mã lỗi theo đúng từng dịch vụ. \\ \hline
+\textbf{\texttt{[VERIFY]}} Route \texttt{GET /payments/:paymentId/status} (\texttt{SD-R04}) & Có trong \texttt{API Contract v4.0} §5 và \texttt{frontend/services/payment.service.ts}, nhưng \texttt{PaymentsController} ở \texttt{A1-final} chưa triển khai route này; UI thực tế gọi \texttt{GET /orders/me} + \texttt{GET /auth/me}. & Bước \texttt{[P3B-04]} vẽ luồng chạy thực tế \texttt{GET /orders/me} và gắn nhãn \texttt{[SD-R04 / VERIFY]} cho route \texttt{GET /payments/:paymentId/status}. \\ \hline
+\textbf{\texttt{[VERIFY / Deferred]}} \texttt{POST /coupons/preview}, \texttt{QueryDR Sandbox E2E} \& \texttt{FR-ORD-005} & \texttt{POST /coupons/preview} thuộc nhóm \texttt{SHOULD / Deferred}; \texttt{VnpayQueryDrService} đã có code/test nhưng hoãn nghiệm thu E2E Sandbox (\texttt{ADR-P2-QueryDR-Sandbox-E2E-Deferred}); hủy đơn chủ động \texttt{FR-ORD-005} là \texttt{Deferred}. & Ghi chú tường minh trong \texttt{note} đầu Pha 1A, gắn nhãn \texttt{[ADR-P2-QueryDR-Sandbox-E2E-Deferred]} tại bước \texttt{[P3B-13]}, và lược bỏ \texttt{FR-ORD-005} khỏi luồng chính. \\ \hline
+\end{longtable}
+\endgroup
+
+\subsection{Ghi chú tích hợp và build báo cáo (lịch sử)}
+Compiler vẫn pdfLaTeX + VnTeX theo preamble/log SGU; MiKTeX user và MuPDF portable
+đã cài với quyền người dùng. Kết quả build/render và giới hạn QA được ghi tại
+report README theo lần thực hiện, không dùng template log làm build mới.
+Nguồn portable và hướng dẫn local/Overleaf vẫn có, không upload.
+Hồ sơ có thể review cập nhật PR17,
+chưa đủ căn cứ nghiệm thu release hoặc Jira Done. Source và PDF được chuẩn bị
+trong bộ thay đổi PR17; trạng thái phát hành theo evidence trên PR.
+
+
+Audit10:31 đối chiếu checksum của \textbf{PDF65 trang local trước lần tích hợp
+này}, khác \textbf{PDF53 trang ở commit6ee4199}. Bản65 trang sau tích hợp đã commit/push tại21749cc, CI43587629629 API/Web success.
+Bản bổ sung phân công và lịch sử trong lượt này được build lại
+từ working tree; số trang/checksum và QA mới ghi trong Markdown bàn giao,
+không đưa checksum vào PDF để tránh vòng tự tham chiếu. Sau commit/push được
+phép, phải đọc CI đúng SHA mới; CI của6ee4199 hoặc21749cc không chứng minh thay đổi mới chưa commit.

@@ -1,6 +1,11 @@
-# BrewLite A2 Documentation Center
+# Tài liệu đồ án BrewLite
 
-Trung tâm điều hướng tài liệu và tạo phẩm của đồ án **BrewLite Assignment 2**. Các đường dẫn trong file này được viết tương đối từ thư mục `docs/`.
+Trung tâm tra cứu hệ thống BrewLite: yêu cầu, mô hình, hiện thực, kiểm thử, vận hành và báo cáo.
+
+- [Báo cáo PDF](report/output/main.pdf), [nguồn LaTeX](report/main.tex), [build và QA](report/README.md#bản-pdf-hiện-hành).
+- [Phân công104 issue](planning/BrewLite_Task_Allocation.md): 102 Task,1 Epic,1 Subtask; phụ lục PDF trình bày theo thành viên và nhóm công việc.
+- [Use Case tổng quát](report/assets/use-case-overview.pdf), [ERD hiện hành](report/assets/database-erd.pdf), [source và exports](diagrams/README.md).
+- [Runbook vận hành](deployment.md), [hồ sơ kiểm chứng kỹ thuật](delivery/SCRUM-117-delivery.md), [release notes](delivery/release-notes-A2.md).
 
 ## 1. Bản đồ tài liệu
 
@@ -15,53 +20,20 @@ Trung tâm điều hướng tài liệu và tạo phẩm của đồ án **BrewL
 | Architecture | Tổng quan kiến trúc và ADR 001–005 | [`architecture/architecture.md`](architecture/architecture.md), [`architecture/adr/`](architecture/adr/) |
 | Deployment | Mô tả triển khai Vercel/Render của [SCRUM-108](https://nguyenkhang03012006.atlassian.net/browse/SCRUM-108) | [`deployment.md`](deployment.md) |
 | CI | Hướng dẫn và thông tin quality gates | [`ci/README.md`](ci/README.md) |
-| Report sources | Các fragment LaTeX theo section, asset PDF và file kiểm tra domain class | [`report/sections/`](report/sections/), [`report/assets/`](report/assets/), [`report/domain-class-check.tex`](report/domain-class-check.tex) |
+| Report sources | Báo cáo, section fragments và assets | [`report/main.tex`](report/main.tex), [`report/README.md`](report/README.md), [`report/sections/`](report/sections/), [`report/assets/`](report/assets/), [`report/domain-class-check.tex`](report/domain-class-check.tex) |
+| Delivery / release | Readiness, mapping release/deploy/run/smoke, demo/Scrum agenda và checklist kỹ thuật | [`delivery/SCRUM-117-delivery.md`](delivery/SCRUM-117-delivery.md), [`delivery/release-notes-A2.md`](delivery/release-notes-A2.md) |
+| MVP evidence | Báo cáo local Sprint 1 kế thừa, không production smoke | [`A2_TestReport/MVP_Sprint1_Verification_Report.md`](A2_TestReport/MVP_Sprint1_Verification_Report.md) |
 | A1 archive | Snapshot tài liệu kế thừa từ Assignment 1; xem provenance để biết nguồn gốc | [`a1-archive/PROVENANCE.md`](a1-archive/PROVENANCE.md) |
-| Traceability | Ma trận nối Planning, Task 1–4.1, Jira, PR, commit và nguồn nghiệp vụ | [`TRACEABILITY.md`](TRACEABILITY.md) |
+| Traceability | Ma trận Planning/Task 1–4 và snapshot delivery Task 5.4, Jira, PR, commit, nguồn và evidence | [`TRACEABILITY.md`](TRACEABILITY.md) |
+| Requirement traceability | 48 FR + 49 NFR từ SRS → US/UC → design → code/API → test inventory, theo đề §8.1 | [`traceability-matrix.md`](traceability-matrix.md) |
 
-## 2. Vị trí artifact sau [SCRUM-110](https://nguyenkhang03012006.atlassian.net/browse/SCRUM-110)
 
-Các đường dẫn dưới đây phản ánh tree được kiểm tra trên `origin/dev` tại baseline ghi trong [`TRACEABILITY.md`](TRACEABILITY.md):
+## Báo cáo và bộ nguồn
 
-- Deployment document của [SCRUM-108](https://nguyenkhang03012006.atlassian.net/browse/SCRUM-108) hiện ở **`docs/deployment.md`**. Không dùng đường dẫn cũ `docs/architecture/deployment.md` trong tài liệu A2 hiện tại.
-- ADR nằm tại `docs/architecture/adr/001-modular-monolith.md` đến `docs/architecture/adr/005-production-hosting.md`.
-- Activity Diagram nằm dưới `docs/diagrams/activity_diagram/`; Sequence Diagram nằm dưới `docs/diagrams/sequence_diagram/`.
-- Domain Class và Deployment Diagram nằm trực tiếp dưới `docs/diagrams/` với source `.drawio` và các bản xuất tương ứng.
-- Tài liệu A1 được giữ dưới `docs/a1-archive/`; danh sách và provenance ở `docs/a1-archive/PROVENANCE.md`.
+Báo cáo trình bày bài toán → yêu cầu → mô hình hóa → kiến trúc/database/API → hiện thực → kiểm thử → vận hành → quản lý dự án → kết luận. Phụ lục giữ nguồn/truy vết và bảng104 issue. Logo SGU, hình vector và ảnh giao diện local có nguồn nằm trong repository; build từ root bằng pdfLaTeX + VnTeX.
 
-## 3. LaTeX: entrypoint và fragments
+Nhật ký Git/CI, checksum lịch sử, tám AC SCRUM-117 và quyết định vận hành được giữ trong dossier. Hình thức trình nộp của PDF không thay trạng thái nghiệm thu. Bảng traceability phục vụ đối chiếu yêu cầu và tạo phẩm, không tự khẳng định tất cả test hoặc luồng nghiệp vụ đều đạt.
 
-Tree được kiểm tra có các fragment sau:
+## Nguồn kế thừa
 
-- Report sections: `report/sections/context-and-scope.tex`, `requirements-summary.tex`, `checkout-use-case.tex`, `activity-diagram.tex`, `sequence-diagram.tex`.
-- Report support: `report/domain-class-check.tex`.
-- Diagram fragments: `diagrams/deployment-figure.tex` và `diagrams/domain-class-figure.tex`.
-
-**Không có `docs/report/main.tex` trong tree được kiểm tra.** Vì vậy, không mô tả `main.tex` là entrypoint hiện hữu và không tự suy ra một file build entrypoint khác. Khi bổ sung entrypoint LaTeX, cần thêm file nguồn cùng lệnh build/hướng dẫn tương ứng rồi cập nhật mục này.
-
-## 4. Quy tắc quản lý tài liệu
-
-1. **Không chỉnh sửa archive như tài liệu A2 đang hoạt động.** `docs/a1-archive/` là snapshot kế thừa; giữ nguyên nội dung và provenance. Nếu A2 cần kế thừa quy tắc, hãy dẫn liên kết tới nguồn archive và ghi nội dung A2 ở đúng khu vực hiện hành.
-2. **Không tạo bản sao tài liệu chỉ để đổi vị trí.** Một artifact có một vị trí chuẩn; các trang điều hướng và ma trận truy vết nên liên kết tới artifact đó.
-3. **Sơ đồ mới hoặc được cập nhật phải giữ source có thể chỉnh sửa và bản xuất để review.** Với PlantUML dùng `.puml`; Draw.io dùng `.drawio`; sơ đồ dạng Graphviz dùng `.dot`. Lưu bản xuất SVG và/hoặc PDF tương ứng theo quy ước của nhóm. Không suy ra một source file tồn tại chỉ từ việc có SVG/PDF.
-4. **Tách source, bản xuất và bằng chứng kiểm thử.** SVG/PDF là bản trình bày; file `.puml`/`.drawio`/`.dot` là source; log hoặc verification report là bằng chứng cho một lần kiểm tra cụ thể. Không dùng một loại thay thế cho loại khác.
-5. **Giữ traceability khi di chuyển hoặc đổi tên.** Cập nhật link tại tài liệu tham chiếu và `TRACEABILITY.md` trong cùng thay đổi; không giữ đường dẫn cũ như thể nó vẫn tồn tại.
-6. **Không nâng trạng thái quá bằng chứng.** `Merged` chỉ xác nhận PR đã được merge; `Reviewed` không tự có nghĩa `Approved`; `Verified` phải gắn với phạm vi kiểm chứng và evidence cụ thể. Quy ước trạng thái đầy đủ nằm trong [`TRACEABILITY.md`](TRACEABILITY.md).
-
-## 5. Kiểm tra trước khi tạo Pull Request
-
-Chạy từ Git Bash tại repository root:
-
-```bash
-# Xác nhận các artifact docs hiện có trên nhánh nền
-git ls-tree -r --name-only origin/dev docs
-
-# Kiểm tra whitespace/conflict marker trong thay đổi tài liệu
-git diff --check
-
-# Kiểm tra phạm vi thay đổi
-git diff --stat
-git status --short
-```
-
-Khi PR có thay đổi đường dẫn, đối chiếu link tương đối với file thực tế trong Git tree. Có thể dùng công cụ Markdown link checker đã được nhóm chấp thuận nếu đã được cấu hình; không giả định một checker chưa có trong repository. Trước khi commit, bảo đảm không stage file môi trường, secret, log chứa thông tin nhạy cảm hoặc file review tạm.
+Repository này tiếp nối đồ án BrewLite; [archive bất biến và provenance](a1-archive/PROVENANCE.md) giữ nguồn A1 tại tag A1-final. Tài liệu hiện hành dùng apps/web, apps/api và các đường dẫn docs ở repository này; không cần checkout A1 để build báo cáo.
