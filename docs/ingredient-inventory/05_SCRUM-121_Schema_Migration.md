@@ -1,13 +1,17 @@
 # SCRUM-121 / INV-03 — Prisma schema và additive migration
 
 Owner: Nguyễn Khải Hoàng. Reviewer theo task: Khang. PR base: `dev`.
-Trạng thái hiện tại: [PR #38](https://github.com/brewlite-project/brewlite-a2/pull/38)
-đã mở vào dev tại head `4e9f1f0d23e4daac49d060af4b76bc72c2430738` (đã xác minh lại
-local/remote PR). Revision core `57fa0486…` và temporal `4e9f1f0…` đã commit/push;
-temporal đã được tác giả phản hồi tại comment 6949067714. Revision provenance
-đang sửa local riêng, không có commit/push/comment mới trong lượt này.
-Leader đã chốt merge core trước/defer persistence; formal PR approval, required
-CI cho revision mới và merge chưa được xác nhận, task chưa Done.
+Trạng thái: [PR #38](https://github.com/brewlite-project/brewlite-a2/pull/38) vào dev.
+**Source rehearsal:** `4e9f1f0d23e4daac49d060af4b76bc72c2430738` cộng exact working
+snapshot được lưu trong artifact (§6.3).
+**Commit bàn giao provenance/evidence:** `05385eb65922efe302a16f9dfb53f0d5c440f595`,
+đã commit/push; core `57fa0486…` và temporal `4e9f1f0…` là các mốc trước đó.
+Revision hiện tại chỉ sửa metadata tài liệu; không đổi source rehearsal/evidence.
+Reviewer Ryannguyxn xác nhận R-01/R-03 đã xử lý tại 05385eb trong
+[comment 6951340446](https://github.com/brewlite-project/brewlite-a2/pull/38#issuecomment-6951340446)
+lúc 2026-11-17 14:44:26 UTC; đây không phải formal PR approval hoặc task Done.
+Leader đã chốt merge core trước/defer persistence; required CI và merge vẫn là
+điều kiện cần xác minh riêng.
 
 ## 1. Nguồn, baseline và phạm vi
 
@@ -341,10 +345,11 @@ real VNPay Sandbox, Docker/UI/full E2E hoặc Production. Không chạy thêm bu
 ngoài runner trừ env-only và chẩn đoán checksum có mục đích. Không thay đổi demo/
 Production, không sửa cấu hình người dùng hoặc dừng/restart stack trong lượt này.
 
-### 6.3 Provenance revision sau 4e9f1f0 — evidence mới có source truy xuất được
+### 6.3 Lịch sử rehearsal provenance — source 4e9f1f0 + snapshot, bàn giao tại 05385eb
 
 Nguồn review: [Major 6949549474](https://github.com/brewlite-project/brewlite-a2/pull/38#issuecomment-6949549474),
-Ryannguyxn, created/updated **2026-11-17T13:33:42Z**. Git đầu lượt sạch, local và
+Ryannguyxn, created/updated **2026-11-17T13:33:42Z**. Ở lượt provenance lịch sử này,
+Git đầu lượt sạch, local và
 PR head cùng `4e9f1f0d23e4daac49d060af4b76bc72c2430738`; dev/base vẫn
 `3a183d67c12658432100298eefd2b4ffe0bbfb7a`. Không tích hợp dev hoặc đổi branch.
 
@@ -377,7 +382,8 @@ lại full rehearsal; không chỉnh input sau run cuối.
 format `brewlite-scrum121-source-v1`. Base commit truy xuất được `4e9f1f0…` cộng
 manifest **191 input files**. Unchanged files tham chiếu Git blob và explicit
 EOL transform; source mới/đổi/mixed-EOL lưu exact base64 bytes. Có cả helper mới
-chưa tracked, không phụ thuộc git diff có thể bỏ sót untracked. Mỗi file có size,
+chưa tracked lúc capture (đã được bàn giao tại 05385eb), không phụ thuộc git diff
+có thể bỏ sót untracked. Mỗi file có size,
 raw SHA-256 và canonical-LF SHA-256. Canonical chỉ thay CRLF→LF trên UTF-8, không
 trim/reformat; raw mới là bằng chứng exact bytes. Artifact hash được khóa trong
 evidence; đây không phải cơ chế chữ ký chống actor sửa đồng thời cả artifacts.
@@ -400,8 +406,9 @@ Self-test tạo bản sao temp, xác nhận content drift, thêm file input và 
 
 **Run evidence cuối:** 2026-11-17 **14:06:27–14:07:39 UTC**
 (21:06:27–21:07:39 UTC+7). Branch `SCRUM-121-ingredient-inventory-schema`,
-headAtRun `4e9f1f0d23e4daac49d060af4b76bc72c2430738`, dirty=true vì source provenance
-đang sửa local; snapshot khóa working source đó. PostgreSQL 18.6 / Node 26.13.1 /
+headAtRun `4e9f1f0d23e4daac49d060af4b76bc72c2430738`, dirty=true vì tại thời điểm
+chạy, source provenance còn local; snapshot khóa working source đó, sau này được
+bàn giao tại commit 05385eb. PostgreSQL 18.6 / Node 26.13.1 /
 Prisma & Client 7.10.1 / Vitest 4.1.11; xem `versions.tools` cho công cụ khác.
 
 | Kiểm chứng thực thi mới | Kết quả |
@@ -484,8 +491,9 @@ test environment được override trước khi Prisma/Nest nạp dotenv.
 Tài nguyên được giữ để review: cluster test mới, các DB `scrum121_clean_*` và
 `scrum121_upgrade_*` của các lần rehearsal (kể cả lần harness lỗi), các thư mục
 `%TEMP%\brewlite-scrum121-rehearsal-*`, và baseline.prisma temp của migrate diff.
-Run cuối xác định chính xác hai DB trong evidence JSON. Lượt này chỉ restart
-cluster test mới để nạp cluster_name; không restart/dừng stack có sẵn.
+Evidence provenance §6.3 xác định chính xác ba DB test. Việc restart để nạp
+cluster_name thuộc lượt khởi tạo cluster lịch sử; revision metadata hiện tại
+không truy cập DB hoặc restart/dừng stack.
 
 Dọn sau review: xác minh `pg_ctl status -D <đúng path trên>` và cluster_name,
 dừng riêng bằng `pg_ctl -D <đúng path trên> -m fast -w stop`; sau đó kiểm tra
@@ -731,10 +739,10 @@ Body cập nhật đề xuất cho PR #38 (base dev, reviewer Khang; chưa đăn
 > 6 skipped; baseline runtime 103 passed/10 skipped. Snapshot/verifier/history và
 > command timestamps/exit codes xem §6.3, không tính skipped là PASS.
 >
-> Snapshot-integrity §8.1 là **đề xuất chờ Leader**: marker + version/count/digest
+> Chi tiết thiết kế snapshot-integrity §8.1 vẫn là **đề xuất**: marker + version/count/digest
 > tại Order, canonicalization xác định, atomic seal/verify, legacy classification,
 > immutable guards/permissions và acceptance tests; chưa thêm fields/triggers vào
-> schema. Đề xuất 121 core/temporal/handoff, 123 persistence nếu defer được duyệt,
+> schema. 121 core/temporal/handoff; persistence đã deferred sang SCRUM-123;
 > 124 verify/exact one-time release, phối hợp 126 concurrency/corruption. Leader
 > Ryannguyxn đã cho phép merge core trước/defer persistence sang SCRUM-123 tại
 > comment 6949554030 lúc 2026-11-17 13:33:54 UTC. Chi tiết thiết kế vẫn đề xuất;
@@ -744,10 +752,11 @@ Body cập nhật đề xuất cho PR #38 (base dev, reviewer Khang; chưa đăn
 > Giới hạn: seed, ingredient reserve/release/concurrency, availability, restore và
 > real VNPay Sandbox/full E2E/Production chưa kiểm chứng bởi revision này. Required
 > remote CI/review/merge còn pending; không đổi Payment/VNPay/Product.stock, không
-> deploy hoặc tự đánh dấu Done. Temporal revision đã push tại 4e9f1f0; provenance
-> revision và phản hồi review mới còn local/draft, chưa đăng/resolve.
+> deploy hoặc tự đánh dấu Done. Source rehearsal là 4e9f1f0 + exact working
+> snapshot; commit bàn giao provenance/evidence là 05385eb. Revision hiện tại
+> chỉ sửa metadata documentation, không đổi source/evidence hoặc chạy lại rehearsal.
 
-Files đề nghị commit revision provenance sau review (schema/migrations đã commit giữ nguyên):
+Files của revision provenance đã bàn giao tại 05385eb (danh sách lịch sử):
 
 1. `.gitattributes` — giữ exact bytes cho hai artifact, không normalize repository.
 2. `apps/api/test/ingredient-schema.rehearsal.mjs`
@@ -757,6 +766,9 @@ Files đề nghị commit revision provenance sau review (schema/migrations đã
 6. `docs/ingredient-inventory/SCRUM-121-source-snapshot.json`
 7. `docs/ingredient-inventory/SCRUM-121-evidence.history.json`
 8. `docs/ingredient-inventory/README.md`
+
+Revision metadata hiện tại chỉ sửa tài liệu 05 này và README index; không có
+thay đổi executable inputs, evidence JSON/source snapshot/history hoặc hashes.
 
 DoD còn pending: formal review/approval, required CI cho source revision mới và
 merge dev. Scope core/defer đã được Leader chốt; persistence/implementation/tests
@@ -787,12 +799,14 @@ self-review local, không thay thế review/approval của Khang hoặc required
 > baseline runtime 103/10 skipped. Evidence cũ giữ byte-for-byte trong history.
 > Reviewer chạy từ apps/api: `node test/ingredient-source.provenance.mjs --verify
 > ../../docs/ingredient-inventory/SCRUM-121-evidence.json` (không truy cập DB).
-> Revision provenance còn local cho tới khi người dùng commit/push; chưa resolve.
+> Source rehearsal giữ nguyên 4e9f1f0 + exact snapshot; provenance/evidence đã được
+> bàn giao tại commit 05385eb. Đoạn phản hồi này được cập nhật metadata, không đổi
+> kết quả/hash của lần chạy hoặc tự resolve comment.
 
 **Cho comment 6949554030 — metadata và quyết định Leader:**
 
-> Đã cập nhật metadata hiện tại thành PR head 4e9f1f0: temporal revision đã
-> commit/push và đã có phản hồi 6949067714; provenance revision mới còn local.
+> Metadata phân biệt source rehearsal 4e9f1f0 + exact snapshot với commit bàn giao
+> provenance/evidence 05385eb; revision hiện tại chỉ sửa metadata tài liệu.
 > Các SHA/ngày/evidence của run lịch sử và core baseline 57fa048 được giữ có nhãn.
 > Đã ghi nhận quyết định của Ryannguyxn tại chính comment này, created/updated
 > 2026-11-17T13:33:54Z: core schema được phép merge trước; persistence deferred
@@ -801,3 +815,14 @@ self-review local, không thay thế review/approval của Khang hoặc required
 > thiết kế đề xuất, chưa implement/PASS; scope decision không thay formal approval,
 > required CI hoặc merge. Báo cáo/index và PR body draft đã đồng bộ; chưa tự đăng
 > comment, sửa PR hoặc resolve thread.
+
+**Cho comment 6951340446 — metadata sau bàn giao provenance:**
+
+> Đã sửa báo cáo và README để phân biệt Source rehearsal: 4e9f1f0 + exact working
+> snapshot với Commit bàn giao provenance/evidence: 05385eb65922efe302a16f9dfb53f0d5c440f595.
+> Các trạng thái local của lượt chạy cũ được gắn nhãn lịch sử; không hardcode SHA
+> commit documentation tương lai dưới nhãn PR HEAD hiện tại. Đã bỏ câu defer có
+> điều kiện: persistence deferred sang SCRUM-123, gates 123/124/126 phải hoàn tất
+> trước ingredient-backed Orders. Giữ nguyên evidence/headAtRun/hashes và executable
+> inputs. Provenance verifier không truy cập DB và git diff --check PASS; không
+> chạy lại tests/rehearsal. Revision này chỉ documentation, chưa tự đăng/resolve.
