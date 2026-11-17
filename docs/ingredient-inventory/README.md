@@ -1,13 +1,14 @@
 # Bộ tài liệu triển khai Ingredient Inventory — BrewLite A2
 
-**Trạng thái:** proposed baseline / chờ xác nhận lịch chấm mới và khóa quyết định.
+**Trạng thái:** **DESIGN BASELINE COMPLETE** — D-01..D-08 **APPROVED DESIGN**. SCRUM-120 vẫn chờ final review, PR merge và Jira closure; không suy diễn design approval thành implementation hoặc production readiness.
 
 Tài liệu mới bổ sung, **không thay thế** Requirements, API Contract, Payment Architecture và các docs cũ. Khi có mâu thuẫn, dừng và ghi Decision Record trong tài liệu này; không tự sửa rule cũ để hợp code mới.
 
-1. `01_Ingredient_Inventory_Decision_Spec_v1.0.md`: phạm vi và quy tắc nghiệp vụ, schema đề xuất, những quyết định còn OPEN.
-2. `02_Implementation_and_Work_Plan_v1.0.md`: audit, chia việc, workflow Git/Docker, day-by-day, prompt Codex read-only.
-3. `03_Test_and_Release_Gates_v1.0.md`: test matrix, SQL assertions, VNPay test boundary, GO/NO-GO.
+1. [01_Ingredient_Inventory_Decision_Spec_v1.0.md](01_Ingredient_Inventory_Decision_Spec_v1.0.md): quyết định D-01..D-08, invariants, cutover và GO/NO-GO design.
+2. [02_Implementation_and_Work_Plan_v1.0.md](02_Implementation_and_Work_Plan_v1.0.md): Jira ownership/dependencies, implementation phases và D-05 legacy-drain runbook requirement.
+3. [03_Test_and_Release_Gates_v1.0.md](03_Test_and_Release_Gates_v1.0.md): Test Matrix, PostgreSQL/concurrency gates, VNPay boundary và release evidence.
+4. [04_Ingredient_Recipe_Master_v1.0.md](04_Ingredient_Recipe_Master_v1.0.md): 22-ingredient master cùng 25 Product/Size và 5 topping DEMO recipes đã approved ở phạm vi design.
 
-**VNPay:** Giữ nguyên IPN Merchant và flow thanh toán hiện tại. Unit/integration test offline trước release, một Sandbox Production smoke sau release. Không gọi đó là Sandbox Local E2E nếu callback không về Local.
+**Trạng thái thực thi:** Implementation là **NOT EXECUTED**; migration, seed, PostgreSQL tests và deployment là **NOT VERIFIED** nếu không có evidence riêng. Opening stock, seed idempotency và detailed input conversion còn là dependency SCRUM-122; snapshot-integrity persistence còn cần SCRUM-121/123 đề xuất/review; active API Contract verification thuộc SCRUM-125; PostgreSQL tests thuộc SCRUM-126; migration/cutover và VNPay evidence thuộc SCRUM-128/129/130.
 
-**Production safety:** Main auto-deploy; không merge main để thử nghiệm. Không chạy migrations/seed trên Production trước khi hoàn tất release gates.
+**Operational assumptions:** Repository không tự xác minh current merchant IPN URL/target, deployed version, auto-deploy behavior, Production DB/traffic, maintenance/test-only access hay rollback capability. SCRUM-129/130 phải xác minh và lưu release evidence trước cutover/reopen traffic. Policy vẫn là không đổi VNPay signing, callback, IPN URL hoặc QueryDR nếu không có authorization riêng; không gọi local callback là Sandbox E2E thật khi callback target chưa được xác minh.

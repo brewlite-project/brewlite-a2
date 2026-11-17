@@ -1,6 +1,6 @@
 # BrewLite A2 — Ingredient & Recipe Master v1.0
 
-**Trạng thái:** **PROPOSED DEMO design — D-01/D-02 APPROVED by Khang/Hoang; implementation remains pending**
+**Trạng thái:** **APPROVED DESIGN baseline — D-01..D-08 approved; implementation remains pending**
 **Jira:** SCRUM-120 / INV-02 — Design Decisions
 **Phạm vi:** Ingredient Master và DEMO recipe dataset cho verification software.
 **Không phải:** production recipe specification, supplier specification, seed authorization, migration authorization hoặc bằng chứng implementation/test/deployment. Approval D-01/D-02 chỉ áp dụng đúng phạm vi DEMO nêu trong Decision Spec.
@@ -12,7 +12,7 @@
 - **VERIFIED:** fact đọc trực tiếp từ source hiện tại.
 - **APPROVED BUSINESS DECISION:** quyết định B-01…B-07 được project owners xác nhận cho tài liệu này.
 - **ASSUMED DEMO DATA:** định lượng chỉ để implement/test software; **NOT VERIFIED** là công thức thương mại, vận hành bếp hay supplier-approved recipe.
-- **OPEN:** D-03..D-08; opening stock, seed idempotency và detailed seed process cũng vẫn OPEN cho SCRUM-122.
+- **OPEN:** opening stock values, seed idempotency và detailed input-conversion/seed procedure vẫn là dependency chưa được quyết của SCRUM-122.
 
 ### 1.2 Provenance đã kiểm chứng
 
@@ -29,7 +29,7 @@
 
 **VERIFIED:** source hiện tại chưa có Ingredient, recipe hoặc order ingredient reservation; Product stock hiện là inventory source theo số product. [schema.prisma:27-73](../../apps/api/prisma/schema.prisma#L27-L73), [Inventory Dependency Map:22-30](Inventory_Dependency_Map.md#L22-L30)
 
-**APPROVED BUSINESS DECISION:** Khang và Hoàng jointly approved D-01 canonical units và D-02 25 Product/Size + 5 topping DEMO recipes. D-03..D-08, opening stock, seed idempotency và detailed seed process vẫn OPEN; approval không xác nhận implementation. [Decision Spec:143-158](01_Ingredient_Inventory_Decision_Spec_v1.0.md#L143-L158)
+**APPROVED DESIGN:** D-01..D-08 đã được Khang và Hoàng phê duyệt ở phạm vi design. D-01 phê duyệt canonical units; D-02 phê duyệt 25 Product/Size + 5 topping DEMO recipes. Opening stock, seed idempotency và detailed input-conversion/seed procedure vẫn OPEN cho SCRUM-122. Approval không xác nhận implementation, migration, seed, test hay deployment. Xem [Decision Spec, §11 “Quyết định và trạng thái owner review”](01_Ingredient_Inventory_Decision_Spec_v1.0.md#11-quyết-định-và-trạng-thái-owner-review).
 
 ## 2. Confirmed business decisions
 
@@ -134,7 +134,7 @@ All quantities are **ASSUMED DEMO DATA / NOT VERIFIED**, per one topping applica
 
 ## 6. Unit và numeric integrity rules
 
-U-01…U-11 là phạm vi **APPROVED** của D-01/D-02 cho DEMO verification data. U-12 vẫn là target-cutover rule **PROPOSED** vì Product API/legacy stock compatibility thuộc D-03 đang OPEN. Không rule nào trong phần này là bằng chứng implementation đã tồn tại.
+U-01…U-11 là phạm vi **APPROVED DESIGN** của D-01/D-02 cho DEMO verification data. U-12 là target-cutover rule đã được D-03 phê duyệt ở phạm vi design; Product API/legacy-stock compatibility vẫn là implementation work pending. Không rule nào trong phần này là bằng chứng implementation đã tồn tại.
 
 | ID   | Rule                                                                                                                    |
 | ---- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -179,7 +179,7 @@ U-01…U-11 là phạm vi **APPROVED** của D-01/D-02 cho DEMO verification dat
 
 ## 7. Order aggregation / reservation principles
 
-All principles here are **PROPOSED**. Chúng giữ Payment/TTL/VNPay behavior hiện hữu, không yêu cầu đổi Payment State Machine.
+Các nguyên tắc target ở đây thuộc D-02/D-06/D-07 đã **APPROVED DESIGN**; việc triển khai, migration và test vẫn **NOT EXECUTED**. Chúng giữ Payment/TTL/VNPay behavior hiện hữu, không yêu cầu đổi Payment State Machine.
 
 1. Resolve valid base recipe by exact `(productId, size)`.
 2. Validate every selected topping is eligible via existing ProductTopping relation before calculating topping demand.
@@ -203,7 +203,7 @@ All principles here are **PROPOSED**. Chúng giữ Payment/TTL/VNPay behavior hi
 - **B-03:** Croissant được trừ theo ingredient per sale, không thực hiện batch manufacturing, yield, scrap/waste hoặc finished-goods accounting.
 - Cold Brew demand được phân bổ theo cup; không model production batch, steeping yield hoặc brew loss.
 - All recipe amounts are software DEMO assumptions, not certified food recipes, commercial recipes, allergen data or supplier specifications.
-- Opening ingredient stock, initial replenishment units và receiving policy **NOT VERIFIED**; thuộc SCRUM-122 / INV-04 sau khi D-01/D-02 được reviewed.
+- Opening ingredient stock, initial replenishment units và receiving policy **NOT VERIFIED**; thuộc SCRUM-122 / INV-04, dù D-01/D-02 đã approved ở phạm vi design.
 - Không migration, schema change, seed, production data write hoặc deployment nào được ủy quyền bởi tài liệu này.
 - Fixture catalog itself labels prices and stocks as example values; không suy diễn opening ingredient stock từ legacy Product stock. [seed-catalog.fixtures.ts:8-9](../../apps/api/prisma/seed-catalog.fixtures.ts#L8-L9)
 
@@ -243,9 +243,8 @@ All principles here are **PROPOSED**. Chúng giữ Payment/TTL/VNPay behavior hi
 - [x] Khang and Hoàng jointly approved 25 Product/Size DEMO recipes and five topping DEMO recipes for software verification.
 - [x] Khang and Hoàng approved MG canonical units for SALT/YEAST and Prisma `Int` MVP bounds/overflow policy.
 - [ ] Decide ingredient opening stock, stock receiving conversion and seed ownership in SCRUM-122.
-- [ ] Confirm target error-code/API compatibility and Product availability behavior before cutover.
-- [ ] Review legacy active Order policy before any schema/read-write switch.
-- [ ] Add real PostgreSQL concurrency/rollback tests before release; test matrix remains PROPOSED until executed.
-- [ ] Keep D-03..D-08 **OPEN** until the required owner approvals and evidence exist.
+- [ ] Implement and regression-test approved D-03 Product API/Frontend availability and D-04 error compatibility before cutover.
+- [ ] Implement D-05 legacy drain, D-06 immutable release path, D-07 PostgreSQL concurrency controls and D-08 controlled-release gates with required evidence.
+- [ ] Add real PostgreSQL concurrency/rollback tests before release; test matrix remains proposed verification work until executed.
 
 **Final status:** D-01/D-02 approved DEMO design scope; implementation remains pending. This document does not authorize code, migration, seed, deployment, commit, push, PR, or production change.
