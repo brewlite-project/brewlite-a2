@@ -1,7 +1,7 @@
 # BrewLite A2 — Ingredient Inventory Decision & Specification
 
-**Phiên bản:** 1.0 — Proposed baseline for implementation
-**Trạng thái:** CONDITIONAL GO — chỉ bắt đầu code khi giảng viên chính thức xác nhận dời lịch; các quyết định ở mục 11 phải được hai owner chốt.
+**Phiên bản:** 1.0 — Proposed baseline for implementation; D-01/D-02 approval recorded.
+**Trạng thái:** CONDITIONAL GO — D-01/D-02 đã được hai owner chốt trong phạm vi DEMO; chỉ bắt đầu code khi giảng viên chính thức xác nhận dời lịch và D-03..D-08 được xử lý theo quyết định owner.
 **Owners:** Khang (leader/acceptance), Hoàng (implementation/concurrency).
 **Phạm vi:** Chuyển từ trừ `Product.stock` theo số ly sang quản lý tồn kho **nguyên liệu thực tế** trong luồng Order/Inventory, không viết lại Payment.
 **Nguồn đối chiếu:** `orders.service.ts`, `inventory-policy.ts`, `cart-pricing.ts`, Prisma schema + SQL migrations tại commit làm việc; Payment Architecture Phase 2; API Contract hiện hành. Tên bảng/file mới trong tài liệu là đề xuất, không tuyên bố đã tồn tại.
@@ -67,17 +67,22 @@
 - Các API/Product UI hiện tiêu thụ `stock` phải được audit: hoặc chuyển sang **số ly tối đa có thể bán tính từ recipe** hoặc hiển thị trạng thái availability có nguồn duy nhất. Không để Product.stock giả gây sai lệch trong UI/validation.
 - Việc xóa cột cũ là **ngoài phạm vi MVP**.
 
-## 5. Cách tính nguyên liệu (minh họa, không phải recipe BrewLite)
+## 5. Cách tính nguyên liệu (ví dụ theo DEMO Recipe Master đã duyệt)
 
-Đơn Cà phê muối M x 2 + topping trân châu x 1 mỗi ly:
+Order: Cà Phê Muối Cố Đô size M × 2, mỗi ly thêm topping Kem cheese (`CHEESE_FOAM`).
 
-| Nguồn    | Ingredient | Mỗi ly | Tổng 2 ly |
-| -------- | ---------- | -----: | --------: |
-| Recipe M | Coffee     |   20 g |      40 g |
-| Recipe M | Milk       |  50 ml |    100 ml |
-| Topping  | Pearl      |   15 g |      30 g |
+Đây là tổ hợp Product/Size/Topping hợp lệ theo Recipe Master v1.0. Các định lượng là dữ liệu DEMO đã duyệt, không phải công thức thương mại.
 
-**Tính:** Với mỗi cart line, resolve product/size recipe và topping recipes; nhân với quantity; cộng gộp theo `ingredient_id`; sắp xếp khóa theo `ingredient_id` để tránh deadlock; reserve tất cả trong một transaction. Nếu recipe hoặc ingredient inactive/thiếu mapping: reject `INVALID_CART`/business code phù hợp **trước khi commit**; không tự coi định lượng bằng 0.
+| Nguồn               | Ingredient     |  Mỗi ly | Tổng 2 ly |
+| ------------------- | -------------- | ------: | --------: |
+| Recipe M            | COFFEE_BEANS   |    20 G |      40 G |
+| Recipe M            | CONDENSED_MILK |   18 ML |     36 ML |
+| Recipe M            | FRESH_MILK     |   60 ML |    120 ML |
+| Recipe M            | DAIRY_CREAM    |   20 ML |     40 ML |
+| Recipe M            | SALT           | 1000 MG |   2000 MG |
+| Topping CHEESE_FOAM | CHEESE_FOAM    |   30 ML |     60 ML |
+
+**Tính:** Với mỗi cart line, xác thực Product/Size và topping eligibility, resolve base recipe và topping recipe, nhân với quantity, sau đó cộng gộp theo `ingredient_id` trên toàn Order. Khóa nguyên liệu theo thứ tự xác định và reserve atomically trong cùng transaction tạo Order. Nếu thiếu recipe, ingredient inactive hoặc không đủ tồn kho, rollback toàn bộ; không mặc định lượng tiêu hao bằng 0.
 
 ### Quy tắc tồn kho khả dụng
 
@@ -140,17 +145,19 @@ return prisma.$transaction(async (tx) => {
 - **Pre-release với sandbox thật:** Chỉ tính E2E khi có một môi trường callback độc lập được kết nối đúng hoặc một kỹ thuật thử nghiệm không làm thay đổi IPN Production và được chứng minh; nếu không, đánh dấu E2E sandbox trước release là **NOT EXECUTED**.
 - **Post-release:** Chạy ngay một giao dịch VNPay Sandbox qua Vercel/Render với IPN đã giữ nguyên; xác minh Payment SUCCESS, Order PAID, ingredient reservation không bị hoàn, GET /orders/me và database. Nếu lỗi nghiêm trọng phải dừng nhận traffic theo phương án rollback có chuẩn bị, không đoán trạng thái thanh toán.
 
-## 11. Các quyết định cần hai owner chốt trước khi code
+## 11. Quyết định và trạng thái owner review
 
-| ID   | Quyết định                                                            | Đề xuất                                                  | Trạng thái |
-| ---- | --------------------------------------------------------------------- | -------------------------------------------------------- | ---------- |
-| D-01 | Đơn vị từng ingredient                                                | integer theo base unit quy chuẩn; không float            | OPEN       |
-| D-02 | Công thức đủ mọi sản phẩm demo/size/topping                           | dữ liệu được xác minh, không giả định                    | OPEN       |
-| D-03 | Legacy `products.stock` trên API                                      | availability suy từ ingredients, không dùng stock cũ     | OPEN       |
-| D-04 | Mã lỗi thiếu nguyên liệu                                              | ưu tiên giữ `409 INSUFFICIENT_STOCK` để tương thích      | OPEN       |
-| D-05 | Old active Order khi deploy                                           | cần policy riêng, không dùng recipe hiện hành để hoàn    | OPEN       |
-| D-06 | Reservation lifecycle schema                                          | unique/order/ingredient, one-time release in transaction | OPEN       |
-| D-07 | Lock order/transaction retry                                          | chốt sau audit source hiện tại                           | OPEN       |
-| D-08 | Production release readiness nếu không test VNPay Sandbox pre-release | ghi rõ residual risk, leader quyết định GO/NO-GO         | OPEN       |
+| ID   | Quyết định                                                            | Đề xuất                                                                                                                                                                            | Trạng thái |
+| ---- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| D-01 | Đơn vị từng ingredient                                                | 22 ingredient canonical base units theo Recipe Master; G/ML/MG/UNIT, integer-only, Prisma Int MVP với bound/overflow/atomic update; không ICE/plain water, không receiving API MVP | APPROVED   |
+| D-02 | Công thức đủ mọi sản phẩm demo/size/topping                           | 25 Product/Size DEMO recipes + 5 topping DEMO recipes; Croissant theo baking ingredients; ProductTopping eligibility, aggregate ingredientId và immutable reservation snapshot     | APPROVED   |
+| D-03 | Legacy `products.stock` trên API                                      | availability suy từ ingredients, không dùng stock cũ                                                                                                                               | OPEN       |
+| D-04 | Mã lỗi thiếu nguyên liệu                                              | ưu tiên giữ `409 INSUFFICIENT_STOCK` để tương thích                                                                                                                                | OPEN       |
+| D-05 | Old active Order khi deploy                                           | cần policy riêng, không dùng recipe hiện hành để hoàn                                                                                                                              | OPEN       |
+| D-06 | Reservation lifecycle schema                                          | unique/order/ingredient, one-time release in transaction                                                                                                                           | OPEN       |
+| D-07 | Lock order/transaction retry                                          | chốt sau audit source hiện tại                                                                                                                                                     | OPEN       |
+| D-08 | Production release readiness nếu không test VNPay Sandbox pre-release | ghi rõ residual risk, leader quyết định GO/NO-GO                                                                                                                                   | OPEN       |
 
-**Không coi các mục OPEN đã approved.**
+**Approval scope D-01/D-02:** dữ liệu recipe là DEMO verification data, không phải commercial/supplier-certified recipe. Opening stock values, seed idempotency và detailed seed process vẫn OPEN cho SCRUM-122. Approval này không xác nhận implementation, migration, seed, test, deployment hoặc Production state.
+
+**D-03..D-08 vẫn OPEN; không coi các mục OPEN đã approved.**
