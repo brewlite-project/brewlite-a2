@@ -12,6 +12,8 @@ import pg from 'pg';
 const api = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const repo = resolve(api, '../..');
 const baseline = '3a183d67c12658432100298eefd2b4ffe0bbfb7a';
+const ingredientBaseline = '57fa0486c9fce5633f7be0f58c4ce99028ff2f22';
+const temporalConstraint = 'ck_order_ingredient_reservations_release_time';
 const taskPort = 55421;
 const url = (database) => `postgresql://scrum121@127.0.0.1:${taskPort}/${database}`;
 
@@ -73,9 +75,10 @@ if (process.argv.includes('--check-env-only')) {
 const port = Number(process.env.SCRUM121_TEST_PORT);
 assert.equal(port, taskPort, 'Set SCRUM121_TEST_PORT=55421 for the dedicated cluster.');
 const root = mkdtempSync(join(tmpdir(), 'brewlite-scrum121-rehearsal-'));
-const evidence = { baseline, startedAt: new Date().toISOString(), root, checks: [], commands: [] };
+const evidence = { baseline, ingredientBaseline, startedAt: new Date().toISOString(), root, checks: [], commands: [] };
 evidence.changeHashes = Object.fromEntries([
   'prisma/schema.prisma', 'prisma/migrations/20261117110000_scrum121_ingredient_inventory/migration.sql',
+  'prisma/migrations/20261117130000_scrum121_reservation_release_time/migration.sql',
   'test/ingredient-schema.rehearsal.mjs',
 ].map((path) => [path, createHash('sha256').update(readFileSync(join(api, path))).digest('hex')]));
 const check = (name, detail) => {
@@ -137,9 +140,9 @@ async function fixtures(db) {
     [randomUUID(), ids[key], ids[`${key}User`], randomUUID(), payment]);
   }
 }
-async function snapshot(db) {
+async function snapshot(db, names = legacy) {
   const data = {};
-  for (const table of legacy) {
+  for (const table of names) {
     const { rows } = await db.query(`SELECT COALESCE(jsonb_agg(j ORDER BY j::text),'[]'::jsonb) AS data
       FROM (SELECT to_jsonb(t) AS j FROM "${table}" t) s`);
     data[table] = rows[0].data;
@@ -159,7 +162,11 @@ async function catalog(db) {
   assert.equal(columns.length, 23);
   assert.equal(constraints.filter((c) => c.contype === 'p').length, 4);
   assert.equal(constraints.filter((c) => c.contype === 'f').length, 6);
-  assert.equal(constraints.filter((c) => c.contype === 'c').length, 4);
+  assert.equal(constraints.filter((c) => c.contype === 'c').length, 5);
+  const temporal = constraints.find((c) => c.conname === temporalConstraint);
+  assert.ok(temporal?.convalidated, 'Temporal CHECK must exist and be validated');
+  assert.match(temporal.definition, /released_at IS NULL/);
+  assert.match(temporal.definition, /released_at >= created_at/);
   assert.ok(constraints.every((c) => c.convalidated));
   assert.ok(constraints.filter((c) => c.contype === 'f').every((c) => /ON DELETE RESTRICT/.test(c.definition) && /ON UPDATE CASCADE/.test(c.definition)));
   assert.equal(indexes.length, 11); // 4 PK + 4 unique + 3 reverse ingredient lookups.
@@ -171,6 +178,7 @@ async function catalog(db) {
 async function assertions(db, label) {
   let negative = 0;
   const negativeCases = [];
+  const temporalPositiveCases = [];
   const reject = async (name, sql, values, code, constraint, column) => {
     await db.query('SAVEPOINT invalid_case');
     let error;
@@ -273,8 +281,41 @@ async function assertions(db, label) {
     assert.equal((await db.query('SELECT count(*)::int AS n FROM order_ingredient_reservations WHERE ingredient_id=$1', [changedId])).rows[0].n, 4);
     await db.query('UPDATE order_ingredient_reservations SET released_at=now() WHERE order_id=$1', [ids.cancelled]);
     assert.ok((await db.query('SELECT released_at FROM order_ingredient_reservations WHERE order_id=$1', [ids.cancelled])).rows[0].released_at);
+    // Fixed UTC instants; each INSERT has a fresh ingredient so a unique/FK
+    // failure cannot stand in for the temporal CHECK. Everything rolls back.
+    const t0 = '2026-11-17T00:00:00.000Z';
+    const earlier = '2026-11-16T23:59:59.000Z';
+    const later = '2026-11-17T00:00:01.000Z';
+    const temporalInsert = `INSERT INTO order_ingredient_reservations
+      (id,order_id,ingredient_id,quantity_reserved,created_at,released_at) VALUES($1,$2,$3,1,$4,$5)`;
+    let temporalId;
+    let temporalIngredient;
+    for (const [name, release] of [['null', null], ['equal', t0], ['later', later]]) {
+      temporalId = randomUUID(); temporalIngredient = randomUUID();
+      await db.query(insertIng, [temporalIngredient, `TEMPORAL_${name}`, 'G', 0]);
+      await db.query(temporalInsert, [temporalId, ids.paid, temporalIngredient, t0, release]);
+      const row = (await db.query('SELECT created_at,released_at FROM order_ingredient_reservations WHERE id=$1', [temporalId])).rows[0];
+      assert.equal(row.created_at.toISOString(), t0);
+      assert.equal(row.released_at?.toISOString() ?? null, release);
+      temporalPositiveCases.push(`INSERT released_at ${name}`);
+    }
+    const invalidIngredient = randomUUID();
+    await db.query(insertIng, [invalidIngredient, 'TEMPORAL_INVALID', 'G', 0]);
+    await reject('temporal INSERT earlier release', temporalInsert,
+      [randomUUID(), ids.paid, invalidIngredient, t0, earlier], '23514', temporalConstraint);
+    for (const [name, release] of [['null', null], ['equal', t0], ['later', later]]) {
+      await db.query('UPDATE order_ingredient_reservations SET released_at=$2 WHERE id=$1', [temporalId, release]);
+      assert.equal((await db.query('SELECT released_at FROM order_ingredient_reservations WHERE id=$1', [temporalId])).rows[0].released_at?.toISOString() ?? null, release);
+      temporalPositiveCases.push(`UPDATE released_at ${name}`);
+    }
+    await reject('temporal UPDATE earlier release', 'UPDATE order_ingredient_reservations SET released_at=$2 WHERE id=$1',
+      [temporalId, earlier], '23514', temporalConstraint);
+    await reject('temporal UPDATE created_at after release', 'UPDATE order_ingredient_reservations SET created_at=$2 WHERE id=$1',
+      [temporalId, '2026-11-17T00:00:02.000Z'], '23514', temporalConstraint);
+    assert.deepEqual((await db.query('SELECT created_at,released_at FROM order_ingredient_reservations WHERE id=$1', [temporalId])).rows,
+      [{ created_at: new Date(t0), released_at: new Date(later) }]);
     // No claim of transaction-level immutability/once-only release or size-policy validation.
-    check(label, { negativeAssertions: negative, negativeCases,
+    check(label, { negativeAssertions: negative, negativeCases, temporalPositiveCases,
       valid: 'all base units, Int bounds, S/M/L/ONE_SIZE, multi-ingredient, Order states, snapshot independent of recipes, nullable release, FK update cascade' });
   } finally { await db.query('ROLLBACK'); }
 }
@@ -292,11 +333,13 @@ try {
   const suffix = randomUUID().replaceAll('-', '').slice(0, 12);
   const clean = `scrum121_clean_${suffix}`;
   const upgrade = `scrum121_upgrade_${suffix}`;
-  evidence.databases = { clean, upgrade };
-  for (const database of [clean, upgrade]) assert.match(database, /^scrum121_(clean|upgrade)_[0-9a-f]{12}$/);
-  assert.equal((await admin.query('SELECT datname FROM pg_database WHERE datname=ANY($1)', [[clean, upgrade]])).rowCount, 0,
+  const coreUpgrade = `scrum121_core_upgrade_${suffix}`;
+  const databases = [clean, upgrade, coreUpgrade];
+  evidence.databases = { clean, upgrade, coreUpgrade };
+  for (const database of databases) assert.match(database, /^scrum121_(clean|upgrade|core_upgrade)_[0-9a-f]{12}$/);
+  assert.equal((await admin.query('SELECT datname FROM pg_database WHERE datname=ANY($1)', [databases])).rowCount, 0,
     'Refuse to reuse existing databases');
-  for (const database of [clean, upgrade]) await admin.query(`CREATE DATABASE "${database}"`);
+  for (const database of databases) await admin.query(`CREATE DATABASE "${database}"`);
   check('isolated PostgreSQL 18', { port, cluster: server.cluster, databases: evidence.databases });
   const archive = join(root, 'baseline.tar');
   const tar = execFileSync('git', ['archive', '--format=tar', baseline, 'apps/api'], {
@@ -306,6 +349,14 @@ try {
   execFileSync(tarExecutable, ['-xf', archive, '-C', root], { env: subprocessEnv(upgrade) });
   const oldApi = join(root, 'apps/api');
   symlinkSync(join(api, 'node_modules'), join(oldApi, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
+  evidence.headAtRun = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repo, env: subprocessEnv(upgrade), encoding: 'utf8' }).trim();
+  const coreRoot = mkdtempSync(join(root, 'ingredient-core-'));
+  const coreArchive = join(coreRoot, 'core.tar');
+  writeFileSync(coreArchive, execFileSync('git', ['archive', '--format=tar', ingredientBaseline, 'apps/api'], {
+    cwd: repo, env: subprocessEnv(coreUpgrade), maxBuffer: 100 * 1024 * 1024 }));
+  execFileSync(tarExecutable, ['-xf', coreArchive, '-C', coreRoot], { env: subprocessEnv(coreUpgrade) });
+  const coreApi = join(coreRoot, 'apps/api');
+  symlinkSync(join(api, 'node_modules'), join(coreApi, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
   evidence.versions = { node: process.version,
     prisma: JSON.parse(readFileSync(join(api, 'node_modules/prisma/package.json'))).version,
     client: JSON.parse(readFileSync(join(api, 'node_modules/@prisma/client/package.json'))).version };
@@ -327,12 +378,62 @@ try {
   assert.deepEqual(after, before);
   evidence.afterHash = createHash('sha256').update(JSON.stringify(after)).digest('hex');
   check('legacy whole-row preservation', { hash: evidence.afterHash, counts: Object.fromEntries(Object.entries(after).map(([key, rows]) => [key, rows.length])) });
-  for (const [name, db] of [['clean', cleanDb], ['upgrade', upgradeDb]]) {
+  // Rehearse the exact pushed schema (11 applied migrations) with persisted
+  // reservations before applying only the new temporal migration.
+  prisma(coreApi, coreUpgrade, 'core-baseline-deploy', 'migrate', 'deploy');
+  const coreDb = new pg.Client(connection(coreUpgrade)); await coreDb.connect(); clients.push(coreDb);
+  const migrationState = async () => (await coreDb.query('SELECT id,migration_name,checksum,finished_at,rolled_back_at FROM _prisma_migrations ORDER BY migration_name')).rows;
+  const coreMigrationsBefore = await migrationState();
+  assert.equal(coreMigrationsBefore.length, 11);
+  assert.ok(coreMigrationsBefore.every((m) => m.finished_at && !m.rolled_back_at));
+  const coreMigrationPath = 'prisma/migrations/20261117110000_scrum121_ingredient_inventory/migration.sql';
+  const archivedMigration = readFileSync(join(coreApi, coreMigrationPath));
+  const workingMigration = readFileSync(join(api, coreMigrationPath));
+  const sha = (bytes) => createHash('sha256').update(bytes).digest('hex');
+  assert.equal(coreMigrationsBefore.at(-1).checksum, sha(archivedMigration));
+  assert.equal(sha(archivedMigration.toString().replaceAll('\r\n', '\n')), sha(workingMigration.toString().replaceAll('\r\n', '\n')),
+    'Historical migration SQL must match the committed core export (allow LF/CRLF only)');
+  evidence.coreMigrationsBefore = coreMigrationsBefore;
+  evidence.coreMigrationEncoding = { archiveByteHash: sha(archivedMigration), workingByteHash: sha(workingMigration),
+    canonicalLfHash: sha(workingMigration.toString().replaceAll('\r\n', '\n')), method: 'compare SQL LF-normalized content across export/workspace; compare stored checksum unchanged within same DB' };
+  await fixtures(coreDb);
+  for (const [index, release] of [null, '2026-11-17T00:00:00.000Z', '2026-11-17T00:00:01.000Z'].entries()) {
+    const ingredient = randomUUID();
+    await coreDb.query(`INSERT INTO ingredients(id,code,name,base_unit,stock_quantity) VALUES($1,$2,'Core upgrade fixture','MG',5)`, [ingredient, `CORE_${index}`]);
+    await coreDb.query(`INSERT INTO recipe_ingredients(id,product_id,size,ingredient_id,quantity_per_unit) VALUES($1,$2,'ONE_SIZE',$3,1)`, [randomUUID(), ids.oneSize, ingredient]);
+    await coreDb.query(`INSERT INTO topping_ingredients(id,topping_id,ingredient_id,quantity_per_topping) VALUES($1,$2,$3,1)`, [randomUUID(), ids.topping, ingredient]);
+    await coreDb.query(`INSERT INTO order_ingredient_reservations(id,order_id,ingredient_id,quantity_reserved,created_at,released_at) VALUES($1,$2,$3,$4,$5,$6)`,
+      [randomUUID(), ids.paid, ingredient, index + 1, '2026-11-17T00:00:00.000Z', release]);
+  }
+  const coreBefore = await snapshot(coreDb, [...legacy, ...tables]);
+  writeFileSync(join(root, 'core-before.json'), JSON.stringify(coreBefore, null, 2));
+  evidence.coreBeforeHash = createHash('sha256').update(JSON.stringify(coreBefore)).digest('hex');
+  // Do not repair invalid timestamps to make deployment pass.
+  assert.equal((await coreDb.query('SELECT count(*)::int AS n FROM order_ingredient_reservations WHERE released_at < created_at')).rows[0].n, 0,
+    'Core upgrade blocked by invalid existing timestamps; investigate without rewriting data');
+  prisma(api, coreUpgrade, 'core-upgrade-deploy', 'migrate', 'deploy');
+  prisma(api, coreUpgrade, 'core-upgrade-status', 'migrate', 'status');
+  prisma(api, coreUpgrade, 'core-upgrade-redeploy', 'migrate', 'deploy');
+  const coreMigrationsAfter = await migrationState();
+  assert.equal(coreMigrationsAfter.length, 12);
+  assert.ok(coreMigrationsAfter.every((m) => m.finished_at && !m.rolled_back_at));
+  assert.deepEqual(coreMigrationsAfter.filter((m) => coreMigrationsBefore.some((old) => old.id === m.id)), coreMigrationsBefore,
+    'Applied migration history/checksums must remain unchanged within this database');
+  evidence.coreMigrationsAfter = coreMigrationsAfter;
+  check('core applied migration history preserved', { existingRowsUnchanged: 11, newRows: 1,
+    originalChecksum: coreMigrationsBefore.at(-1).checksum, temporalMigration: coreMigrationsAfter.at(-1).migration_name });
+  const coreAfter = await snapshot(coreDb, [...legacy, ...tables]);
+  writeFileSync(join(root, 'core-after.json'), JSON.stringify(coreAfter, null, 2));
+  assert.deepEqual(coreAfter, coreBefore);
+  evidence.coreAfterHash = createHash('sha256').update(JSON.stringify(coreAfter)).digest('hex');
+  check('core schema upgrade whole-row preservation', { beforeHash: evidence.coreBeforeHash, afterHash: evidence.coreAfterHash,
+    tables: [...legacy, ...tables], persistedReservations: 3, fromAppliedMigrations: 11, toAppliedMigrations: 12 });
+  for (const [name, db] of [['clean', cleanDb], ['upgrade', upgradeDb], ['core-upgrade', coreDb]]) {
     if (name === 'clean') await fixtures(db);
     const schema = await catalog(db);
     writeFileSync(join(root, `${name}-catalog.json`), JSON.stringify(schema, null, 2));
     check(`${name} catalog`, { columns: schema.columns.length, constraints: schema.constraints.length, indexes: schema.indexes.length });
-    assert.equal((await db.query('SELECT count(*)::int AS n FROM order_ingredient_reservations')).rows[0].n, 0);
+    assert.equal((await db.query('SELECT count(*)::int AS n FROM order_ingredient_reservations')).rows[0].n, name === 'core-upgrade' ? 3 : 0);
     await assertions(db, `${name} constraints`);
   }
   prisma(api, upgrade, 'prisma-validate', 'validate');

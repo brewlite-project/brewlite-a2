@@ -1,7 +1,10 @@
 # SCRUM-121 / INV-03 — Prisma schema và additive migration
 
 Owner: Nguyễn Khải Hoàng. Reviewer theo task: Khang. PR base: `dev`.
-Trạng thái: implementation local; chưa stage/commit/push/PR, chưa nghiệm thu/Done.
+Trạng thái hiện tại: [PR #38](https://github.com/brewlite-project/brewlite-a2/pull/38)
+đã mở vào dev tại head `57fa0486c9fce5633f7be0f58c4ce99028ff2f22`.
+Revision temporal CHECK / integrity design bên dưới còn local, chưa stage/commit/push;
+chưa đăng phản hồi review, chưa approval/merge/Done.
 
 ## 1. Nguồn, baseline và phạm vi
 
@@ -89,6 +92,8 @@ CHECKs chỉ nằm trong migration SQL:
 - `ck_recipe_ingredients_quantity_positive`: quantity_per_unit > 0.
 - `ck_topping_ingredients_quantity_positive`: quantity_per_topping > 0.
 - `ck_order_ingredient_reservations_quantity_positive`: quantity_reserved > 0.
+- `ck_order_ingredient_reservations_release_time`: released_at IS NULL OR
+  released_at >= created_at; nằm trong follow-up migration `20261117130000_scrum121_reservation_release_time`.
 
 INTEGER tự giới hạn -2,147,483,648…2,147,483,647; CHECK giới hạn miền không âm/dương.
 Prisma không biểu diễn CHECK; các migration sau phải bảo toàn chúng và chạy lại
@@ -121,13 +126,24 @@ thêm trigger hay đổi ý nghĩa size ngoài design đã duyệt.
 
 ## 5. Migration strategy và rủi ro
 
-Migration mới: `20261117110000_scrum121_ingredient_inventory`.
+Migration core ban đầu: `20261117110000_scrum121_ingredient_inventory`.
 Sinh bằng Prisma 7.10.1 `migrate diff --from-schema <baseline.prisma>
 --to-schema prisma/schema.prisma --script --output <migration.sql>`, sau đó review,
 bọc BEGIN/COMMIT và thêm 4 CHECK thủ công. Diff schema-to-schema tránh Prisma
 đề xuất xóa PostgreSQL CHECK/partial index baseline không biểu diễn trong Prisma.
 
-SQL chỉ CREATE enum/bảng/index, ADD FK/CHECK vào bảng mới. Không DROP, UPDATE,
+PR #38 comment 6948316418 được xử lý bằng **migration additive tiếp theo**
+`20261117130000_scrum121_reservation_release_time`: BEGIN/COMMIT, chỉ ADD CHECK
+temporal lên bảng reservation hiện có. SQL core đã commit/push/apply giữ nguyên;
+không migrate reset/resolve hoặc viết lại checksum. Prisma schema chỉ thêm
+comment vì CHECK không biểu diễn bằng Prisma attributes. ADD CHECK validate
+mọi row cũ ngay; nếu có released_at < created_at thì deploy phải fail, không
+tự sửa timestamps hoặc bỏ validation. Preflight read-only có thể đếm các row
+vi phạm, nhưng không thay thế validation trong migration. Constraint có thể
+scan/lock bảng reservation; cần rehearsal và runbook trước release.
+
+SQL core chỉ CREATE enum/bảng/index, ADD FK/CHECK vào bảng mới; follow-up chỉ ADD
+CHECK lên reservation. Không DROP, UPDATE,
 DELETE, TRUNCATE, backfill hay ALTER cột legacy. FK cần lock metadata ở bảng cha;
 DDL vẫn có thể chờ transaction đang chạy. Cần rehearsal, maintenance/drain và
 approved runbook trước release. Không tự thêm global lock_timeout vào migration.
@@ -156,7 +172,8 @@ Kiểm chứng env riêng, không cần port/DB: `node test/ingredient-schema.re
 Runner chỉ chấp nhận loopback:55421, user scrum121, PostgreSQL 18 và cluster_name
 `brewlite_scrum121_test`. Không nhận DATABASE_URL có sẵn; override cả
 DATABASE_URL, SHADOW_DATABASE_URL, AUTH_TEST_DATABASE_URL, ORDERS_TEST_DATABASE_URL
-cho subprocess. Mỗi lần tạo hai DB tên ngẫu nhiên mới, không ghi đè DB cũ.
+cho subprocess. Revision mới tạo ba DB tên ngẫu nhiên: clean, legacy upgrade
+và core upgrade; không ghi đè DB cũ.
 Sau review, mọi Node/Prisma/Vitest/Git/tar subprocess đều nhận env riêng từ cùng
 `subprocessEnv`: lọc tên biến không phân biệt hoa/thường, ép
 `SEED_RENDER_PG_INTEGRATION=0`, loại bỏ `SEED_RENDER_INTEGRATION_DATABASE_URL`,
@@ -164,7 +181,7 @@ Sau review, mọi Node/Prisma/Vitest/Git/tar subprocess đều nhận env riêng
 OS/tool variables; không sửa terminal process.env hoặc file môi trường người dùng.
 Chế độ env-only inject cờ bật và target sentinel ngoài phạm vi vào một parent
 object, tạo Node child chỉ assert env đã lọc, không import driver hay kết nối DB.
-Runner kiểm tra hai tên DB đúng prefix task và chưa tồn tại trước CREATE DATABASE;
+Runner kiểm tra cả ba tên DB đúng prefix task và chưa tồn tại trước CREATE DATABASE;
 không DROP/tái sử dụng database hoặc khởi động lại stack khác.
 Baseline source lấy bằng `git archive` SHA cố định, giải nén trong temp;
 generate client cũ tại source snapshot, dùng dependencies đã cài chung qua junction.
@@ -174,9 +191,9 @@ Evidence kết quả cuối được ghi tại [SCRUM-121-evidence.json](SCRUM-1
 File gồm baseline, SHA-256 từng file được kiểm tra, thời điểm UTC, PostgreSQL/
 Node/Prisma versions, DB IDs, câu lệnh/method và kết quả. Raw logs, catalog, toàn
 bộ fixture before/after nằm trong thư mục temp của run, không chứa dữ liệu demo.
-Top-level là run sau sửa review; `historicalRuns[0]` giữ nguyên toàn bộ giá trị
-evidence trước review. `historicalReview` ghi hạn chế đã phát hiện, không biến
-hai assertions cũ thành bằng chứng đầy đủ cho FK mới.
+Top-level là run mới nhất. `historicalRuns[0]` giữ nguyên toàn bộ evidence trước
+revision hiện tại, gồm nested history/provenance từ các lượt trước. Không biến
+hai assertions cũ bị review thành bằng chứng đầy đủ cho FK mới.
 Không publish raw connection strings hoặc password/token/secret vào báo cáo.
 
 <!-- SCRUM121_RESULTS -->
@@ -250,6 +267,75 @@ Whole-row hash before = after:
 Schema/migration hashes giữ nguyên run cũ; xem đầy đủ trong `changeHashes`.
 Không chạy thêm build/test ngoài runner vì kết quả không phát sinh lý do mới.
 Các giới hạn runtime/VNPay/restore/remote CI bên dưới vẫn giữ nguyên.
+
+### 6.2 PR #38 — temporal CHECK, revision sau head đã push
+
+Đã đọc lại [comment temporal](https://github.com/brewlite-project/brewlite-a2/pull/38#issuecomment-6948316418)
+và [comment integrity](https://github.com/brewlite-project/brewlite-a2/pull/38#issuecomment-6948319016)
+cùng timeline PR trước sửa; không thấy human response mới hơn hai comment lúc
+2026-11-17 12:40:50/12:40:57 UTC. Git đầu lượt sạch, không có staged/untracked;
+HEAD local/remote PR là `57fa0486c9fce5633f7be0f58c4ce99028ff2f22`, base/dev sau
+fetch vẫn `3a183d67c12658432100298eefd2b4ffe0bbfb7a`. Không đổi branch/tích hợp dev.
+
+Trước thêm migration, đã kiểm tra cluster riêng/data directory ở port 55421 và
+DB test cũ: 11 migrations finished, không rolled back; migrate status up-to-date;
+core migration checksum `feee2c114603c531a21d930a593de0eee973c7f4fed6c159c9b02747ac4d96f0`.
+Theo AGENTS.md/ADR-002 và convention SQL migrations, thêm migration mới thay vì
+sửa core đã áp dụng. Không reset/resolve/checksum overwrite hoặc sửa timestamps.
+
+**Run cuối: 2026-11-17 12:56:50–12:58:11 UTC (19:56:50–19:58:11 UTC+7).**
+PostgreSQL 18.6 / Node 26.13.1 / Prisma & Client 7.10.1 / Vitest 4.1.11.
+Code đang kiểm tra = HEAD `57fa0486…` + working diff; hash chính xác ở evidence,
+không gán SHA commit cho thay đổi chưa commit. Raw logs/catalog/snapshots:
+`%TEMP%\brewlite-scrum121-rehearsal-Qq7yVI`.
+
+| Đường kiểm chứng / lệnh hoặc phương pháp | Kết quả thực tế |
+| --- | --- |
+| Env-only và full runner env proof | PASS; seed/concurrency opt-ins bị tắt, target seed bị loại; không kết nối sentinel ngoài phạm vi |
+| Clean `scrum121_clean_e750a0d544ec` | PASS deploy đủ 12 migrations → status → redeploy không pending |
+| Legacy upgrade `scrum121_upgrade_e750a0d544ec` | PASS 10 migrations tại baseline 3a183d67 + fixture → 12 migrations → status/redeploy; whole-row 13 bảng legacy bằng nhau |
+| Core upgrade `scrum121_core_upgrade_e750a0d544ec` | PASS export source/config/migrations từ head 57fa0486, deploy 11; thêm fixture có Ingredient/Recipe/Topping và 3 reservation persisted với NULL/equal/later; deploy chỉ follow-up thứ 12 → status/redeploy |
+| Core upgrade preservation | PASS whole-row cả 17 bảng (13 legacy + 4 mới); giữ quantity/timestamps/quan hệ/stock; 11 migration history rows/checksums giữ nguyên, chỉ thêm một migration record |
+| Catalog cả ba DB | PASS; temporal constraint đúng tên/definition và convalidated=true; 23 columns, 4 PK, 6 FK, **5 CHECK**, 22 NOT NULL, 11 indexes; catalogs giống nhau |
+| Negative assertions cả ba DB | **53 mỗi DB PASS**: 50 ca cũ vẫn đúng FK/constraint/column + 3 temporal failures; SAVEPOINT/ROLLBACK cho từng lỗi và rollback toàn bộ assertion fixtures |
+| Temporal positive assertions | 6 ca mỗi DB PASS: INSERT và UPDATE released_at NULL/equal/later; timestamp UTC cố định, không phụ thuộc clock execution |
+| Temporal negative assertions | INSERT early release, UPDATE early release, UPDATE created_at vượt released_at đều trả SQLSTATE **23514** + **ck_order_ingredient_reservations_release_time** |
+| Prisma validate/generate + build + Client mới roundtrip | PASS đúng config/scripts tương đương repo |
+| Unit suite | **479 passed, 6 skipped**; seed one-shot guard suite bị tắt SEED_RENDER_PG_INTEGRATION=0, không tính skipped là PASS |
+| Runtime code/client baseline 3a183d67 trên DB đã nâng cấp | **103 passed, 10 skipped**, 4 suites passed; 7 payment + 3 promotion concurrency cases tắt PAYMENT_CONCURRENCY_TESTS=0 |
+
+Các ca temporal dùng created_at `2026-11-17T00:00:00.000Z`, early release
+`2026-11-16T23:59:59.000Z`, later release `2026-11-17T00:00:01.000Z`.
+UPDATE created_at vi phạm dùng `2026-11-17T00:00:02.000Z`. Ca INSERT lỗi có
+ingredient/pair riêng hợp lệ, tránh PASS bởi FK/unique; errors kiểm tra structured
+DatabaseError.code/constraint, không so thông báo. Valid cases và errors không
+để lại rows làm sai các assertions khác. Không gặp timestamp lỗi trong fixture
+nâng cấp; preflight và ADD CHECK sẽ chặn thay vì repair nếu có dữ liệu vi phạm.
+
+Whole-row legacy before = after:
+`baa2210722bd6a6a8fd792e993736bf1d7d620627ee3ac6b481954e3ef86a0b1`.
+Whole-row core before = after:
+`5ca144c099d2020ba58043e45f8a64d27a808b7b876127d4d08d7bb69eed49ad`.
+Migration temporal hash:
+`b97bf7478f27ad3549abfccee049d5f59634891e5c162576c1e6215d1d5a9caf`.
+Runner hash:
+`b5e32f2ae98945496c08e6ca51d3a0e835c56ab7496f7cb019bafd170df0b545`.
+
+Checksum provenance: core export Windows có CRLF, byte hash `08a61dae…`; file
+workspace/Git blob có LF, hash `feee2c11…`. Canonical LF content khớp hoàn toàn.
+Không sửa cả hai file hoặc metadata đã áp dụng để làm chúng cùng byte hash.
+`coreMigrationsBefore`/`coreMigrationsAfter` chứng minh 11 records cũ, gồm checksum,
+không đổi **trong cùng DB**; `coreMigrationEncoding` giữ đầy đủ cả hai raw hashes.
+Lượt functional trước ở `%TEMP%\brewlite-scrum121-rehearsal-zq2DjQ` và diagnostic
+line-ending được giữ; run cuối bổ sung check history trước/sau, không dùng
+reset/resolve che mismatch. Các evidence đã publish trước revision được giữ
+nguyên trong historicalRuns, không chuyển 48/50 assertions cũ thành 53 mới.
+
+Giới hạn: temporal CHECK chỉ bảo đảm thứ tự timestamp. Manifest/immutable guards,
+reserve/release/concurrency chưa triển khai; xem đề xuất §8.1. Không test restore,
+real VNPay Sandbox, Docker/UI/full E2E hoặc Production. Không chạy thêm build/test
+ngoài runner trừ env-only và chẩn đoán checksum có mục đích. Không thay đổi demo/
+Production, không sửa cấu hình người dùng hoặc dừng/restart stack trong lượt này.
 
 Assertions hợp lệ: đủ G/ML/MG/UNIT; stock 0 và max Int; quantity dương; nhiều
 ingredient; S/M/L/ONE_SIZE; reservation cho PENDING/PAYMENT_FAILED/PAID/CANCELLED;
@@ -334,39 +420,214 @@ Schema core hỗ trợ aggregate snapshot và released_at. Không thêm
 manifest/version/digest/count hoặc tự bỏ yêu cầu integrity; transaction
 reserve/release và concurrency vẫn thuộc các task tiếp theo.
 
+### 8.1 Đề xuất snapshot-integrity cho comment 6948319016 — PENDING LEADER DECISION
+
+Nguồn: [D-06, Decision Spec §4 và §7](01_Ingredient_Inventory_Decision_Spec_v1.0.md),
+[comment PR #38](https://github.com/brewlite-project/brewlite-a2/pull/38#issuecomment-6948319016).
+Comment cho phép **đề xuất** deferred nếu Leader chấp thuận, không phê duyệt
+phương án cụ thể. Toàn bộ fields/guards/permissions dưới đây là thiết kế đề xuất,
+**chưa có trong Prisma/migration, chưa được triển khai hoặc test**. Temporal CHECK
+là phần triển khai riêng, không thay thế integrity/immutability/one-time release.
+
+**Phương án A đề xuất:** manifest tại Order, snapshot aggregate được seal một
+lần, DB guards bảo vệ immutable data kết hợp runtime role hạn chế và application
+verification trong cùng transaction. Không có ReservationStatus enum mới.
+
+#### A. Marker, manifest và canonicalization
+
+Tên logic đề xuất (tên/type cuối cần review trong migration SCRUM-123):
+
+| Nơi lưu | Giá trị / nullability đề xuất | Vai trò |
+| --- | --- | --- |
+| Order.inventorySource | Nullable, default NULL ở bước expand; giá trị explicit LEGACY_PRODUCT hoặc INGREDIENT_V1 | Marker tồn tại độc lập reservation rows; NULL = chưa phân loại, không tự kết luận legacy |
+| Order.inventorySnapshotVersion | Nullable Int, không default; v1 xác định canonical format + SHA-256 | Chọn verifier; unknown version fail-closed |
+| Order.inventorySnapshotCount | Nullable Int, không default; > 0 khi ingredient-backed | Số ingredient aggregate khác nhau, không phải tổng quantity |
+| Order.inventorySnapshotDigest | Nullable fixed-length 64 hex lowercase, không default | SHA-256 canonical bytes; không coi là chữ ký chống authorized tampering |
+
+Đề xuất shape constraint cuối transaction: INGREDIENT_V1 phải có đủ version,
+count và digest hợp lệ; LEGACY_PRODUCT không có manifest và không có ingredient
+reservation; NULL/partial metadata không được đưa vào ingredient release path.
+Trong lúc dựng snapshot, có thể tạm chưa seal **chỉ trong transaction chưa commit**.
+Không dùng count default 0 hoặc digest của danh sách rỗng để che missing snapshot.
+
+Canonical format v1 (UTF-8, chỉ ASCII trong payload, LF, có trailing LF):
+
+```text
+brewlite:ingredient-reservation:v1
+order=<canonical-order-uuid>
+count=<decimal-count>
+<canonical-ingredient-uuid>:<decimal-positive-quantity>
+... mỗi ingredient đúng một dòng ...
+```
+
+- Parse UUID hợp lệ, serialize lowercase hyphenated UUID; aggregate theo cùng
+  canonical ingredient ID, reject duplicate persisted pairs.
+- Sort ingredient UUID bằng thứ tự byte ASCII xác định; không dùng localeCompare.
+- Quantity là canonical-unit positive Int trong PostgreSQL INTEGER bounds;
+  serialize decimal ASCII, không dấu cộng, leading zeros, fraction/exponent.
+- Hash toàn bộ bytes, gồm domain/version/order ID/count; không hash released_at
+  vì đây là trường lifecycle được phép đổi. Row ID/created_at không ở digest
+  nhưng phải được immutable guard bảo vệ. Ingredient.baseUnit không được đổi
+  ngầm khi có recipe/snapshot tham chiếu; cần unit mới thì dùng identity mới hoặc
+  migration dữ liệu được duyệt riêng.
+
+Create trong **một Prisma transaction**: giữ user/active Order safeguards hiện
+có; tính và checked aggregate demand; decrement Ingredient sorted → reserve
+Coupon theo D-07; tạo Order với INGREDIENT_V1; insert snapshot từ demand thực tế
+đã trừ; đọc lại persisted rows và so exact map với demand; tính count/digest rồi
+seal manifest một lần trước commit. Không HTTP trong transaction. Lỗi bất kỳ
+bước nào rollback Order, stock, Coupon, rows và manifest. Manifest chứng minh
+snapshot không đổi sau seal, không chứng minh recipe ban đầu đúng nếu creation
+logic đã sai; phép so demand/persisted/decrement và regression tests vẫn bắt buộc.
+
+Verifier dùng persisted manifest và **toàn bộ** reservation rows của Order,
+kể cả released rows; kiểm tra source, version, count, positive quantities,
+uniqueness và digest. Chạy trước release, ở creation trước commit và các
+consistency checks được owner quy định. Thiếu một/all rows, partial manifest,
+unknown version hoặc mismatch đều abort transaction, ghi operational error theo
+policy hiện hữu, không sửa stock/status/marker một phần. Không tự thêm public
+error code hoặc lấy recipe hiện hành để dựng lại snapshot đã mất.
+
+#### B. Legacy và cutover
+
+- Ingredient-backed có marker INGREDIENT_V1 đã seal độc lập với rows. Xóa hết
+  rows vẫn để lại marker + expected count > 0, nên verifier phát hiện lỗi.
+- NULL source = legacy/unknown chưa phân loại, **không đủ chứng cứ để fallback**.
+  New ingredient path phải fail-closed. Existing Order History vẫn đọc dữ liệu
+  cũ; không bắt legacy PAID Order phải có ingredient snapshot.
+- Không backfill mọi Order thành ingredient-backed. Không dùng current recipe,
+  ngày tạo hoặc việc không có rows làm chứng cứ duy nhất.
+- Nếu cần backfill LEGACY_PRODUCT: chỉ làm với cohort Order được freeze và đối
+  soát trước cutover theo D-05, có provenance rằng chúng do Product-stock writer
+  tạo, không có ingredient-backed traffic; lưu danh sách/cohort evidence. Có
+  reservation nhưng marker NULL/legacy là inconsistency, không silent classify.
+- Expand nullable/default NULL cho phép schema đọc bởi code baseline. Trước bật
+  ingredient writer: D-05 block/drain/reconcile; loại old writer khỏi Create;
+  review guard tại DB/runtime để mọi **Order mới** phải explicit INGREDIENT_V1
+  và manifest đầy đủ, reject NULL/LEGACY_PRODUCT ở new-write path. Guard áp dụng
+  sau cutover không được cấm đọc/giữ lịch sử legacy. Default NULL chỉ phục vụ
+  expansion, không phải quyền tiếp tục tạo legacy Order sau cutover.
+- Nullability/default/backfill và guard cutover phải có migration/runbook được
+  Leader duyệt, rehearsal trên dữ liệu cũ, rollback/recovery evidence. Việc core
+  schema hiện backward-compatible không cấp phép chạy old writer sau cutover.
+
+#### C. Bảo vệ snapshot và tradeoffs
+
+Đề xuất DB guard: sau seal, cấm INSERT thêm rows, DELETE/TRUNCATE snapshot, thay
+id/order_id/ingredient_id/quantity_reserved/created_at hoặc marker/manifest.
+Chặn xóa Order làm mất bằng chứng. Không cho application tự đặt session flag để
+bypass. Parent UUID không được mutate khi có snapshot: guard có thể làm FK
+ON UPDATE CASCADE hiện tại bị reject; không âm thầm đổi FK hoặc identity policy.
+
+Chỉ cho released_at NULL → timestamp >= created_at; cấm reset NULL hoặc đổi
+timestamp đã ghi, cho no-op cùng giá trị khi policy retry cho phép. Release phải
+đi qua primitive đã lock Order, recheck safeguards và verify manifest; chuyển
+Order eligible sang CANCELLED, restore exact quantity, set markers, release
+Coupon atomically. Mixed released markers là integrity failure; PAID không
+restore. Temporal CHECK hoặc marker tự thân không chứng minh đã hoàn stock.
+
+Không dùng immediate count/hash check cho từng INSERT vì snapshot nhiều rows
+chưa hoàn chỉnh. Đề xuất deferred constraint guard đọc lại trạng thái cuối
+transaction để reject ingredient Order chưa seal/manifest mismatch; không dựa
+vào row image cũ khi kiểm tra batch cuối. PostgreSQL hỗ trợ constraint trigger
+chạy cuối transaction; đây là lựa chọn thiết kế cần review, chưa có trigger trong
+PR này. [PostgreSQL 18 CREATE TRIGGER](https://www.postgresql.org/docs/18/sql-createtrigger.html)
+
+Runtime role phải tách migration owner, không quyền DDL/disable trigger/TRUNCATE,
+không UPDATE immutable columns hoặc sửa manifest đã seal. Audit cả table grants,
+column grants, role membership và SECURITY DEFINER functions; quyền table-level
+rộng không được làm vô hiệu ý định hạn chế column. Permissions cần được kiểm
+chứng bằng đúng runtime role. [PostgreSQL 18 Privileges](https://www.postgresql.org/docs/18/ddl-priv.html)
+
+| Lựa chọn | Lợi ích | Chi phí / giới hạn |
+| --- | --- | --- |
+| A: ORM transaction + immutable/deferred guards + limited runtime role | Giữ architecture Prisma/transaction helper, phát hiện corruption và chặn thay đổi sau seal | Cần guard batch construction/seal/release, quyền runtime và migrations mới; phức tạp hơn core schema |
+| B: Runtime chỉ EXECUTE các DB functions create/seal/release hẹp | Ranh giới ghi mạnh hơn; không cấp raw DML cho snapshot/manifest | Nhiều logic DB, tích hợp Prisma/locks/Coupon khó hơn, cần design review riêng |
+| Application guard + digest đơn thuần | Ít DDL, triển khai nhanh | Không ngăn raw SQL hoặc actor sửa đồng thời rows và digest; không đủ làm protection theo đề xuất này |
+
+Đề xuất A là phương án để Leader cân nhắc; B là tradeoff nếu yêu cầu boundary
+mạnh hơn. Ngay cả A không chống superuser/migration owner disable guards hoặc
+ghi lại cả snapshot và bằng chứng. Digest cùng DB không phải tamper-proof audit;
+cần audit quyền/operational change control, không tuyên bố ngăn authorized tampering.
+
+#### D. Ownership đề xuất và acceptance gates
+
+Đối chiếu Work Plan: 121 schema/migration, 123 atomic reserve, 124 cancellation/
+release, 126 PostgreSQL concurrency. Phân công dưới đây **pending Leader approval**:
+
+| Task | Trách nhiệm đề xuất |
+| --- | --- |
+| SCRUM-121 | Core schema, temporal CHECK đã yêu cầu, thiết kế handoff này và evidence; không thêm manifest/triggers chưa duyệt |
+| SCRUM-123 | Nếu defer được duyệt: additive persistence migration, identity/source/manifest shape, guards/permissions phối hợp owner DB; tạo snapshot/evidence atomically và verifier |
+| SCRUM-124 | Gọi verifier trước release, hoàn exact snapshot và one-time release trong transaction; không fallback recipe |
+| SCRUM-126 | Test deterministic concurrency/corruption/failure injection bằng đúng runtime role, phối hợp 123/124 |
+
+Acceptance tests bắt buộc trước hoàn tất 123/124 (đều NOT EXECUTED cho phương án
+này; corruption fixture dùng quyền test riêng, không tạo bypass cho runtime):
+
+| Case | Expected |
+| --- | --- |
+| Xóa một hoặc toàn bộ rows | Runtime delete bị chặn; corruption cưỡng bức ở DB test bị verifier phát hiện từ marker/count/digest, không kết luận legacy |
+| Quantity đổi sang số dương khác | Runtime update bị chặn; verifier phát hiện digest mismatch khi inject corruption |
+| Thêm row/thay ingredient hoặc order | Guard reject sau seal; verifier count/digest/domain phát hiện corruption |
+| Marker/version/count/digest thiếu, sai hoặc version lạ | Fail-closed; không restore hoặc tự repair; kể cả sửa cả rows+manifest bằng runtime role phải bị guard/permissions chặn |
+| Legacy cohort hợp lệ / NULL unknown / old writer sau cutover | Legacy theo D-05; unknown không fallback; new old-writer Create bị chặn |
+| Recipe thay đổi sau tạo Order | Snapshot/digest giữ nguyên, release dùng lượng đã reserve |
+| Crash/lỗi trước seal hoặc sau một phần stock/Coupon write | Không commit partial Order/reservation/manifest; batch construction commit chỉ khi đã seal đầy đủ |
+| Release lặp hoặc đồng thời, scheduler/lazy/payment races | Chỉ một stock release; PAID never restored; duplicate không tăng stock |
+| Integrity failure trong release / lỗi giữa nhiều Ingredient updates | Rollback stock, Order status, Coupon và released_at; không partial changes |
+| Reset/đổi released_at, sửa identity/base unit, bypass qua runtime permissions | Reject đúng boundary; test role có owner privilege không được dùng để chứng minh runtime protection |
+
+**Dependency/gate:** Không bật ingredient reserve/release trước khi persistence,
+guards, verifier, atomic transaction và các tests liên quan được implement,
+chạy PostgreSQL thật và review. Leader cần chốt A/B cùng nullability/backfill/
+permissions và chọn: (1) accept core 121, duyệt defer persistence sang migration
+123 trước enable; hoặc (2) chốt và bổ sung persistence ngay 121. Chưa có approval
+cho lựa chọn nào; comment chưa được resolve và không tự đánh dấu task Done.
+
 ## 9. PR nháp và danh sách đề nghị commit
 
 Title: `feat(SCRUM-121): add ingredient inventory schema and additive migration`
 
-Body đề xuất (base dev, reviewer Khang; chưa tạo PR):
+Body cập nhật đề xuất cho PR #38 (base dev, reviewer Khang; chưa đăng):
 
 > Bổ sung Ingredient, RecipeIngredient, ToppingIngredient và
 > OrderIngredientReservation theo D-01…D-08; giữ Product.stock và mọi nghiệp vụ
 > Order/Payment/Coupon/Loyalty hiện tại. Dùng canonical-unit Int, unique aggregate,
-> FK Restrict/Update Cascade và CHECK trong SQL migration transaction.
+> FK Restrict/Update Cascade và CHECK trong SQL migrations.
 >
-> Strategy: additive migration, không backfill/seed/cutover. Đã kiểm chứng trên
-> PostgreSQL 18 riêng từ baseline 3a183d67: clean deploy/status/redeploy, baseline
-> fixture upgrade + whole-row preservation, catalog/negative constraints, Prisma
-> roundtrip, build/unit và runtime baseline. Kết quả chính xác, file hashes và
-> giới hạn xem §6 cùng SCRUM-121-evidence.json.
+> Temporal review fix dùng migration tiếp theo
+> `20261117130000_scrum121_reservation_release_time`, ADD CHECK
+> `(released_at IS NULL OR released_at >= created_at)`; giữ nguyên migration core
+> đã commit/push/apply. Không backfill/seed/cutover/reset/resolve hoặc sửa timestamps.
 >
-> Đã sửa review findings: env riêng cho mọi subprocess, tắt seed ngoài phạm vi,
-> env-only proof không kết nối DB; isolated delete-restrict fixtures assert đúng
-> SQLSTATE + tên FK. Run mới 50 negative assertions mỗi DB PASS, unit 479 passed/6
-> skipped, baseline runtime 103 passed/10 skipped. Evidence cũ được giữ cùng ghi
-> chú hai assertions cũ có hạn chế; không tính skipped là PASS.
+> Evidence local mới: PostgreSQL 18.6, 12:56:50–12:58:11 UTC ngày 2026-11-17,
+> baseline 3a183d67, core head 57fa0486 + working diff. Ba DB riêng PASS clean
+> deploy 12 migrations, legacy upgrade 10→12, core upgrade 11→12 với reservation
+> data; status/redeploy và whole-row preservation PASS. 11 migration history rows/
+> checksums cũ không đổi trong cùng DB. Catalog validated temporal CHECK; 53 negative
+> assertions mỗi DB + 6 temporal positive cases, đúng SQLSTATE/constraint. Env filter
+> và exact-FK assertions được giữ. Validate/generate/build/new-client roundtrip PASS;
+> unit 479 passed/6 skipped, baseline runtime 103 passed/10 skipped, không tính skips
+> là PASS. File hashes, command logs, LF/CRLF provenance và history xem §6.2/evidence.
 >
-> Chưa triển khai snapshot-integrity persistence/transaction immutability,
-> ingredient reserve/release/concurrency, seed hoặc availability. Khang cần quyết
-> định persistence D-06 và ranh giới SCRUM-121/123 trước approval/merge; chưa tự
-> phê duyệt defer. Remote CI/review/merge còn pending;
-> không triển khai Production và không tự đánh dấu Done.
+> Snapshot-integrity §8.1 là **đề xuất chờ Leader**: marker + version/count/digest
+> tại Order, canonicalization xác định, atomic seal/verify, legacy classification,
+> immutable guards/permissions và acceptance tests; chưa thêm fields/triggers vào
+> schema. Đề xuất 121 core/temporal/handoff, 123 persistence nếu defer được duyệt,
+> 124 verify/exact one-time release, phối hợp 126 concurrency/corruption. Không bật
+> ingredient reserve/release trước implement/test/review cơ chế bắt buộc. Cần Leader
+> chốt phương án/defer trước approval/merge; không tự nhận đã được duyệt.
+>
+> Giới hạn: seed, ingredient reserve/release/concurrency, availability, restore và
+> real VNPay Sandbox/full E2E/Production chưa kiểm chứng bởi revision này. Required
+> remote CI/review/merge còn pending; không đổi Payment/VNPay/Product.stock, không
+> deploy hoặc tự đánh dấu Done. Phản hồi review mới chỉ là draft, chưa đăng/resolve.
 
-Files đề nghị commit sau review:
+Files đề nghị commit revision này sau review (core migration đã commit giữ nguyên):
 
 1. `apps/api/prisma/schema.prisma`
-2. `apps/api/prisma/migrations/20261117110000_scrum121_ingredient_inventory/migration.sql`
+2. `apps/api/prisma/migrations/20261117130000_scrum121_reservation_release_time/migration.sql`
 3. `apps/api/test/ingredient-schema.rehearsal.mjs`
 4. `docs/ingredient-inventory/05_SCRUM-121_Schema_Migration.md`
 5. `docs/ingredient-inventory/SCRUM-121-evidence.json`
@@ -376,10 +637,43 @@ DoD còn pending: Khang review/approval, xử lý quyết định integrity theo
 thống nhất, cho phép stage/commit/push/tạo hoặc cập nhật PR, required CI PASS và
 merge dev. Không tự gửi thông báo thành viên, không tự đóng Jira.
 
-Review cuối local ngày 2026-11-17: HEAD vẫn bằng baseline đã fetch. Chỉ sáu file
-trong danh sách trên thay đổi; toàn bộ migration lịch sử nguyên vẹn. Đã đọc lại
-schema, SQL mới, runner và tài liệu/evidence; SQL không thay dữ liệu/cột legacy.
+Review cuối revision temporal ngày 2026-11-17: HEAD vẫn `57fa0486…`, PR #38 base
+dev `3a183d67…`. Chỉ sáu file trong danh sách trên thay đổi; migration lịch sử
+nguyên vẹn. Đã đọc lại schema, SQL mới, runner và tài liệu/evidence. Follow-up chỉ
+thêm CHECK trên reservation, không UPDATE dữ liệu hoặc ALTER cột legacy.
 `git diff --check` PASS; file mới kiểm tra bằng `git diff --no-index --check -- NUL
 <path>` không có whitespace errors (Git chỉ cảnh báo autocrlf). Không có staged
 files, conflict markers hoặc secret patterns trong phạm vi thay đổi. Đây là
 self-review local, không thay thế review/approval của Khang hoặc required CI.
+
+## 10. Hai phản hồi review dự thảo — chưa đăng hoặc resolve
+
+**Cho comment 6948316418 — temporal CHECK:**
+
+> Local revision đã bổ sung migration additive
+> `apps/api/prisma/migrations/20261117130000_scrum121_reservation_release_time/migration.sql`
+> với `ck_order_ingredient_reservations_release_time`: CHECK released_at NULL hoặc
+> >= created_at. Migration core đã apply giữ nguyên; không reset/resolve/sửa
+> timestamps. Runner kiểm tra INSERT và UPDATE NULL/equal/later bằng timestamp
+> cố định; INSERT/UPDATE early release và UPDATE created_at làm invalid đều trả
+> 23514 + đúng tên CHECK. Catalog cả ba DB xác nhận validated. Run cuối §6.2,
+> `docs/ingredient-inventory/SCRUM-121-evidence.json`: clean 12 migrations,
+> legacy upgrade 10→12, core có dữ liệu 11→12, preservation/status/redeploy PASS;
+> 53 negative assertions mỗi DB + 6 temporal positive cases PASS. Revision còn
+> local, chờ commit/push/reviewer kiểm tra; chưa tự resolve comment.
+
+**Cho comment 6948319016 — snapshot integrity:**
+
+> Đã hoàn thiện đề xuất tại `docs/ingredient-inventory/05_SCRUM-121_Schema_Migration.md`
+> §8.1: marker/source + version/count/SHA-256 manifest tại Order, canonical UTF-8
+> payload và deterministic UUID sort, seal cùng transaction với deduction/Order/
+> reservations, verify fail-closed từ persisted snapshot trước release. NULL marker
+> là unknown, không dùng zero rows để kết luận legacy; legacy cohort cần D-05
+> provenance/drain. Đề xuất immutable/deferred DB guards + runtime permissions và
+> application checks, có tradeoff DB functions và giới hạn cùng actor sửa rows+
+> digest. Ownership/gates và corruption/concurrency acceptance tests cho 123/124/126
+> đã liệt kê. Theo evidence §6.2, **chỉ temporal CHECK đã triển khai/test**;
+> manifest/guards chưa implement/test và không có field/trigger mới trong PR.
+> Nhờ Leader chốt phương án và chọn defer persistence sang migration SCRUM-123
+> trước enable, hay bổ sung ngay SCRUM-121. Chưa coi comment là approval; không bật
+> ingredient reserve/release trước implement/test/review, chưa tự resolve thread.

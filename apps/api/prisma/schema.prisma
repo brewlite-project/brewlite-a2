@@ -426,7 +426,9 @@ model ToppingIngredient {
 }
 
 /// D-06 Option A: aggregate snapshot, never recalculate from mutable recipes.
-/// SQL enforces positive quantity; transaction logic must enforce immutability,
+/// SQL enforces positive quantity and released_at >= created_at when released.
+/// These CHECKs are maintained in SQL migrations, not Prisma validation.
+/// Transaction logic must enforce immutability,
 /// integrity and one-time release (SCRUM-123/124), not this marker alone.
 model OrderIngredientReservation {
   id               String    @id @default(uuid()) @db.Uuid

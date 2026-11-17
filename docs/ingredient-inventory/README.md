@@ -8,7 +8,7 @@ Tài liệu mới bổ sung, **không thay thế** Requirements, API Contract, P
 2. [02_Implementation_and_Work_Plan_v1.0.md](02_Implementation_and_Work_Plan_v1.0.md): Jira ownership/dependencies, implementation phases và D-05 legacy-drain runbook requirement.
 3. [03_Test_and_Release_Gates_v1.0.md](03_Test_and_Release_Gates_v1.0.md): Test Matrix, PostgreSQL/concurrency gates, VNPay boundary và release evidence.
 4. [04_Ingredient_Recipe_Master_v1.0.md](04_Ingredient_Recipe_Master_v1.0.md): 22-ingredient master cùng 25 Product/Size và 5 topping DEMO recipes đã approved ở phạm vi design.
-5. [05_SCRUM-121_Schema_Migration.md](05_SCRUM-121_Schema_Migration.md): schema/migration implementation local, mapping D-01…D-08, rehearsal evidence, compatibility, giới hạn và handoff; chưa thay thế release approval.
+5. [05_SCRUM-121_Schema_Migration.md](05_SCRUM-121_Schema_Migration.md): PR #38 core schema + temporal CHECK follow-up migration, rehearsal ba đường nâng cấp, evidence/provenance, compatibility và đề xuất snapshot-integrity (§8.1) chờ Leader; chưa thay thế release approval.
 
 **Trạng thái thực thi:** SCRUM-121 có implementation và evidence local riêng ở tài liệu 05; không suy rộng thành inventory cutover hoặc production readiness. Seed, ingredient reserve/release/concurrency và deployment chưa được xác nhận bởi task này. Opening stock, seed idempotency và detailed input conversion còn là dependency SCRUM-122; snapshot-integrity persistence còn cần SCRUM-121/123 đề xuất/review; active API Contract verification thuộc SCRUM-125; PostgreSQL concurrency tests thuộc SCRUM-126; migration/cutover và VNPay evidence thuộc SCRUM-128/129/130.
 

@@ -1,7 +1,8 @@
 {
   "baseline": "3a183d67c12658432100298eefd2b4ffe0bbfb7a",
-  "startedAt": "2026-11-17T11:27:47.532Z",
-  "root": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-1pv30K",
+  "ingredientBaseline": "57fa0486c9fce5633f7be0f58c4ce99028ff2f22",
+  "startedAt": "2026-11-17T12:56:50.027Z",
+  "root": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-Qq7yVI",
   "checks": [
     {
       "name": "subprocess environment isolation",
@@ -14,7 +15,7 @@
         "parentUnchanged": true
       },
       "result": "PASS",
-      "at": "2026-11-17T11:27:47.534Z"
+      "at": "2026-11-17T12:56:50.047Z"
     },
     {
       "name": "isolated PostgreSQL 18",
@@ -22,59 +23,60 @@
         "port": 55421,
         "cluster": "brewlite_scrum121_test",
         "databases": {
-          "clean": "scrum121_clean_8d6deb4dbe8b",
-          "upgrade": "scrum121_upgrade_8d6deb4dbe8b"
+          "clean": "scrum121_clean_e750a0d544ec",
+          "upgrade": "scrum121_upgrade_e750a0d544ec",
+          "coreUpgrade": "scrum121_core_upgrade_e750a0d544ec"
         }
       },
       "result": "PASS",
-      "at": "2026-11-17T11:27:48.141Z"
+      "at": "2026-11-17T12:56:51.368Z"
     },
     {
       "name": "clean-deploy",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:27:50.747Z"
+      "at": "2026-11-17T12:56:55.249Z"
     },
     {
       "name": "clean-status",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:27:52.327Z"
+      "at": "2026-11-17T12:56:57.220Z"
     },
     {
       "name": "clean-redeploy",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:27:53.891Z"
+      "at": "2026-11-17T12:56:59.314Z"
     },
     {
       "name": "baseline-deploy",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:27:55.671Z"
+      "at": "2026-11-17T12:57:01.688Z"
     },
     {
       "name": "upgrade-deploy",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:27:57.481Z"
+      "at": "2026-11-17T12:57:03.912Z"
     },
     {
       "name": "upgrade-status",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:27:58.938Z"
+      "at": "2026-11-17T12:57:06.543Z"
     },
     {
       "name": "upgrade-redeploy",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:28:00.359Z"
+      "at": "2026-11-17T12:57:08.374Z"
     },
     {
       "name": "legacy whole-row preservation",
       "detail": {
-        "hash": "4883626e22f5aaed1f2dab8dccdbe9932f61bf762bfd4c1932d83fe5c28dc5d6",
+        "hash": "baa2210722bd6a6a8fd792e993736bf1d7d620627ee3ac6b481954e3ef86a0b1",
         "counts": {
           "categories": 4,
           "products": 2,
@@ -92,22 +94,88 @@
         }
       },
       "result": "PASS",
-      "at": "2026-11-17T11:28:00.370Z"
+      "at": "2026-11-17T12:57:08.385Z"
+    },
+    {
+      "name": "core-baseline-deploy",
+      "detail": "exit 0",
+      "result": "PASS",
+      "at": "2026-11-17T12:57:10.806Z"
+    },
+    {
+      "name": "core-upgrade-deploy",
+      "detail": "exit 0",
+      "result": "PASS",
+      "at": "2026-11-17T12:57:12.772Z"
+    },
+    {
+      "name": "core-upgrade-status",
+      "detail": "exit 0",
+      "result": "PASS",
+      "at": "2026-11-17T12:57:14.417Z"
+    },
+    {
+      "name": "core-upgrade-redeploy",
+      "detail": "exit 0",
+      "result": "PASS",
+      "at": "2026-11-17T12:57:16.398Z"
+    },
+    {
+      "name": "core applied migration history preserved",
+      "detail": {
+        "existingRowsUnchanged": 11,
+        "newRows": 1,
+        "originalChecksum": "08a61dae571bb8ed507c443957464d355f4ebb0d87a342b3a1b2afe042a2b543",
+        "temporalMigration": "20261117130000_scrum121_reservation_release_time"
+      },
+      "result": "PASS",
+      "at": "2026-11-17T12:57:16.399Z"
+    },
+    {
+      "name": "core schema upgrade whole-row preservation",
+      "detail": {
+        "beforeHash": "5ca144c099d2020ba58043e45f8a64d27a808b7b876127d4d08d7bb69eed49ad",
+        "afterHash": "5ca144c099d2020ba58043e45f8a64d27a808b7b876127d4d08d7bb69eed49ad",
+        "tables": [
+          "categories",
+          "products",
+          "toppings",
+          "product_toppings",
+          "users",
+          "coupons",
+          "orders",
+          "order_items",
+          "order_item_toppings",
+          "coupon_redemptions",
+          "payments",
+          "payment_gateway_events",
+          "seed_executions",
+          "ingredients",
+          "recipe_ingredients",
+          "topping_ingredients",
+          "order_ingredient_reservations"
+        ],
+        "persistedReservations": 3,
+        "fromAppliedMigrations": 11,
+        "toAppliedMigrations": 12
+      },
+      "result": "PASS",
+      "at": "2026-11-17T12:57:16.415Z"
     },
     {
       "name": "clean catalog",
       "detail": {
         "columns": 23,
-        "constraints": 36,
+        "constraints": 37,
         "indexes": 11
       },
       "result": "PASS",
-      "at": "2026-11-17T11:28:00.484Z"
+      "at": "2026-11-17T12:57:16.609Z"
     },
     {
       "name": "clean constraints",
       "detail": {
-        "negativeAssertions": 50,
+        "negativeAssertions": 53,
         "negativeCases": [
           {
             "name": "duplicate code",
@@ -408,27 +476,53 @@
             "sqlstate": "23001",
             "constraint": "order_ingredient_reservations_order_id_fkey",
             "column": null
+          },
+          {
+            "name": "temporal INSERT earlier release",
+            "sqlstate": "23514",
+            "constraint": "ck_order_ingredient_reservations_release_time",
+            "column": null
+          },
+          {
+            "name": "temporal UPDATE earlier release",
+            "sqlstate": "23514",
+            "constraint": "ck_order_ingredient_reservations_release_time",
+            "column": null
+          },
+          {
+            "name": "temporal UPDATE created_at after release",
+            "sqlstate": "23514",
+            "constraint": "ck_order_ingredient_reservations_release_time",
+            "column": null
           }
+        ],
+        "temporalPositiveCases": [
+          "INSERT released_at null",
+          "INSERT released_at equal",
+          "INSERT released_at later",
+          "UPDATE released_at null",
+          "UPDATE released_at equal",
+          "UPDATE released_at later"
         ],
         "valid": "all base units, Int bounds, S/M/L/ONE_SIZE, multi-ingredient, Order states, snapshot independent of recipes, nullable release, FK update cascade"
       },
       "result": "PASS",
-      "at": "2026-11-17T11:28:00.572Z"
+      "at": "2026-11-17T12:57:16.757Z"
     },
     {
       "name": "upgrade catalog",
       "detail": {
         "columns": 23,
-        "constraints": 36,
+        "constraints": 37,
         "indexes": 11
       },
       "result": "PASS",
-      "at": "2026-11-17T11:28:00.601Z"
+      "at": "2026-11-17T12:57:16.810Z"
     },
     {
       "name": "upgrade constraints",
       "detail": {
-        "negativeAssertions": 50,
+        "negativeAssertions": 53,
         "negativeCases": [
           {
             "name": "duplicate code",
@@ -729,54 +823,427 @@
             "sqlstate": "23001",
             "constraint": "order_ingredient_reservations_order_id_fkey",
             "column": null
+          },
+          {
+            "name": "temporal INSERT earlier release",
+            "sqlstate": "23514",
+            "constraint": "ck_order_ingredient_reservations_release_time",
+            "column": null
+          },
+          {
+            "name": "temporal UPDATE earlier release",
+            "sqlstate": "23514",
+            "constraint": "ck_order_ingredient_reservations_release_time",
+            "column": null
+          },
+          {
+            "name": "temporal UPDATE created_at after release",
+            "sqlstate": "23514",
+            "constraint": "ck_order_ingredient_reservations_release_time",
+            "column": null
           }
+        ],
+        "temporalPositiveCases": [
+          "INSERT released_at null",
+          "INSERT released_at equal",
+          "INSERT released_at later",
+          "UPDATE released_at null",
+          "UPDATE released_at equal",
+          "UPDATE released_at later"
         ],
         "valid": "all base units, Int bounds, S/M/L/ONE_SIZE, multi-ingredient, Order states, snapshot independent of recipes, nullable release, FK update cascade"
       },
       "result": "PASS",
-      "at": "2026-11-17T11:28:00.657Z"
+      "at": "2026-11-17T12:57:16.913Z"
+    },
+    {
+      "name": "core-upgrade catalog",
+      "detail": {
+        "columns": 23,
+        "constraints": 37,
+        "indexes": 11
+      },
+      "result": "PASS",
+      "at": "2026-11-17T12:57:16.946Z"
+    },
+    {
+      "name": "core-upgrade constraints",
+      "detail": {
+        "negativeAssertions": 53,
+        "negativeCases": [
+          {
+            "name": "duplicate code",
+            "sqlstate": "23505",
+            "constraint": "ingredients_code_key",
+            "column": null
+          },
+          {
+            "name": "negative stock",
+            "sqlstate": "23514",
+            "constraint": "ck_ingredients_stock_nonnegative",
+            "column": null
+          },
+          {
+            "name": "Int overflow",
+            "sqlstate": "22003",
+            "constraint": null,
+            "column": null
+          },
+          {
+            "name": "fractional stock",
+            "sqlstate": "22P02",
+            "constraint": null,
+            "column": null
+          },
+          {
+            "name": "invalid unit",
+            "sqlstate": "22P02",
+            "constraint": null,
+            "column": null
+          },
+          {
+            "name": "duplicate product/size/ingredient",
+            "sqlstate": "23505",
+            "constraint": "uq_recipe_ingredients_product_size_ingredient",
+            "column": null
+          },
+          {
+            "name": "null size",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "size"
+          },
+          {
+            "name": "invalid size",
+            "sqlstate": "22P02",
+            "constraint": null,
+            "column": null
+          },
+          {
+            "name": "duplicate topping/ingredient",
+            "sqlstate": "23505",
+            "constraint": "uq_topping_ingredients_topping_ingredient",
+            "column": null
+          },
+          {
+            "name": "duplicate order/ingredient",
+            "sqlstate": "23505",
+            "constraint": "uq_order_ingredient_reservations_order_ingredient",
+            "column": null
+          },
+          {
+            "name": "nonpositive recipe",
+            "sqlstate": "23514",
+            "constraint": "ck_recipe_ingredients_quantity_positive",
+            "column": null
+          },
+          {
+            "name": "nonpositive topping",
+            "sqlstate": "23514",
+            "constraint": "ck_topping_ingredients_quantity_positive",
+            "column": null
+          },
+          {
+            "name": "nonpositive reservation",
+            "sqlstate": "23514",
+            "constraint": "ck_order_ingredient_reservations_quantity_positive",
+            "column": null
+          },
+          {
+            "name": "nonpositive recipe",
+            "sqlstate": "23514",
+            "constraint": "ck_recipe_ingredients_quantity_positive",
+            "column": null
+          },
+          {
+            "name": "nonpositive topping",
+            "sqlstate": "23514",
+            "constraint": "ck_topping_ingredients_quantity_positive",
+            "column": null
+          },
+          {
+            "name": "nonpositive reservation",
+            "sqlstate": "23514",
+            "constraint": "ck_order_ingredient_reservations_quantity_positive",
+            "column": null
+          },
+          {
+            "name": "recipe product FK",
+            "sqlstate": "23503",
+            "constraint": "recipe_ingredients_product_id_fkey",
+            "column": null
+          },
+          {
+            "name": "recipe ingredient FK",
+            "sqlstate": "23503",
+            "constraint": "recipe_ingredients_ingredient_id_fkey",
+            "column": null
+          },
+          {
+            "name": "topping FK",
+            "sqlstate": "23503",
+            "constraint": "topping_ingredients_topping_id_fkey",
+            "column": null
+          },
+          {
+            "name": "topping ingredient FK",
+            "sqlstate": "23503",
+            "constraint": "topping_ingredients_ingredient_id_fkey",
+            "column": null
+          },
+          {
+            "name": "order FK",
+            "sqlstate": "23503",
+            "constraint": "order_ingredient_reservations_order_id_fkey",
+            "column": null
+          },
+          {
+            "name": "reservation ingredient FK",
+            "sqlstate": "23503",
+            "constraint": "order_ingredient_reservations_ingredient_id_fkey",
+            "column": null
+          },
+          {
+            "name": "ingredients.id required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "id"
+          },
+          {
+            "name": "ingredients.code required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "code"
+          },
+          {
+            "name": "ingredients.name required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "name"
+          },
+          {
+            "name": "ingredients.base_unit required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "base_unit"
+          },
+          {
+            "name": "ingredients.stock_quantity required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "stock_quantity"
+          },
+          {
+            "name": "ingredients.is_active required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "is_active"
+          },
+          {
+            "name": "ingredients.created_at required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "created_at"
+          },
+          {
+            "name": "ingredients.updated_at required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "updated_at"
+          },
+          {
+            "name": "recipe_ingredients.id required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "id"
+          },
+          {
+            "name": "recipe_ingredients.product_id required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "product_id"
+          },
+          {
+            "name": "recipe_ingredients.size required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "size"
+          },
+          {
+            "name": "recipe_ingredients.ingredient_id required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "ingredient_id"
+          },
+          {
+            "name": "recipe_ingredients.quantity_per_unit required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "quantity_per_unit"
+          },
+          {
+            "name": "topping_ingredients.id required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "id"
+          },
+          {
+            "name": "topping_ingredients.topping_id required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "topping_id"
+          },
+          {
+            "name": "topping_ingredients.ingredient_id required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "ingredient_id"
+          },
+          {
+            "name": "topping_ingredients.quantity_per_topping required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "quantity_per_topping"
+          },
+          {
+            "name": "order_ingredient_reservations.id required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "id"
+          },
+          {
+            "name": "order_ingredient_reservations.order_id required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "order_id"
+          },
+          {
+            "name": "order_ingredient_reservations.ingredient_id required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "ingredient_id"
+          },
+          {
+            "name": "order_ingredient_reservations.quantity_reserved required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "quantity_reserved"
+          },
+          {
+            "name": "order_ingredient_reservations.created_at required",
+            "sqlstate": "23502",
+            "constraint": null,
+            "column": "created_at"
+          },
+          {
+            "name": "recipe product restrict",
+            "sqlstate": "23001",
+            "constraint": "recipe_ingredients_product_id_fkey",
+            "column": null
+          },
+          {
+            "name": "recipe ingredient restrict",
+            "sqlstate": "23001",
+            "constraint": "recipe_ingredients_ingredient_id_fkey",
+            "column": null
+          },
+          {
+            "name": "topping restrict",
+            "sqlstate": "23001",
+            "constraint": "topping_ingredients_topping_id_fkey",
+            "column": null
+          },
+          {
+            "name": "topping ingredient restrict",
+            "sqlstate": "23001",
+            "constraint": "topping_ingredients_ingredient_id_fkey",
+            "column": null
+          },
+          {
+            "name": "snapshot ingredient restrict",
+            "sqlstate": "23001",
+            "constraint": "order_ingredient_reservations_ingredient_id_fkey",
+            "column": null
+          },
+          {
+            "name": "history order restrict",
+            "sqlstate": "23001",
+            "constraint": "order_ingredient_reservations_order_id_fkey",
+            "column": null
+          },
+          {
+            "name": "temporal INSERT earlier release",
+            "sqlstate": "23514",
+            "constraint": "ck_order_ingredient_reservations_release_time",
+            "column": null
+          },
+          {
+            "name": "temporal UPDATE earlier release",
+            "sqlstate": "23514",
+            "constraint": "ck_order_ingredient_reservations_release_time",
+            "column": null
+          },
+          {
+            "name": "temporal UPDATE created_at after release",
+            "sqlstate": "23514",
+            "constraint": "ck_order_ingredient_reservations_release_time",
+            "column": null
+          }
+        ],
+        "temporalPositiveCases": [
+          "INSERT released_at null",
+          "INSERT released_at equal",
+          "INSERT released_at later",
+          "UPDATE released_at null",
+          "UPDATE released_at equal",
+          "UPDATE released_at later"
+        ],
+        "valid": "all base units, Int bounds, S/M/L/ONE_SIZE, multi-ingredient, Order states, snapshot independent of recipes, nullable release, FK update cascade"
+      },
+      "result": "PASS",
+      "at": "2026-11-17T12:57:17.024Z"
     },
     {
       "name": "prisma-validate",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:28:02.058Z"
+      "at": "2026-11-17T12:57:18.912Z"
     },
     {
       "name": "new-client-generate",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:28:03.741Z"
+      "at": "2026-11-17T12:57:20.743Z"
     },
     {
       "name": "backend-build",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:28:15.231Z"
+      "at": "2026-11-17T12:57:32.745Z"
     },
     {
       "name": "new-client-roundtrip",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:28:15.665Z"
+      "at": "2026-11-17T12:57:33.203Z"
     },
     {
       "name": "unit-tests",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:28:30.523Z"
+      "at": "2026-11-17T12:57:50.275Z"
     },
     {
       "name": "baseline-client-generate",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:28:32.101Z"
+      "at": "2026-11-17T12:57:52.222Z"
     },
     {
       "name": "baseline-runtime",
       "detail": "exit 0",
       "result": "PASS",
-      "at": "2026-11-17T11:28:52.791Z"
+      "at": "2026-11-17T12:58:11.706Z"
     }
   ],
   "commands": [
@@ -791,9 +1258,9 @@
         "prisma7.config.ts"
       ],
       "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-      "database": "scrum121_clean_8d6deb4dbe8b",
+      "database": "scrum121_clean_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:27:50.747Z"
+      "at": "2026-11-17T12:56:55.249Z"
     },
     {
       "label": "clean-status",
@@ -806,9 +1273,9 @@
         "prisma7.config.ts"
       ],
       "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-      "database": "scrum121_clean_8d6deb4dbe8b",
+      "database": "scrum121_clean_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:27:52.327Z"
+      "at": "2026-11-17T12:56:57.220Z"
     },
     {
       "label": "clean-redeploy",
@@ -821,9 +1288,9 @@
         "prisma7.config.ts"
       ],
       "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-      "database": "scrum121_clean_8d6deb4dbe8b",
+      "database": "scrum121_clean_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:27:53.891Z"
+      "at": "2026-11-17T12:56:59.314Z"
     },
     {
       "label": "baseline-deploy",
@@ -835,10 +1302,10 @@
         "--config",
         "prisma7.config.ts"
       ],
-      "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-1pv30K\\apps\\api",
-      "database": "scrum121_upgrade_8d6deb4dbe8b",
+      "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-Qq7yVI\\apps\\api",
+      "database": "scrum121_upgrade_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:27:55.671Z"
+      "at": "2026-11-17T12:57:01.688Z"
     },
     {
       "label": "upgrade-deploy",
@@ -851,9 +1318,9 @@
         "prisma7.config.ts"
       ],
       "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-      "database": "scrum121_upgrade_8d6deb4dbe8b",
+      "database": "scrum121_upgrade_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:27:57.481Z"
+      "at": "2026-11-17T12:57:03.912Z"
     },
     {
       "label": "upgrade-status",
@@ -866,9 +1333,9 @@
         "prisma7.config.ts"
       ],
       "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-      "database": "scrum121_upgrade_8d6deb4dbe8b",
+      "database": "scrum121_upgrade_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:27:58.938Z"
+      "at": "2026-11-17T12:57:06.543Z"
     },
     {
       "label": "upgrade-redeploy",
@@ -881,9 +1348,69 @@
         "prisma7.config.ts"
       ],
       "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-      "database": "scrum121_upgrade_8d6deb4dbe8b",
+      "database": "scrum121_upgrade_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:28:00.359Z"
+      "at": "2026-11-17T12:57:08.374Z"
+    },
+    {
+      "label": "core-baseline-deploy",
+      "executable": "node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy",
+        "--config",
+        "prisma7.config.ts"
+      ],
+      "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-Qq7yVI\\ingredient-core-R2cRFA\\apps\\api",
+      "database": "scrum121_core_upgrade_e750a0d544ec",
+      "exitCode": 0,
+      "at": "2026-11-17T12:57:10.806Z"
+    },
+    {
+      "label": "core-upgrade-deploy",
+      "executable": "node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy",
+        "--config",
+        "prisma7.config.ts"
+      ],
+      "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
+      "database": "scrum121_core_upgrade_e750a0d544ec",
+      "exitCode": 0,
+      "at": "2026-11-17T12:57:12.772Z"
+    },
+    {
+      "label": "core-upgrade-status",
+      "executable": "node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "status",
+        "--config",
+        "prisma7.config.ts"
+      ],
+      "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
+      "database": "scrum121_core_upgrade_e750a0d544ec",
+      "exitCode": 0,
+      "at": "2026-11-17T12:57:14.417Z"
+    },
+    {
+      "label": "core-upgrade-redeploy",
+      "executable": "node",
+      "args": [
+        "node_modules/prisma/build/index.js",
+        "migrate",
+        "deploy",
+        "--config",
+        "prisma7.config.ts"
+      ],
+      "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
+      "database": "scrum121_core_upgrade_e750a0d544ec",
+      "exitCode": 0,
+      "at": "2026-11-17T12:57:16.398Z"
     },
     {
       "label": "prisma-validate",
@@ -895,9 +1422,9 @@
         "prisma7.config.ts"
       ],
       "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-      "database": "scrum121_upgrade_8d6deb4dbe8b",
+      "database": "scrum121_upgrade_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:28:02.058Z"
+      "at": "2026-11-17T12:57:18.912Z"
     },
     {
       "label": "new-client-generate",
@@ -909,9 +1436,9 @@
         "prisma7.config.ts"
       ],
       "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-      "database": "scrum121_upgrade_8d6deb4dbe8b",
+      "database": "scrum121_upgrade_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:28:03.741Z"
+      "at": "2026-11-17T12:57:20.743Z"
     },
     {
       "label": "backend-build",
@@ -921,20 +1448,20 @@
         "build"
       ],
       "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-      "database": "scrum121_upgrade_8d6deb4dbe8b",
+      "database": "scrum121_upgrade_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:28:15.231Z"
+      "at": "2026-11-17T12:57:32.745Z"
     },
     {
       "label": "new-client-roundtrip",
       "executable": "node",
       "args": [
-        "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-1pv30K\\apps\\api\\ingredient-client-smoke.mjs"
+        "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-Qq7yVI\\apps\\api\\ingredient-client-smoke.mjs"
       ],
-      "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-1pv30K\\apps\\api",
-      "database": "scrum121_upgrade_8d6deb4dbe8b",
+      "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-Qq7yVI\\apps\\api",
+      "database": "scrum121_upgrade_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:28:15.665Z"
+      "at": "2026-11-17T12:57:33.203Z"
     },
     {
       "label": "unit-tests",
@@ -944,9 +1471,9 @@
         "run"
       ],
       "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-      "database": "scrum121_upgrade_8d6deb4dbe8b",
+      "database": "scrum121_upgrade_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:28:30.523Z"
+      "at": "2026-11-17T12:57:50.275Z"
     },
     {
       "label": "baseline-client-generate",
@@ -957,10 +1484,10 @@
         "--config",
         "prisma7.config.ts"
       ],
-      "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-1pv30K\\apps\\api",
-      "database": "scrum121_upgrade_8d6deb4dbe8b",
+      "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-Qq7yVI\\apps\\api",
+      "database": "scrum121_upgrade_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:28:32.101Z"
+      "at": "2026-11-17T12:57:52.222Z"
     },
     {
       "label": "baseline-runtime",
@@ -975,16 +1502,17 @@
         "test/promotions-postgres.integration-spec.ts",
         "test/order-lifecycle.integration-spec.ts"
       ],
-      "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-1pv30K\\apps\\api",
-      "database": "scrum121_upgrade_8d6deb4dbe8b",
+      "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-Qq7yVI\\apps\\api",
+      "database": "scrum121_upgrade_e750a0d544ec",
       "exitCode": 0,
-      "at": "2026-11-17T11:28:52.791Z"
+      "at": "2026-11-17T12:58:11.706Z"
     }
   ],
   "changeHashes": {
-    "prisma/schema.prisma": "860b8b2941cf96ed16193955a2568bf2730f1684251b9bd0093cb5b9ce27876c",
+    "prisma/schema.prisma": "6979d0c58e553d84266681dc4e57d05548b5cfd07630d30c334fcb44b597104e",
     "prisma/migrations/20261117110000_scrum121_ingredient_inventory/migration.sql": "feee2c114603c531a21d930a593de0eee973c7f4fed6c159c9b02747ac4d96f0",
-    "test/ingredient-schema.rehearsal.mjs": "b734c6c9c0182e7eec3217f0079cd0e3c8f87bdd6ea0981aa8466ccdc35ba765"
+    "prisma/migrations/20261117130000_scrum121_reservation_release_time/migration.sql": "b97bf7478f27ad3549abfccee049d5f59634891e5c162576c1e6215d1d5a9caf",
+    "test/ingredient-schema.rehearsal.mjs": "b5e32f2ae98945496c08e6ca51d3a0e835c56ab7496f7cb019bafd170df0b545"
   },
   "server": {
     "version": "PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
@@ -992,18 +1520,193 @@
     "current_user": "scrum121"
   },
   "databases": {
-    "clean": "scrum121_clean_8d6deb4dbe8b",
-    "upgrade": "scrum121_upgrade_8d6deb4dbe8b"
+    "clean": "scrum121_clean_e750a0d544ec",
+    "upgrade": "scrum121_upgrade_e750a0d544ec",
+    "coreUpgrade": "scrum121_core_upgrade_e750a0d544ec"
   },
+  "headAtRun": "57fa0486c9fce5633f7be0f58c4ce99028ff2f22",
   "versions": {
     "node": "v26.13.1",
     "prisma": "7.10.1",
     "client": "7.10.1"
   },
-  "beforeHash": "4883626e22f5aaed1f2dab8dccdbe9932f61bf762bfd4c1932d83fe5c28dc5d6",
-  "afterHash": "4883626e22f5aaed1f2dab8dccdbe9932f61bf762bfd4c1932d83fe5c28dc5d6",
+  "beforeHash": "baa2210722bd6a6a8fd792e993736bf1d7d620627ee3ac6b481954e3ef86a0b1",
+  "afterHash": "baa2210722bd6a6a8fd792e993736bf1d7d620627ee3ac6b481954e3ef86a0b1",
+  "coreMigrationsBefore": [
+    {
+      "id": "8306b4a7-1ac0-4f63-9bcd-e47158e37187",
+      "migration_name": "20261020143341_init_product_catalog",
+      "checksum": "c2703ce2e330812be7a3d0a6bac001bfba4249fcd74c58a2663449664a1dd7cf",
+      "finished_at": "2026-11-17T12:57:10.517Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "c8a0e84a-86b4-4340-adbc-37698f2e655f",
+      "migration_name": "20261021153059_extend_user_order_orderitem",
+      "checksum": "a28340b556ffd72423e907bc372b6cb29da258248c4ff6aa1a74861a28c5dc1b",
+      "finished_at": "2026-11-17T12:57:10.594Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "8e207727-1582-4b27-8958-0c664869d812",
+      "migration_name": "20261022011000_scrum36_active_order_coupon_constraints",
+      "checksum": "2d661a949441fda8b9f7298cf8683212544a97134305d42f1474d9a29cc54cfa",
+      "finished_at": "2026-11-17T12:57:10.602Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "2439940b-d96e-42d8-8d3b-3eadf79fe8ee",
+      "migration_name": "20261022013000_add_coupon_redemptions",
+      "checksum": "64c68c9d02153f6f0bf74ed27605c68b06ac5d3971beacddb6868f526a83a9cf",
+      "finished_at": "2026-11-17T12:57:10.622Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "baf794bd-93fd-4cce-a008-87c561ba0734",
+      "migration_name": "20261023130000_product_catalog_schema_upgrade",
+      "checksum": "cceb95f88d1a6a8efbf0a910e1fec4f0196b90eb46110b36469af23d4d7b81cf",
+      "finished_at": "2026-11-17T12:57:10.647Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "fa3d1520-d258-41f5-b4ef-e9ef4f73a596",
+      "migration_name": "20261024010000_order_item_one_size_constraint",
+      "checksum": "bb0bd474e20c5807da88fa8701c3339807b9aeb7543b1bbb8479beb14b07dd81",
+      "finished_at": "2026-11-17T12:57:10.651Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "52daead4-9b9c-44db-8e82-53cf2d09431d",
+      "migration_name": "20261026065408_add_payment_schema",
+      "checksum": "14286aea31a3156d8993ff07337b4095dd26e1370c076eaecd8495d88ef2c56e",
+      "finished_at": "2026-11-17T12:57:10.670Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "7240f16c-4b65-442d-be05-8776d2db1c98",
+      "migration_name": "20261031190000_scrum76_payment_pending_enum",
+      "checksum": "a86b8b03aa4735436b1c5c145fc9bf07762e2d48fe7b07d9d210c8e9dc367f8c",
+      "finished_at": "2026-11-17T12:57:10.674Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "ee63340e-b92f-4256-9430-945247c5fef0",
+      "migration_name": "20261031190100_scrum76_payment_gateway_delta",
+      "checksum": "a8f3911466bf403c040e19f76f111744d31f1b6a8633f22ad7d32151f0b8551e",
+      "finished_at": "2026-11-17T12:57:10.717Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "1fad4b4b-35e8-476c-9296-a3dff2a87028",
+      "migration_name": "20261112153000_seed_executions_once_guard",
+      "checksum": "00049f7c05015eddf48bdaa1dabac3d3b69c6c5dc106ccc8c8fec101491aee4f",
+      "finished_at": "2026-11-17T12:57:10.724Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "61c0b9fc-5d75-4ce0-a9c3-c46dd5f445eb",
+      "migration_name": "20261117110000_scrum121_ingredient_inventory",
+      "checksum": "08a61dae571bb8ed507c443957464d355f4ebb0d87a342b3a1b2afe042a2b543",
+      "finished_at": "2026-11-17T12:57:10.771Z",
+      "rolled_back_at": null
+    }
+  ],
+  "coreMigrationEncoding": {
+    "archiveByteHash": "08a61dae571bb8ed507c443957464d355f4ebb0d87a342b3a1b2afe042a2b543",
+    "workingByteHash": "feee2c114603c531a21d930a593de0eee973c7f4fed6c159c9b02747ac4d96f0",
+    "canonicalLfHash": "feee2c114603c531a21d930a593de0eee973c7f4fed6c159c9b02747ac4d96f0",
+    "method": "compare SQL LF-normalized content across export/workspace; compare stored checksum unchanged within same DB"
+  },
+  "coreBeforeHash": "5ca144c099d2020ba58043e45f8a64d27a808b7b876127d4d08d7bb69eed49ad",
+  "coreMigrationsAfter": [
+    {
+      "id": "8306b4a7-1ac0-4f63-9bcd-e47158e37187",
+      "migration_name": "20261020143341_init_product_catalog",
+      "checksum": "c2703ce2e330812be7a3d0a6bac001bfba4249fcd74c58a2663449664a1dd7cf",
+      "finished_at": "2026-11-17T12:57:10.517Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "c8a0e84a-86b4-4340-adbc-37698f2e655f",
+      "migration_name": "20261021153059_extend_user_order_orderitem",
+      "checksum": "a28340b556ffd72423e907bc372b6cb29da258248c4ff6aa1a74861a28c5dc1b",
+      "finished_at": "2026-11-17T12:57:10.594Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "8e207727-1582-4b27-8958-0c664869d812",
+      "migration_name": "20261022011000_scrum36_active_order_coupon_constraints",
+      "checksum": "2d661a949441fda8b9f7298cf8683212544a97134305d42f1474d9a29cc54cfa",
+      "finished_at": "2026-11-17T12:57:10.602Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "2439940b-d96e-42d8-8d3b-3eadf79fe8ee",
+      "migration_name": "20261022013000_add_coupon_redemptions",
+      "checksum": "64c68c9d02153f6f0bf74ed27605c68b06ac5d3971beacddb6868f526a83a9cf",
+      "finished_at": "2026-11-17T12:57:10.622Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "baf794bd-93fd-4cce-a008-87c561ba0734",
+      "migration_name": "20261023130000_product_catalog_schema_upgrade",
+      "checksum": "cceb95f88d1a6a8efbf0a910e1fec4f0196b90eb46110b36469af23d4d7b81cf",
+      "finished_at": "2026-11-17T12:57:10.647Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "fa3d1520-d258-41f5-b4ef-e9ef4f73a596",
+      "migration_name": "20261024010000_order_item_one_size_constraint",
+      "checksum": "bb0bd474e20c5807da88fa8701c3339807b9aeb7543b1bbb8479beb14b07dd81",
+      "finished_at": "2026-11-17T12:57:10.651Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "52daead4-9b9c-44db-8e82-53cf2d09431d",
+      "migration_name": "20261026065408_add_payment_schema",
+      "checksum": "14286aea31a3156d8993ff07337b4095dd26e1370c076eaecd8495d88ef2c56e",
+      "finished_at": "2026-11-17T12:57:10.670Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "7240f16c-4b65-442d-be05-8776d2db1c98",
+      "migration_name": "20261031190000_scrum76_payment_pending_enum",
+      "checksum": "a86b8b03aa4735436b1c5c145fc9bf07762e2d48fe7b07d9d210c8e9dc367f8c",
+      "finished_at": "2026-11-17T12:57:10.674Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "ee63340e-b92f-4256-9430-945247c5fef0",
+      "migration_name": "20261031190100_scrum76_payment_gateway_delta",
+      "checksum": "a8f3911466bf403c040e19f76f111744d31f1b6a8633f22ad7d32151f0b8551e",
+      "finished_at": "2026-11-17T12:57:10.717Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "1fad4b4b-35e8-476c-9296-a3dff2a87028",
+      "migration_name": "20261112153000_seed_executions_once_guard",
+      "checksum": "00049f7c05015eddf48bdaa1dabac3d3b69c6c5dc106ccc8c8fec101491aee4f",
+      "finished_at": "2026-11-17T12:57:10.724Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "61c0b9fc-5d75-4ce0-a9c3-c46dd5f445eb",
+      "migration_name": "20261117110000_scrum121_ingredient_inventory",
+      "checksum": "08a61dae571bb8ed507c443957464d355f4ebb0d87a342b3a1b2afe042a2b543",
+      "finished_at": "2026-11-17T12:57:10.771Z",
+      "rolled_back_at": null
+    },
+    {
+      "id": "7d314ada-cf07-4af8-b192-428fcaa3a15d",
+      "migration_name": "20261117130000_scrum121_reservation_release_time",
+      "checksum": "b97bf7478f27ad3549abfccee049d5f59634891e5c162576c1e6215d1d5a9caf",
+      "finished_at": "2026-11-17T12:57:12.742Z",
+      "rolled_back_at": null
+    }
+  ],
+  "coreAfterHash": "5ca144c099d2020ba58043e45f8a64d27a808b7b876127d4d08d7bb69eed49ad",
   "result": "PASS",
-  "finishedAt": "2026-11-17T11:28:52.804Z",
+  "finishedAt": "2026-11-17T12:58:11.717Z",
   "actualCatalog": {
     "columns": [
       {
@@ -1271,6 +1974,13 @@
       },
       {
         "table_name": "order_ingredient_reservations",
+        "conname": "ck_order_ingredient_reservations_release_time",
+        "contype": "c",
+        "convalidated": true,
+        "definition": "CHECK (((released_at IS NULL) OR (released_at >= created_at)))"
+      },
+      {
+        "table_name": "order_ingredient_reservations",
         "conname": "order_ingredient_reservations_created_at_not_null",
         "contype": "n",
         "convalidated": true,
@@ -1507,79 +2217,96 @@
     "unit": {
       "passed": 479,
       "skipped": 6,
-      "skipReason": "SEED_RENDER_PG_INTEGRATION forced to 0; six baseline seed guard integration tests excluded"
+      "skipReason": "SEED_RENDER_PG_INTEGRATION=0 disables six baseline seed guard tests"
     },
     "baselineRuntime": {
       "passed": 103,
       "skipped": 10,
-      "skipReason": "PAYMENT_CONCURRENCY_TESTS forced to 0; seven payment and three promotion concurrency tests excluded"
+      "skipReason": "PAYMENT_CONCURRENCY_TESTS=0 disables seven payment and three promotion concurrency tests"
     }
   },
+  "sourceComments": [
+    "https://github.com/brewlite-project/brewlite-a2/pull/38#issuecomment-6948316418",
+    "https://github.com/brewlite-project/brewlite-a2/pull/38#issuecomment-6948319016"
+  ],
   "historicalRuns": [
     {
       "baseline": "3a183d67c12658432100298eefd2b4ffe0bbfb7a",
-      "startedAt": "2026-11-17T11:12:11.513Z",
-      "root": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-6FEIKU",
+      "startedAt": "2026-11-17T11:27:47.532Z",
+      "root": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-1pv30K",
       "checks": [
+        {
+          "name": "subprocess environment isolation",
+          "detail": {
+            "method": "real Node child with injected parent opt-ins/sentinel; no DB imports/connections",
+            "seedOptInDisabled": true,
+            "seedTargetRemoved": true,
+            "paymentConcurrencyDisabled": true,
+            "taskTargetsOnly": true,
+            "parentUnchanged": true
+          },
+          "result": "PASS",
+          "at": "2026-11-17T11:27:47.534Z"
+        },
         {
           "name": "isolated PostgreSQL 18",
           "detail": {
             "port": 55421,
             "cluster": "brewlite_scrum121_test",
             "databases": {
-              "clean": "scrum121_clean_73fc6a314aa6",
-              "upgrade": "scrum121_upgrade_73fc6a314aa6"
+              "clean": "scrum121_clean_8d6deb4dbe8b",
+              "upgrade": "scrum121_upgrade_8d6deb4dbe8b"
             }
           },
           "result": "PASS",
-          "at": "2026-11-17T11:12:12.509Z"
+          "at": "2026-11-17T11:27:48.141Z"
         },
         {
           "name": "clean-deploy",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:12:15.655Z"
+          "at": "2026-11-17T11:27:50.747Z"
         },
         {
           "name": "clean-status",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:12:17.651Z"
+          "at": "2026-11-17T11:27:52.327Z"
         },
         {
           "name": "clean-redeploy",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:12:19.737Z"
+          "at": "2026-11-17T11:27:53.891Z"
         },
         {
           "name": "baseline-deploy",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:12:22.145Z"
+          "at": "2026-11-17T11:27:55.671Z"
         },
         {
           "name": "upgrade-deploy",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:12:24.007Z"
+          "at": "2026-11-17T11:27:57.481Z"
         },
         {
           "name": "upgrade-status",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:12:25.579Z"
+          "at": "2026-11-17T11:27:58.938Z"
         },
         {
           "name": "upgrade-redeploy",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:12:27.136Z"
+          "at": "2026-11-17T11:28:00.359Z"
         },
         {
           "name": "legacy whole-row preservation",
           "detail": {
-            "hash": "fdb43e1e6d5add4590c1d4bb14e5edb491b55be23e41772c2a3579896dae0de8",
+            "hash": "4883626e22f5aaed1f2dab8dccdbe9932f61bf762bfd4c1932d83fe5c28dc5d6",
             "counts": {
               "categories": 4,
               "products": 2,
@@ -1597,7 +2324,7 @@
             }
           },
           "result": "PASS",
-          "at": "2026-11-17T11:12:27.149Z"
+          "at": "2026-11-17T11:28:00.370Z"
         },
         {
           "name": "clean catalog",
@@ -1607,16 +2334,318 @@
             "indexes": 11
           },
           "result": "PASS",
-          "at": "2026-11-17T11:12:27.275Z"
+          "at": "2026-11-17T11:28:00.484Z"
         },
         {
           "name": "clean constraints",
           "detail": {
-            "negativeAssertions": 48,
+            "negativeAssertions": 50,
+            "negativeCases": [
+              {
+                "name": "duplicate code",
+                "sqlstate": "23505",
+                "constraint": "ingredients_code_key",
+                "column": null
+              },
+              {
+                "name": "negative stock",
+                "sqlstate": "23514",
+                "constraint": "ck_ingredients_stock_nonnegative",
+                "column": null
+              },
+              {
+                "name": "Int overflow",
+                "sqlstate": "22003",
+                "constraint": null,
+                "column": null
+              },
+              {
+                "name": "fractional stock",
+                "sqlstate": "22P02",
+                "constraint": null,
+                "column": null
+              },
+              {
+                "name": "invalid unit",
+                "sqlstate": "22P02",
+                "constraint": null,
+                "column": null
+              },
+              {
+                "name": "duplicate product/size/ingredient",
+                "sqlstate": "23505",
+                "constraint": "uq_recipe_ingredients_product_size_ingredient",
+                "column": null
+              },
+              {
+                "name": "null size",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "size"
+              },
+              {
+                "name": "invalid size",
+                "sqlstate": "22P02",
+                "constraint": null,
+                "column": null
+              },
+              {
+                "name": "duplicate topping/ingredient",
+                "sqlstate": "23505",
+                "constraint": "uq_topping_ingredients_topping_ingredient",
+                "column": null
+              },
+              {
+                "name": "duplicate order/ingredient",
+                "sqlstate": "23505",
+                "constraint": "uq_order_ingredient_reservations_order_ingredient",
+                "column": null
+              },
+              {
+                "name": "nonpositive recipe",
+                "sqlstate": "23514",
+                "constraint": "ck_recipe_ingredients_quantity_positive",
+                "column": null
+              },
+              {
+                "name": "nonpositive topping",
+                "sqlstate": "23514",
+                "constraint": "ck_topping_ingredients_quantity_positive",
+                "column": null
+              },
+              {
+                "name": "nonpositive reservation",
+                "sqlstate": "23514",
+                "constraint": "ck_order_ingredient_reservations_quantity_positive",
+                "column": null
+              },
+              {
+                "name": "nonpositive recipe",
+                "sqlstate": "23514",
+                "constraint": "ck_recipe_ingredients_quantity_positive",
+                "column": null
+              },
+              {
+                "name": "nonpositive topping",
+                "sqlstate": "23514",
+                "constraint": "ck_topping_ingredients_quantity_positive",
+                "column": null
+              },
+              {
+                "name": "nonpositive reservation",
+                "sqlstate": "23514",
+                "constraint": "ck_order_ingredient_reservations_quantity_positive",
+                "column": null
+              },
+              {
+                "name": "recipe product FK",
+                "sqlstate": "23503",
+                "constraint": "recipe_ingredients_product_id_fkey",
+                "column": null
+              },
+              {
+                "name": "recipe ingredient FK",
+                "sqlstate": "23503",
+                "constraint": "recipe_ingredients_ingredient_id_fkey",
+                "column": null
+              },
+              {
+                "name": "topping FK",
+                "sqlstate": "23503",
+                "constraint": "topping_ingredients_topping_id_fkey",
+                "column": null
+              },
+              {
+                "name": "topping ingredient FK",
+                "sqlstate": "23503",
+                "constraint": "topping_ingredients_ingredient_id_fkey",
+                "column": null
+              },
+              {
+                "name": "order FK",
+                "sqlstate": "23503",
+                "constraint": "order_ingredient_reservations_order_id_fkey",
+                "column": null
+              },
+              {
+                "name": "reservation ingredient FK",
+                "sqlstate": "23503",
+                "constraint": "order_ingredient_reservations_ingredient_id_fkey",
+                "column": null
+              },
+              {
+                "name": "ingredients.id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "id"
+              },
+              {
+                "name": "ingredients.code required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "code"
+              },
+              {
+                "name": "ingredients.name required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "name"
+              },
+              {
+                "name": "ingredients.base_unit required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "base_unit"
+              },
+              {
+                "name": "ingredients.stock_quantity required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "stock_quantity"
+              },
+              {
+                "name": "ingredients.is_active required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "is_active"
+              },
+              {
+                "name": "ingredients.created_at required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "created_at"
+              },
+              {
+                "name": "ingredients.updated_at required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "updated_at"
+              },
+              {
+                "name": "recipe_ingredients.id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "id"
+              },
+              {
+                "name": "recipe_ingredients.product_id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "product_id"
+              },
+              {
+                "name": "recipe_ingredients.size required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "size"
+              },
+              {
+                "name": "recipe_ingredients.ingredient_id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "ingredient_id"
+              },
+              {
+                "name": "recipe_ingredients.quantity_per_unit required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "quantity_per_unit"
+              },
+              {
+                "name": "topping_ingredients.id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "id"
+              },
+              {
+                "name": "topping_ingredients.topping_id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "topping_id"
+              },
+              {
+                "name": "topping_ingredients.ingredient_id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "ingredient_id"
+              },
+              {
+                "name": "topping_ingredients.quantity_per_topping required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "quantity_per_topping"
+              },
+              {
+                "name": "order_ingredient_reservations.id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "id"
+              },
+              {
+                "name": "order_ingredient_reservations.order_id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "order_id"
+              },
+              {
+                "name": "order_ingredient_reservations.ingredient_id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "ingredient_id"
+              },
+              {
+                "name": "order_ingredient_reservations.quantity_reserved required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "quantity_reserved"
+              },
+              {
+                "name": "order_ingredient_reservations.created_at required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "created_at"
+              },
+              {
+                "name": "recipe product restrict",
+                "sqlstate": "23001",
+                "constraint": "recipe_ingredients_product_id_fkey",
+                "column": null
+              },
+              {
+                "name": "recipe ingredient restrict",
+                "sqlstate": "23001",
+                "constraint": "recipe_ingredients_ingredient_id_fkey",
+                "column": null
+              },
+              {
+                "name": "topping restrict",
+                "sqlstate": "23001",
+                "constraint": "topping_ingredients_topping_id_fkey",
+                "column": null
+              },
+              {
+                "name": "topping ingredient restrict",
+                "sqlstate": "23001",
+                "constraint": "topping_ingredients_ingredient_id_fkey",
+                "column": null
+              },
+              {
+                "name": "snapshot ingredient restrict",
+                "sqlstate": "23001",
+                "constraint": "order_ingredient_reservations_ingredient_id_fkey",
+                "column": null
+              },
+              {
+                "name": "history order restrict",
+                "sqlstate": "23001",
+                "constraint": "order_ingredient_reservations_order_id_fkey",
+                "column": null
+              }
+            ],
             "valid": "all base units, Int bounds, S/M/L/ONE_SIZE, multi-ingredient, Order states, snapshot independent of recipes, nullable release, FK update cascade"
           },
           "result": "PASS",
-          "at": "2026-11-17T11:12:27.335Z"
+          "at": "2026-11-17T11:28:00.572Z"
         },
         {
           "name": "upgrade catalog",
@@ -1626,58 +2655,360 @@
             "indexes": 11
           },
           "result": "PASS",
-          "at": "2026-11-17T11:12:27.364Z"
+          "at": "2026-11-17T11:28:00.601Z"
         },
         {
           "name": "upgrade constraints",
           "detail": {
-            "negativeAssertions": 48,
+            "negativeAssertions": 50,
+            "negativeCases": [
+              {
+                "name": "duplicate code",
+                "sqlstate": "23505",
+                "constraint": "ingredients_code_key",
+                "column": null
+              },
+              {
+                "name": "negative stock",
+                "sqlstate": "23514",
+                "constraint": "ck_ingredients_stock_nonnegative",
+                "column": null
+              },
+              {
+                "name": "Int overflow",
+                "sqlstate": "22003",
+                "constraint": null,
+                "column": null
+              },
+              {
+                "name": "fractional stock",
+                "sqlstate": "22P02",
+                "constraint": null,
+                "column": null
+              },
+              {
+                "name": "invalid unit",
+                "sqlstate": "22P02",
+                "constraint": null,
+                "column": null
+              },
+              {
+                "name": "duplicate product/size/ingredient",
+                "sqlstate": "23505",
+                "constraint": "uq_recipe_ingredients_product_size_ingredient",
+                "column": null
+              },
+              {
+                "name": "null size",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "size"
+              },
+              {
+                "name": "invalid size",
+                "sqlstate": "22P02",
+                "constraint": null,
+                "column": null
+              },
+              {
+                "name": "duplicate topping/ingredient",
+                "sqlstate": "23505",
+                "constraint": "uq_topping_ingredients_topping_ingredient",
+                "column": null
+              },
+              {
+                "name": "duplicate order/ingredient",
+                "sqlstate": "23505",
+                "constraint": "uq_order_ingredient_reservations_order_ingredient",
+                "column": null
+              },
+              {
+                "name": "nonpositive recipe",
+                "sqlstate": "23514",
+                "constraint": "ck_recipe_ingredients_quantity_positive",
+                "column": null
+              },
+              {
+                "name": "nonpositive topping",
+                "sqlstate": "23514",
+                "constraint": "ck_topping_ingredients_quantity_positive",
+                "column": null
+              },
+              {
+                "name": "nonpositive reservation",
+                "sqlstate": "23514",
+                "constraint": "ck_order_ingredient_reservations_quantity_positive",
+                "column": null
+              },
+              {
+                "name": "nonpositive recipe",
+                "sqlstate": "23514",
+                "constraint": "ck_recipe_ingredients_quantity_positive",
+                "column": null
+              },
+              {
+                "name": "nonpositive topping",
+                "sqlstate": "23514",
+                "constraint": "ck_topping_ingredients_quantity_positive",
+                "column": null
+              },
+              {
+                "name": "nonpositive reservation",
+                "sqlstate": "23514",
+                "constraint": "ck_order_ingredient_reservations_quantity_positive",
+                "column": null
+              },
+              {
+                "name": "recipe product FK",
+                "sqlstate": "23503",
+                "constraint": "recipe_ingredients_product_id_fkey",
+                "column": null
+              },
+              {
+                "name": "recipe ingredient FK",
+                "sqlstate": "23503",
+                "constraint": "recipe_ingredients_ingredient_id_fkey",
+                "column": null
+              },
+              {
+                "name": "topping FK",
+                "sqlstate": "23503",
+                "constraint": "topping_ingredients_topping_id_fkey",
+                "column": null
+              },
+              {
+                "name": "topping ingredient FK",
+                "sqlstate": "23503",
+                "constraint": "topping_ingredients_ingredient_id_fkey",
+                "column": null
+              },
+              {
+                "name": "order FK",
+                "sqlstate": "23503",
+                "constraint": "order_ingredient_reservations_order_id_fkey",
+                "column": null
+              },
+              {
+                "name": "reservation ingredient FK",
+                "sqlstate": "23503",
+                "constraint": "order_ingredient_reservations_ingredient_id_fkey",
+                "column": null
+              },
+              {
+                "name": "ingredients.id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "id"
+              },
+              {
+                "name": "ingredients.code required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "code"
+              },
+              {
+                "name": "ingredients.name required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "name"
+              },
+              {
+                "name": "ingredients.base_unit required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "base_unit"
+              },
+              {
+                "name": "ingredients.stock_quantity required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "stock_quantity"
+              },
+              {
+                "name": "ingredients.is_active required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "is_active"
+              },
+              {
+                "name": "ingredients.created_at required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "created_at"
+              },
+              {
+                "name": "ingredients.updated_at required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "updated_at"
+              },
+              {
+                "name": "recipe_ingredients.id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "id"
+              },
+              {
+                "name": "recipe_ingredients.product_id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "product_id"
+              },
+              {
+                "name": "recipe_ingredients.size required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "size"
+              },
+              {
+                "name": "recipe_ingredients.ingredient_id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "ingredient_id"
+              },
+              {
+                "name": "recipe_ingredients.quantity_per_unit required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "quantity_per_unit"
+              },
+              {
+                "name": "topping_ingredients.id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "id"
+              },
+              {
+                "name": "topping_ingredients.topping_id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "topping_id"
+              },
+              {
+                "name": "topping_ingredients.ingredient_id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "ingredient_id"
+              },
+              {
+                "name": "topping_ingredients.quantity_per_topping required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "quantity_per_topping"
+              },
+              {
+                "name": "order_ingredient_reservations.id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "id"
+              },
+              {
+                "name": "order_ingredient_reservations.order_id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "order_id"
+              },
+              {
+                "name": "order_ingredient_reservations.ingredient_id required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "ingredient_id"
+              },
+              {
+                "name": "order_ingredient_reservations.quantity_reserved required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "quantity_reserved"
+              },
+              {
+                "name": "order_ingredient_reservations.created_at required",
+                "sqlstate": "23502",
+                "constraint": null,
+                "column": "created_at"
+              },
+              {
+                "name": "recipe product restrict",
+                "sqlstate": "23001",
+                "constraint": "recipe_ingredients_product_id_fkey",
+                "column": null
+              },
+              {
+                "name": "recipe ingredient restrict",
+                "sqlstate": "23001",
+                "constraint": "recipe_ingredients_ingredient_id_fkey",
+                "column": null
+              },
+              {
+                "name": "topping restrict",
+                "sqlstate": "23001",
+                "constraint": "topping_ingredients_topping_id_fkey",
+                "column": null
+              },
+              {
+                "name": "topping ingredient restrict",
+                "sqlstate": "23001",
+                "constraint": "topping_ingredients_ingredient_id_fkey",
+                "column": null
+              },
+              {
+                "name": "snapshot ingredient restrict",
+                "sqlstate": "23001",
+                "constraint": "order_ingredient_reservations_ingredient_id_fkey",
+                "column": null
+              },
+              {
+                "name": "history order restrict",
+                "sqlstate": "23001",
+                "constraint": "order_ingredient_reservations_order_id_fkey",
+                "column": null
+              }
+            ],
             "valid": "all base units, Int bounds, S/M/L/ONE_SIZE, multi-ingredient, Order states, snapshot independent of recipes, nullable release, FK update cascade"
           },
           "result": "PASS",
-          "at": "2026-11-17T11:12:27.444Z"
+          "at": "2026-11-17T11:28:00.657Z"
         },
         {
           "name": "prisma-validate",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:12:28.938Z"
+          "at": "2026-11-17T11:28:02.058Z"
         },
         {
           "name": "new-client-generate",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:12:30.649Z"
+          "at": "2026-11-17T11:28:03.741Z"
         },
         {
           "name": "backend-build",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:12:42.138Z"
+          "at": "2026-11-17T11:28:15.231Z"
         },
         {
           "name": "new-client-roundtrip",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:12:42.762Z"
+          "at": "2026-11-17T11:28:15.665Z"
         },
         {
           "name": "unit-tests",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:13:00.203Z"
+          "at": "2026-11-17T11:28:30.523Z"
         },
         {
           "name": "baseline-client-generate",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:13:02.022Z"
+          "at": "2026-11-17T11:28:32.101Z"
         },
         {
           "name": "baseline-runtime",
           "detail": "exit 0",
           "result": "PASS",
-          "at": "2026-11-17T11:13:21.634Z"
+          "at": "2026-11-17T11:28:52.791Z"
         }
       ],
       "commands": [
@@ -1692,9 +3023,9 @@
             "prisma7.config.ts"
           ],
           "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-          "database": "scrum121_clean_73fc6a314aa6",
+          "database": "scrum121_clean_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:12:15.655Z"
+          "at": "2026-11-17T11:27:50.747Z"
         },
         {
           "label": "clean-status",
@@ -1707,9 +3038,9 @@
             "prisma7.config.ts"
           ],
           "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-          "database": "scrum121_clean_73fc6a314aa6",
+          "database": "scrum121_clean_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:12:17.651Z"
+          "at": "2026-11-17T11:27:52.327Z"
         },
         {
           "label": "clean-redeploy",
@@ -1722,9 +3053,9 @@
             "prisma7.config.ts"
           ],
           "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-          "database": "scrum121_clean_73fc6a314aa6",
+          "database": "scrum121_clean_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:12:19.737Z"
+          "at": "2026-11-17T11:27:53.891Z"
         },
         {
           "label": "baseline-deploy",
@@ -1736,10 +3067,10 @@
             "--config",
             "prisma7.config.ts"
           ],
-          "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-6FEIKU\\apps\\api",
-          "database": "scrum121_upgrade_73fc6a314aa6",
+          "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-1pv30K\\apps\\api",
+          "database": "scrum121_upgrade_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:12:22.145Z"
+          "at": "2026-11-17T11:27:55.671Z"
         },
         {
           "label": "upgrade-deploy",
@@ -1752,9 +3083,9 @@
             "prisma7.config.ts"
           ],
           "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-          "database": "scrum121_upgrade_73fc6a314aa6",
+          "database": "scrum121_upgrade_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:12:24.007Z"
+          "at": "2026-11-17T11:27:57.481Z"
         },
         {
           "label": "upgrade-status",
@@ -1767,9 +3098,9 @@
             "prisma7.config.ts"
           ],
           "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-          "database": "scrum121_upgrade_73fc6a314aa6",
+          "database": "scrum121_upgrade_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:12:25.579Z"
+          "at": "2026-11-17T11:27:58.938Z"
         },
         {
           "label": "upgrade-redeploy",
@@ -1782,9 +3113,9 @@
             "prisma7.config.ts"
           ],
           "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-          "database": "scrum121_upgrade_73fc6a314aa6",
+          "database": "scrum121_upgrade_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:12:27.136Z"
+          "at": "2026-11-17T11:28:00.359Z"
         },
         {
           "label": "prisma-validate",
@@ -1796,9 +3127,9 @@
             "prisma7.config.ts"
           ],
           "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-          "database": "scrum121_upgrade_73fc6a314aa6",
+          "database": "scrum121_upgrade_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:12:28.938Z"
+          "at": "2026-11-17T11:28:02.058Z"
         },
         {
           "label": "new-client-generate",
@@ -1810,9 +3141,9 @@
             "prisma7.config.ts"
           ],
           "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-          "database": "scrum121_upgrade_73fc6a314aa6",
+          "database": "scrum121_upgrade_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:12:30.649Z"
+          "at": "2026-11-17T11:28:03.741Z"
         },
         {
           "label": "backend-build",
@@ -1822,20 +3153,20 @@
             "build"
           ],
           "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-          "database": "scrum121_upgrade_73fc6a314aa6",
+          "database": "scrum121_upgrade_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:12:42.138Z"
+          "at": "2026-11-17T11:28:15.231Z"
         },
         {
           "label": "new-client-roundtrip",
           "executable": "node",
           "args": [
-            "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-6FEIKU\\apps\\api\\ingredient-client-smoke.mjs"
+            "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-1pv30K\\apps\\api\\ingredient-client-smoke.mjs"
           ],
-          "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-6FEIKU\\apps\\api",
-          "database": "scrum121_upgrade_73fc6a314aa6",
+          "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-1pv30K\\apps\\api",
+          "database": "scrum121_upgrade_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:12:42.762Z"
+          "at": "2026-11-17T11:28:15.665Z"
         },
         {
           "label": "unit-tests",
@@ -1845,9 +3176,9 @@
             "run"
           ],
           "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
-          "database": "scrum121_upgrade_73fc6a314aa6",
+          "database": "scrum121_upgrade_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:13:00.203Z"
+          "at": "2026-11-17T11:28:30.523Z"
         },
         {
           "label": "baseline-client-generate",
@@ -1858,10 +3189,10 @@
             "--config",
             "prisma7.config.ts"
           ],
-          "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-6FEIKU\\apps\\api",
-          "database": "scrum121_upgrade_73fc6a314aa6",
+          "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-1pv30K\\apps\\api",
+          "database": "scrum121_upgrade_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:13:02.022Z"
+          "at": "2026-11-17T11:28:32.101Z"
         },
         {
           "label": "baseline-runtime",
@@ -1876,16 +3207,16 @@
             "test/promotions-postgres.integration-spec.ts",
             "test/order-lifecycle.integration-spec.ts"
           ],
-          "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-6FEIKU\\apps\\api",
-          "database": "scrum121_upgrade_73fc6a314aa6",
+          "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-1pv30K\\apps\\api",
+          "database": "scrum121_upgrade_8d6deb4dbe8b",
           "exitCode": 0,
-          "at": "2026-11-17T11:13:21.634Z"
+          "at": "2026-11-17T11:28:52.791Z"
         }
       ],
       "changeHashes": {
         "prisma/schema.prisma": "860b8b2941cf96ed16193955a2568bf2730f1684251b9bd0093cb5b9ce27876c",
         "prisma/migrations/20261117110000_scrum121_ingredient_inventory/migration.sql": "feee2c114603c531a21d930a593de0eee973c7f4fed6c159c9b02747ac4d96f0",
-        "test/ingredient-schema.rehearsal.mjs": "416a606284cf7a5286a4a10870043392245a1fdd5dbd6ec1183624a0b4da277b"
+        "test/ingredient-schema.rehearsal.mjs": "b734c6c9c0182e7eec3217f0079cd0e3c8f87bdd6ea0981aa8466ccdc35ba765"
       },
       "server": {
         "version": "PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
@@ -1893,18 +3224,18 @@
         "current_user": "scrum121"
       },
       "databases": {
-        "clean": "scrum121_clean_73fc6a314aa6",
-        "upgrade": "scrum121_upgrade_73fc6a314aa6"
+        "clean": "scrum121_clean_8d6deb4dbe8b",
+        "upgrade": "scrum121_upgrade_8d6deb4dbe8b"
       },
       "versions": {
         "node": "v26.13.1",
         "prisma": "7.10.1",
         "client": "7.10.1"
       },
-      "beforeHash": "fdb43e1e6d5add4590c1d4bb14e5edb491b55be23e41772c2a3579896dae0de8",
-      "afterHash": "fdb43e1e6d5add4590c1d4bb14e5edb491b55be23e41772c2a3579896dae0de8",
+      "beforeHash": "4883626e22f5aaed1f2dab8dccdbe9932f61bf762bfd4c1932d83fe5c28dc5d6",
+      "afterHash": "4883626e22f5aaed1f2dab8dccdbe9932f61bf762bfd4c1932d83fe5c28dc5d6",
       "result": "PASS",
-      "finishedAt": "2026-11-17T11:13:21.644Z",
+      "finishedAt": "2026-11-17T11:28:52.804Z",
       "actualCatalog": {
         "columns": [
           {
@@ -2405,28 +3736,932 @@
         ]
       },
       "testTotals": {
-        "baselineRuntime": {
-          "filesPassed": 4,
-          "skipped": 10,
-          "skipReason": "PAYMENT_CONCURRENCY_TESTS not enabled; baseline payment/promotion opt-in cases",
-          "passed": 103
-        },
         "unit": {
-          "filesPassed": 39,
-          "filesSkipped": 1,
+          "passed": 479,
           "skipped": 6,
-          "passed": 479
+          "skipReason": "SEED_RENDER_PG_INTEGRATION forced to 0; six baseline seed guard integration tests excluded"
+        },
+        "baselineRuntime": {
+          "passed": 103,
+          "skipped": 10,
+          "skipReason": "PAYMENT_CONCURRENCY_TESTS forced to 0; seven payment and three promotion concurrency tests excluded"
         }
+      },
+      "historicalRuns": [
+        {
+          "baseline": "3a183d67c12658432100298eefd2b4ffe0bbfb7a",
+          "startedAt": "2026-11-17T11:12:11.513Z",
+          "root": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-6FEIKU",
+          "checks": [
+            {
+              "name": "isolated PostgreSQL 18",
+              "detail": {
+                "port": 55421,
+                "cluster": "brewlite_scrum121_test",
+                "databases": {
+                  "clean": "scrum121_clean_73fc6a314aa6",
+                  "upgrade": "scrum121_upgrade_73fc6a314aa6"
+                }
+              },
+              "result": "PASS",
+              "at": "2026-11-17T11:12:12.509Z"
+            },
+            {
+              "name": "clean-deploy",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:12:15.655Z"
+            },
+            {
+              "name": "clean-status",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:12:17.651Z"
+            },
+            {
+              "name": "clean-redeploy",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:12:19.737Z"
+            },
+            {
+              "name": "baseline-deploy",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:12:22.145Z"
+            },
+            {
+              "name": "upgrade-deploy",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:12:24.007Z"
+            },
+            {
+              "name": "upgrade-status",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:12:25.579Z"
+            },
+            {
+              "name": "upgrade-redeploy",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:12:27.136Z"
+            },
+            {
+              "name": "legacy whole-row preservation",
+              "detail": {
+                "hash": "fdb43e1e6d5add4590c1d4bb14e5edb491b55be23e41772c2a3579896dae0de8",
+                "counts": {
+                  "categories": 4,
+                  "products": 2,
+                  "toppings": 1,
+                  "product_toppings": 1,
+                  "users": 4,
+                  "coupons": 1,
+                  "orders": 4,
+                  "order_items": 4,
+                  "order_item_toppings": 4,
+                  "coupon_redemptions": 4,
+                  "payments": 3,
+                  "payment_gateway_events": 0,
+                  "seed_executions": 0
+                }
+              },
+              "result": "PASS",
+              "at": "2026-11-17T11:12:27.149Z"
+            },
+            {
+              "name": "clean catalog",
+              "detail": {
+                "columns": 23,
+                "constraints": 36,
+                "indexes": 11
+              },
+              "result": "PASS",
+              "at": "2026-11-17T11:12:27.275Z"
+            },
+            {
+              "name": "clean constraints",
+              "detail": {
+                "negativeAssertions": 48,
+                "valid": "all base units, Int bounds, S/M/L/ONE_SIZE, multi-ingredient, Order states, snapshot independent of recipes, nullable release, FK update cascade"
+              },
+              "result": "PASS",
+              "at": "2026-11-17T11:12:27.335Z"
+            },
+            {
+              "name": "upgrade catalog",
+              "detail": {
+                "columns": 23,
+                "constraints": 36,
+                "indexes": 11
+              },
+              "result": "PASS",
+              "at": "2026-11-17T11:12:27.364Z"
+            },
+            {
+              "name": "upgrade constraints",
+              "detail": {
+                "negativeAssertions": 48,
+                "valid": "all base units, Int bounds, S/M/L/ONE_SIZE, multi-ingredient, Order states, snapshot independent of recipes, nullable release, FK update cascade"
+              },
+              "result": "PASS",
+              "at": "2026-11-17T11:12:27.444Z"
+            },
+            {
+              "name": "prisma-validate",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:12:28.938Z"
+            },
+            {
+              "name": "new-client-generate",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:12:30.649Z"
+            },
+            {
+              "name": "backend-build",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:12:42.138Z"
+            },
+            {
+              "name": "new-client-roundtrip",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:12:42.762Z"
+            },
+            {
+              "name": "unit-tests",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:13:00.203Z"
+            },
+            {
+              "name": "baseline-client-generate",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:13:02.022Z"
+            },
+            {
+              "name": "baseline-runtime",
+              "detail": "exit 0",
+              "result": "PASS",
+              "at": "2026-11-17T11:13:21.634Z"
+            }
+          ],
+          "commands": [
+            {
+              "label": "clean-deploy",
+              "executable": "node",
+              "args": [
+                "node_modules/prisma/build/index.js",
+                "migrate",
+                "deploy",
+                "--config",
+                "prisma7.config.ts"
+              ],
+              "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
+              "database": "scrum121_clean_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:12:15.655Z"
+            },
+            {
+              "label": "clean-status",
+              "executable": "node",
+              "args": [
+                "node_modules/prisma/build/index.js",
+                "migrate",
+                "status",
+                "--config",
+                "prisma7.config.ts"
+              ],
+              "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
+              "database": "scrum121_clean_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:12:17.651Z"
+            },
+            {
+              "label": "clean-redeploy",
+              "executable": "node",
+              "args": [
+                "node_modules/prisma/build/index.js",
+                "migrate",
+                "deploy",
+                "--config",
+                "prisma7.config.ts"
+              ],
+              "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
+              "database": "scrum121_clean_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:12:19.737Z"
+            },
+            {
+              "label": "baseline-deploy",
+              "executable": "node",
+              "args": [
+                "node_modules/prisma/build/index.js",
+                "migrate",
+                "deploy",
+                "--config",
+                "prisma7.config.ts"
+              ],
+              "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-6FEIKU\\apps\\api",
+              "database": "scrum121_upgrade_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:12:22.145Z"
+            },
+            {
+              "label": "upgrade-deploy",
+              "executable": "node",
+              "args": [
+                "node_modules/prisma/build/index.js",
+                "migrate",
+                "deploy",
+                "--config",
+                "prisma7.config.ts"
+              ],
+              "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
+              "database": "scrum121_upgrade_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:12:24.007Z"
+            },
+            {
+              "label": "upgrade-status",
+              "executable": "node",
+              "args": [
+                "node_modules/prisma/build/index.js",
+                "migrate",
+                "status",
+                "--config",
+                "prisma7.config.ts"
+              ],
+              "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
+              "database": "scrum121_upgrade_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:12:25.579Z"
+            },
+            {
+              "label": "upgrade-redeploy",
+              "executable": "node",
+              "args": [
+                "node_modules/prisma/build/index.js",
+                "migrate",
+                "deploy",
+                "--config",
+                "prisma7.config.ts"
+              ],
+              "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
+              "database": "scrum121_upgrade_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:12:27.136Z"
+            },
+            {
+              "label": "prisma-validate",
+              "executable": "node",
+              "args": [
+                "node_modules/prisma/build/index.js",
+                "validate",
+                "--config",
+                "prisma7.config.ts"
+              ],
+              "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
+              "database": "scrum121_upgrade_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:12:28.938Z"
+            },
+            {
+              "label": "new-client-generate",
+              "executable": "node",
+              "args": [
+                "node_modules/prisma/build/index.js",
+                "generate",
+                "--config",
+                "prisma7.config.ts"
+              ],
+              "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
+              "database": "scrum121_upgrade_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:12:30.649Z"
+            },
+            {
+              "label": "backend-build",
+              "executable": "node",
+              "args": [
+                "node_modules/@nestjs/cli/bin/nest.js",
+                "build"
+              ],
+              "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
+              "database": "scrum121_upgrade_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:12:42.138Z"
+            },
+            {
+              "label": "new-client-roundtrip",
+              "executable": "node",
+              "args": [
+                "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-6FEIKU\\apps\\api\\ingredient-client-smoke.mjs"
+              ],
+              "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-6FEIKU\\apps\\api",
+              "database": "scrum121_upgrade_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:12:42.762Z"
+            },
+            {
+              "label": "unit-tests",
+              "executable": "node",
+              "args": [
+                "node_modules/vitest/vitest.mjs",
+                "run"
+              ],
+              "cwd": "D:\\CNPM_PJ\\brewlite-a2\\apps\\api",
+              "database": "scrum121_upgrade_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:13:00.203Z"
+            },
+            {
+              "label": "baseline-client-generate",
+              "executable": "node",
+              "args": [
+                "node_modules/prisma/build/index.js",
+                "generate",
+                "--config",
+                "prisma7.config.ts"
+              ],
+              "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-6FEIKU\\apps\\api",
+              "database": "scrum121_upgrade_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:13:02.022Z"
+            },
+            {
+              "label": "baseline-runtime",
+              "executable": "node",
+              "args": [
+                "node_modules/vitest/vitest.mjs",
+                "run",
+                "--config",
+                "./vitest.config.integration.ts",
+                "test/inventory-postgres.integration-spec.ts",
+                "test/payments-postgres.integration-spec.ts",
+                "test/promotions-postgres.integration-spec.ts",
+                "test/order-lifecycle.integration-spec.ts"
+              ],
+              "cwd": "C:\\Users\\KHAIHO~1\\AppData\\Local\\Temp\\brewlite-scrum121-rehearsal-6FEIKU\\apps\\api",
+              "database": "scrum121_upgrade_73fc6a314aa6",
+              "exitCode": 0,
+              "at": "2026-11-17T11:13:21.634Z"
+            }
+          ],
+          "changeHashes": {
+            "prisma/schema.prisma": "860b8b2941cf96ed16193955a2568bf2730f1684251b9bd0093cb5b9ce27876c",
+            "prisma/migrations/20261117110000_scrum121_ingredient_inventory/migration.sql": "feee2c114603c531a21d930a593de0eee973c7f4fed6c159c9b02747ac4d96f0",
+            "test/ingredient-schema.rehearsal.mjs": "416a606284cf7a5286a4a10870043392245a1fdd5dbd6ec1183624a0b4da277b"
+          },
+          "server": {
+            "version": "PostgreSQL 18.6 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit",
+            "cluster": "brewlite_scrum121_test",
+            "current_user": "scrum121"
+          },
+          "databases": {
+            "clean": "scrum121_clean_73fc6a314aa6",
+            "upgrade": "scrum121_upgrade_73fc6a314aa6"
+          },
+          "versions": {
+            "node": "v26.13.1",
+            "prisma": "7.10.1",
+            "client": "7.10.1"
+          },
+          "beforeHash": "fdb43e1e6d5add4590c1d4bb14e5edb491b55be23e41772c2a3579896dae0de8",
+          "afterHash": "fdb43e1e6d5add4590c1d4bb14e5edb491b55be23e41772c2a3579896dae0de8",
+          "result": "PASS",
+          "finishedAt": "2026-11-17T11:13:21.644Z",
+          "actualCatalog": {
+            "columns": [
+              {
+                "table_name": "ingredients",
+                "column_name": "id",
+                "data_type": "uuid",
+                "udt_name": "uuid",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "ingredients",
+                "column_name": "code",
+                "data_type": "character varying",
+                "udt_name": "varchar",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "ingredients",
+                "column_name": "name",
+                "data_type": "character varying",
+                "udt_name": "varchar",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "ingredients",
+                "column_name": "base_unit",
+                "data_type": "USER-DEFINED",
+                "udt_name": "ingredient_base_unit",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "ingredients",
+                "column_name": "stock_quantity",
+                "data_type": "integer",
+                "udt_name": "int4",
+                "is_nullable": "NO",
+                "column_default": "0"
+              },
+              {
+                "table_name": "ingredients",
+                "column_name": "is_active",
+                "data_type": "boolean",
+                "udt_name": "bool",
+                "is_nullable": "NO",
+                "column_default": "true"
+              },
+              {
+                "table_name": "ingredients",
+                "column_name": "created_at",
+                "data_type": "timestamp with time zone",
+                "udt_name": "timestamptz",
+                "is_nullable": "NO",
+                "column_default": "CURRENT_TIMESTAMP"
+              },
+              {
+                "table_name": "ingredients",
+                "column_name": "updated_at",
+                "data_type": "timestamp with time zone",
+                "udt_name": "timestamptz",
+                "is_nullable": "NO",
+                "column_default": "CURRENT_TIMESTAMP"
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "column_name": "id",
+                "data_type": "uuid",
+                "udt_name": "uuid",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "column_name": "order_id",
+                "data_type": "uuid",
+                "udt_name": "uuid",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "column_name": "ingredient_id",
+                "data_type": "uuid",
+                "udt_name": "uuid",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "column_name": "quantity_reserved",
+                "data_type": "integer",
+                "udt_name": "int4",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "column_name": "created_at",
+                "data_type": "timestamp with time zone",
+                "udt_name": "timestamptz",
+                "is_nullable": "NO",
+                "column_default": "CURRENT_TIMESTAMP"
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "column_name": "released_at",
+                "data_type": "timestamp with time zone",
+                "udt_name": "timestamptz",
+                "is_nullable": "YES",
+                "column_default": null
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "column_name": "id",
+                "data_type": "uuid",
+                "udt_name": "uuid",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "column_name": "product_id",
+                "data_type": "uuid",
+                "udt_name": "uuid",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "column_name": "size",
+                "data_type": "USER-DEFINED",
+                "udt_name": "drink_size",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "column_name": "ingredient_id",
+                "data_type": "uuid",
+                "udt_name": "uuid",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "column_name": "quantity_per_unit",
+                "data_type": "integer",
+                "udt_name": "int4",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "topping_ingredients",
+                "column_name": "id",
+                "data_type": "uuid",
+                "udt_name": "uuid",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "topping_ingredients",
+                "column_name": "topping_id",
+                "data_type": "uuid",
+                "udt_name": "uuid",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "topping_ingredients",
+                "column_name": "ingredient_id",
+                "data_type": "uuid",
+                "udt_name": "uuid",
+                "is_nullable": "NO",
+                "column_default": null
+              },
+              {
+                "table_name": "topping_ingredients",
+                "column_name": "quantity_per_topping",
+                "data_type": "integer",
+                "udt_name": "int4",
+                "is_nullable": "NO",
+                "column_default": null
+              }
+            ],
+            "constraints": [
+              {
+                "table_name": "ingredients",
+                "conname": "ck_ingredients_stock_nonnegative",
+                "contype": "c",
+                "convalidated": true,
+                "definition": "CHECK ((stock_quantity >= 0))"
+              },
+              {
+                "table_name": "ingredients",
+                "conname": "ingredients_base_unit_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL base_unit"
+              },
+              {
+                "table_name": "ingredients",
+                "conname": "ingredients_code_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL code"
+              },
+              {
+                "table_name": "ingredients",
+                "conname": "ingredients_created_at_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL created_at"
+              },
+              {
+                "table_name": "ingredients",
+                "conname": "ingredients_id_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL id"
+              },
+              {
+                "table_name": "ingredients",
+                "conname": "ingredients_is_active_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL is_active"
+              },
+              {
+                "table_name": "ingredients",
+                "conname": "ingredients_name_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL name"
+              },
+              {
+                "table_name": "ingredients",
+                "conname": "ingredients_pkey",
+                "contype": "p",
+                "convalidated": true,
+                "definition": "PRIMARY KEY (id)"
+              },
+              {
+                "table_name": "ingredients",
+                "conname": "ingredients_stock_quantity_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL stock_quantity"
+              },
+              {
+                "table_name": "ingredients",
+                "conname": "ingredients_updated_at_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL updated_at"
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "conname": "ck_order_ingredient_reservations_quantity_positive",
+                "contype": "c",
+                "convalidated": true,
+                "definition": "CHECK ((quantity_reserved > 0))"
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "conname": "order_ingredient_reservations_created_at_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL created_at"
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "conname": "order_ingredient_reservations_id_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL id"
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "conname": "order_ingredient_reservations_ingredient_id_fkey",
+                "contype": "f",
+                "convalidated": true,
+                "definition": "FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON UPDATE CASCADE ON DELETE RESTRICT"
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "conname": "order_ingredient_reservations_ingredient_id_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL ingredient_id"
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "conname": "order_ingredient_reservations_order_id_fkey",
+                "contype": "f",
+                "convalidated": true,
+                "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON UPDATE CASCADE ON DELETE RESTRICT"
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "conname": "order_ingredient_reservations_order_id_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL order_id"
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "conname": "order_ingredient_reservations_pkey",
+                "contype": "p",
+                "convalidated": true,
+                "definition": "PRIMARY KEY (id)"
+              },
+              {
+                "table_name": "order_ingredient_reservations",
+                "conname": "order_ingredient_reservations_quantity_reserved_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL quantity_reserved"
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "conname": "ck_recipe_ingredients_quantity_positive",
+                "contype": "c",
+                "convalidated": true,
+                "definition": "CHECK ((quantity_per_unit > 0))"
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "conname": "recipe_ingredients_id_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL id"
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "conname": "recipe_ingredients_ingredient_id_fkey",
+                "contype": "f",
+                "convalidated": true,
+                "definition": "FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON UPDATE CASCADE ON DELETE RESTRICT"
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "conname": "recipe_ingredients_ingredient_id_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL ingredient_id"
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "conname": "recipe_ingredients_pkey",
+                "contype": "p",
+                "convalidated": true,
+                "definition": "PRIMARY KEY (id)"
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "conname": "recipe_ingredients_product_id_fkey",
+                "contype": "f",
+                "convalidated": true,
+                "definition": "FOREIGN KEY (product_id) REFERENCES products(id) ON UPDATE CASCADE ON DELETE RESTRICT"
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "conname": "recipe_ingredients_product_id_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL product_id"
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "conname": "recipe_ingredients_quantity_per_unit_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL quantity_per_unit"
+              },
+              {
+                "table_name": "recipe_ingredients",
+                "conname": "recipe_ingredients_size_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL size"
+              },
+              {
+                "table_name": "topping_ingredients",
+                "conname": "ck_topping_ingredients_quantity_positive",
+                "contype": "c",
+                "convalidated": true,
+                "definition": "CHECK ((quantity_per_topping > 0))"
+              },
+              {
+                "table_name": "topping_ingredients",
+                "conname": "topping_ingredients_id_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL id"
+              },
+              {
+                "table_name": "topping_ingredients",
+                "conname": "topping_ingredients_ingredient_id_fkey",
+                "contype": "f",
+                "convalidated": true,
+                "definition": "FOREIGN KEY (ingredient_id) REFERENCES ingredients(id) ON UPDATE CASCADE ON DELETE RESTRICT"
+              },
+              {
+                "table_name": "topping_ingredients",
+                "conname": "topping_ingredients_ingredient_id_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL ingredient_id"
+              },
+              {
+                "table_name": "topping_ingredients",
+                "conname": "topping_ingredients_pkey",
+                "contype": "p",
+                "convalidated": true,
+                "definition": "PRIMARY KEY (id)"
+              },
+              {
+                "table_name": "topping_ingredients",
+                "conname": "topping_ingredients_quantity_per_topping_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL quantity_per_topping"
+              },
+              {
+                "table_name": "topping_ingredients",
+                "conname": "topping_ingredients_topping_id_fkey",
+                "contype": "f",
+                "convalidated": true,
+                "definition": "FOREIGN KEY (topping_id) REFERENCES toppings(id) ON UPDATE CASCADE ON DELETE RESTRICT"
+              },
+              {
+                "table_name": "topping_ingredients",
+                "conname": "topping_ingredients_topping_id_not_null",
+                "contype": "n",
+                "convalidated": true,
+                "definition": "NOT NULL topping_id"
+              }
+            ],
+            "indexes": [
+              {
+                "tablename": "ingredients",
+                "indexname": "ingredients_code_key",
+                "indexdef": "CREATE UNIQUE INDEX ingredients_code_key ON public.ingredients USING btree (code)"
+              },
+              {
+                "tablename": "ingredients",
+                "indexname": "ingredients_pkey",
+                "indexdef": "CREATE UNIQUE INDEX ingredients_pkey ON public.ingredients USING btree (id)"
+              },
+              {
+                "tablename": "order_ingredient_reservations",
+                "indexname": "ix_order_ingredient_reservations_ingredient_id",
+                "indexdef": "CREATE INDEX ix_order_ingredient_reservations_ingredient_id ON public.order_ingredient_reservations USING btree (ingredient_id)"
+              },
+              {
+                "tablename": "order_ingredient_reservations",
+                "indexname": "order_ingredient_reservations_pkey",
+                "indexdef": "CREATE UNIQUE INDEX order_ingredient_reservations_pkey ON public.order_ingredient_reservations USING btree (id)"
+              },
+              {
+                "tablename": "order_ingredient_reservations",
+                "indexname": "uq_order_ingredient_reservations_order_ingredient",
+                "indexdef": "CREATE UNIQUE INDEX uq_order_ingredient_reservations_order_ingredient ON public.order_ingredient_reservations USING btree (order_id, ingredient_id)"
+              },
+              {
+                "tablename": "recipe_ingredients",
+                "indexname": "ix_recipe_ingredients_ingredient_id",
+                "indexdef": "CREATE INDEX ix_recipe_ingredients_ingredient_id ON public.recipe_ingredients USING btree (ingredient_id)"
+              },
+              {
+                "tablename": "recipe_ingredients",
+                "indexname": "recipe_ingredients_pkey",
+                "indexdef": "CREATE UNIQUE INDEX recipe_ingredients_pkey ON public.recipe_ingredients USING btree (id)"
+              },
+              {
+                "tablename": "recipe_ingredients",
+                "indexname": "uq_recipe_ingredients_product_size_ingredient",
+                "indexdef": "CREATE UNIQUE INDEX uq_recipe_ingredients_product_size_ingredient ON public.recipe_ingredients USING btree (product_id, size, ingredient_id)"
+              },
+              {
+                "tablename": "topping_ingredients",
+                "indexname": "ix_topping_ingredients_ingredient_id",
+                "indexdef": "CREATE INDEX ix_topping_ingredients_ingredient_id ON public.topping_ingredients USING btree (ingredient_id)"
+              },
+              {
+                "tablename": "topping_ingredients",
+                "indexname": "topping_ingredients_pkey",
+                "indexdef": "CREATE UNIQUE INDEX topping_ingredients_pkey ON public.topping_ingredients USING btree (id)"
+              },
+              {
+                "tablename": "topping_ingredients",
+                "indexname": "uq_topping_ingredients_topping_ingredient",
+                "indexdef": "CREATE UNIQUE INDEX uq_topping_ingredients_topping_ingredient ON public.topping_ingredients USING btree (topping_id, ingredient_id)"
+              }
+            ]
+          },
+          "testTotals": {
+            "baselineRuntime": {
+              "filesPassed": 4,
+              "skipped": 10,
+              "skipReason": "PAYMENT_CONCURRENCY_TESTS not enabled; baseline payment/promotion opt-in cases",
+              "passed": 103
+            },
+            "unit": {
+              "filesPassed": 39,
+              "filesSkipped": 1,
+              "skipped": 6,
+              "passed": 479
+            }
+          }
+        }
+      ],
+      "historicalReview": {
+        "originalEvidenceFileSha256": "ac85f2ebabbdc555138e1ec60e5d6b61dd966b8a02780b27d31780dfbe03c3ca",
+        "limitations": [
+          "Initial topping restrict assertion could pass on order_item_toppings_topping_id_fkey",
+          "Initial history order restrict assertion could pass on order_items_order_id_fkey",
+          "Initial subprocess env inherited seed opt-in/target; six seed tests were skipped in that run; no out-of-scope seed execution reported"
+        ],
+        "resolution": "Current run filters subprocess environment and verifies six isolated delete-restrict cases using exact SQLSTATE and new FK names"
       }
     }
   ],
-  "historicalReview": {
-    "originalEvidenceFileSha256": "ac85f2ebabbdc555138e1ec60e5d6b61dd966b8a02780b27d31780dfbe03c3ca",
-    "limitations": [
-      "Initial topping restrict assertion could pass on order_item_toppings_topping_id_fkey",
-      "Initial history order restrict assertion could pass on order_items_order_id_fkey",
-      "Initial subprocess env inherited seed opt-in/target; six seed tests were skipped in that run; no out-of-scope seed execution reported"
-    ],
-    "resolution": "Current run filters subprocess environment and verifies six isolated delete-restrict cases using exact SQLSTATE and new FK names"
-  }
+  "previousEvidenceFileSha256": "0c549092010ad923d538ece00ea4a8160fcd32ad85e03d2436f23cd1b6fc527c"
 }
