@@ -8,9 +8,11 @@ import { tmpdir } from 'node:os';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import pg from 'pg';
+import { createSourceSnapshot, fingerprint, materializeSource, sha256, snapshotFileName, verifyManifest } from './ingredient-source.provenance.mjs';
 
-const api = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const repo = resolve(api, '../..');
+const workspaceApi = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const repo = resolve(workspaceApi, '../..');
+let api = workspaceApi;
 const baseline = '3a183d67c12658432100298eefd2b4ffe0bbfb7a';
 const ingredientBaseline = '57fa0486c9fce5633f7be0f58c4ce99028ff2f22';
 const temporalConstraint = 'ck_order_ingredient_reservations_release_time';
@@ -75,7 +77,21 @@ if (process.argv.includes('--check-env-only')) {
 const port = Number(process.env.SCRUM121_TEST_PORT);
 assert.equal(port, taskPort, 'Set SCRUM121_TEST_PORT=55421 for the dedicated cluster.');
 const root = mkdtempSync(join(tmpdir(), 'brewlite-scrum121-rehearsal-'));
-const evidence = { baseline, ingredientBaseline, startedAt: new Date().toISOString(), root, checks: [], commands: [] };
+const sourceSnapshot = createSourceSnapshot(repo);
+const sourceBytes = Buffer.from(JSON.stringify(sourceSnapshot, null, 2) + '\n');
+writeFileSync(join(root, snapshotFileName), sourceBytes);
+const testedRoot = join(root, 'tested-source');
+materializeSource(repo, sourceSnapshot, testedRoot);
+api = join(testedRoot, 'apps/api');
+symlinkSync(join(workspaceApi, 'node_modules'), join(api, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
+const inputManifest = sourceSnapshot.files.map(({ path, sizeBytes, rawSha256, canonicalLfSha256 }) => ({ path, sizeBytes, rawSha256, canonicalLfSha256 }));
+const evidence = { baseline, ingredientBaseline, headAtRun: sourceSnapshot.baseCommit,
+  startedAt: new Date().toISOString(), root, checks: [], commands: [],
+  provenance: { snapshotFile: snapshotFileName, snapshotSha256: sha256(sourceBytes),
+    branch: sourceSnapshot.branch, workingTreeDirtyAtCapture: sourceSnapshot.workingTreeDirty,
+    gitStatusAtCapture: sourceSnapshot.status, inputsBefore: inputManifest,
+    sourceUnchanged: false, testedSnapshotUnchanged: false,
+    exclusions: sourceSnapshot.scope, algorithms: sourceSnapshot.algorithms } };
 evidence.changeHashes = Object.fromEntries([
   'prisma/schema.prisma', 'prisma/migrations/20261117110000_scrum121_ingredient_inventory/migration.sql',
   'prisma/migrations/20261117130000_scrum121_reservation_release_time/migration.sql',
@@ -89,12 +105,18 @@ check('subprocess environment isolation', envProof);
 const connection = (database) => ({ host: '127.0.0.1', port, user: 'scrum121', database });
 function command(label, executable, args, cwd, database) {
   const env = subprocessEnv(database);
+  const startedAt = new Date().toISOString();
   const result = spawnSync(executable, args, { cwd, env, encoding: 'utf8', maxBuffer: 20 * 1024 * 1024 });
+  const finishedAt = new Date().toISOString();
   // Redact URLs even though this isolated cluster uses no password.
   const output = `${result.stdout ?? ''}\n${result.stderr ?? ''}`.replace(/postgres(?:ql)?:\/\/[^\s"']+/g, '[REDACTED_DATABASE_URL]');
   writeFileSync(join(root, `${label}.log`), output);
+  const totals = output.match(/Tests\s+(\d+) passed \| (\d+) skipped/);
+  const tests = totals ? { passed: Number(totals[1]), skipped: Number(totals[2]),
+    skipReason: label === 'unit-tests' ? 'SEED_RENDER_PG_INTEGRATION=0: six seed guard tests disabled' : 'PAYMENT_CONCURRENCY_TESTS=0: seven payment + three promotion concurrency cases disabled' } : undefined;
   evidence.commands.push({ label, executable: executable === process.execPath ? 'node' : executable,
-    args, cwd, database, exitCode: result.status, at: new Date().toISOString() });
+    args, cwd, database, exitCode: result.status, startedAt, finishedAt, tests });
+  if (tests) { evidence.testTotals ??= {}; evidence.testTotals[label] = tests; }
   assert.equal(result.status, 0, `${label} failed; see isolated evidence log (no connection string).`);
   check(label, 'exit 0');
 }
@@ -322,7 +344,9 @@ async function assertions(db, label) {
 
 let admin;
 const clients = [];
+let baselineManifests;
 try {
+  command('provenance-self-test', process.execPath, ['test/ingredient-source.provenance.mjs', '--self-test'], workspaceApi, 'scrum121_env_probe');
   admin = new pg.Client(connection('postgres'));
   await admin.connect();
   const server = (await admin.query(`SELECT version(),current_setting('cluster_name') AS cluster,current_user`)).rows[0];
@@ -349,7 +373,6 @@ try {
   execFileSync(tarExecutable, ['-xf', archive, '-C', root], { env: subprocessEnv(upgrade) });
   const oldApi = join(root, 'apps/api');
   symlinkSync(join(api, 'node_modules'), join(oldApi, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
-  evidence.headAtRun = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repo, env: subprocessEnv(upgrade), encoding: 'utf8' }).trim();
   const coreRoot = mkdtempSync(join(root, 'ingredient-core-'));
   const coreArchive = join(coreRoot, 'core.tar');
   writeFileSync(coreArchive, execFileSync('git', ['archive', '--format=tar', ingredientBaseline, 'apps/api'], {
@@ -357,9 +380,14 @@ try {
   execFileSync(tarExecutable, ['-xf', coreArchive, '-C', coreRoot], { env: subprocessEnv(coreUpgrade) });
   const coreApi = join(coreRoot, 'apps/api');
   symlinkSync(join(api, 'node_modules'), join(coreApi, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
+  baselineManifests = { legacy: { commit: baseline, root, before: fingerprint(root) },
+    core: { commit: ingredientBaseline, root: coreRoot, before: fingerprint(coreRoot) } };
+  evidence.baselineSources = baselineManifests;
   evidence.versions = { node: process.version,
     prisma: JSON.parse(readFileSync(join(api, 'node_modules/prisma/package.json'))).version,
-    client: JSON.parse(readFileSync(join(api, 'node_modules/@prisma/client/package.json'))).version };
+    client: JSON.parse(readFileSync(join(api, 'node_modules/@prisma/client/package.json'))).version,
+    tools: Object.fromEntries(['vitest','typescript','pg','@nestjs/cli','@prisma/adapter-pg'].map((p) => [p, JSON.parse(readFileSync(join(api, 'node_modules', p, 'package.json'))).version])),
+    git: sourceSnapshot.git.version, platform: process.platform };
   prisma(api, clean, 'clean-deploy', 'migrate', 'deploy');
   prisma(api, clean, 'clean-status', 'migrate', 'status');
   prisma(api, clean, 'clean-redeploy', 'migrate', 'deploy');
@@ -472,6 +500,17 @@ console.log('PASS Prisma model/relations/defaults/snapshot roundtrip');`);
   command('baseline-runtime', process.execPath, ['node_modules/vitest/vitest.mjs', 'run', '--config', './vitest.config.integration.ts',
     'test/inventory-postgres.integration-spec.ts', 'test/payments-postgres.integration-spec.ts',
     'test/promotions-postgres.integration-spec.ts', 'test/order-lifecycle.integration-spec.ts'], oldApi, upgrade);
+  verifyManifest(repo, inputManifest);
+  verifyManifest(testedRoot, inputManifest);
+  for (const entry of Object.values(baselineManifests)) {
+    entry.after = fingerprint(entry.root);
+    assert.deepEqual(entry.after, entry.before, 'Baseline source changed during rehearsal');
+  }
+  evidence.provenance.inputsAfter = fingerprint(repo);
+  evidence.provenance.testedInputsAfter = fingerprint(testedRoot);
+  evidence.provenance.sourceUnchanged = true;
+  evidence.provenance.testedSnapshotUnchanged = true;
+  check('source provenance before/after', { workspaceAndTestedSnapshotExact: true, baselineSourcesUnchanged: true, files: inputManifest.length });
   evidence.result = 'PASS';
 } catch (error) {
   evidence.result = 'FAIL';
@@ -480,6 +519,16 @@ console.log('PASS Prisma model/relations/defaults/snapshot roundtrip');`);
   console.error(`FAIL ${evidence.failure}`);
   process.exitCode = 1;
 } finally {
+  // Always check even after a test failure. Never retain PASS if inputs drift.
+  try {
+    verifyManifest(repo, inputManifest); verifyManifest(testedRoot, inputManifest);
+    evidence.provenance.inputsAfter = fingerprint(repo);
+    evidence.provenance.testedInputsAfter = fingerprint(testedRoot);
+  } catch (error) {
+    evidence.result = 'INVALID_SOURCE_CHANGED'; evidence.failure = error.message;
+    evidence.provenance.sourceUnchanged = false; evidence.provenance.testedSnapshotUnchanged = false;
+    process.exitCode = 1;
+  }
   await Promise.all(clients.map((client) => client.end()));
   if (admin) await admin.end();
   evidence.finishedAt = new Date().toISOString();
