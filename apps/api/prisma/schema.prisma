@@ -43,6 +43,7 @@ model Product {
 
   orderItems      OrderItem[]
   productToppings ProductTopping[]
+  recipeIngredients RecipeIngredient[]
 
   @@index([categoryId], map: "ix_products_category_id")
   @@map("products")
@@ -56,6 +57,7 @@ model Topping {
   isAvailable       Boolean            @default(true) @map("is_available")
   orderItemToppings OrderItemTopping[]
   productToppings   ProductTopping[]
+  toppingIngredients ToppingIngredient[]
 
   @@map("toppings")
 }
@@ -219,6 +221,7 @@ model Order {
   coupon Coupon?     @relation(fields: [couponId], references: [id], onDelete: Restrict)
   items  OrderItem[]
   payments Payment[]
+  ingredientReservations OrderIngredientReservation[]
 
   @@index([userId], map: "ix_orders_user_id")
   @@index([userId, createdAt], map: "ix_orders_user_created")
@@ -362,4 +365,83 @@ model SeedExecution {
   completedAt DateTime @default(now()) @map("completed_at") @db.Timestamptz(6)
 
   @@map("seed_executions")
+}
+
+enum IngredientBaseUnit {
+  G
+  ML
+  MG
+  UNIT
+
+  @@map("ingredient_base_unit")
+}
+
+/// D-01: quantities are canonical-unit Ints. Nonnegative CHECK is in SQL.
+model Ingredient {
+  id            String             @id @default(uuid()) @db.Uuid
+  code          String             @unique @db.VarChar(50)
+  name          String             @db.VarChar(255)
+  baseUnit      IngredientBaseUnit @map("base_unit")
+  stockQuantity Int                @default(0) @map("stock_quantity")
+  isActive      Boolean            @default(true) @map("is_active")
+  createdAt     DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  recipeIngredients RecipeIngredient[]
+  toppingIngredients ToppingIngredient[]
+  orderReservations OrderIngredientReservation[]
+
+  @@map("ingredients")
+}
+
+/// Uses existing DrinkSize, including ONE_SIZE. Positive quantity CHECK in SQL.
+model RecipeIngredient {
+  id              String    @id @default(uuid()) @db.Uuid
+  productId       String    @map("product_id") @db.Uuid
+  size            DrinkSize
+  ingredientId    String    @map("ingredient_id") @db.Uuid
+  quantityPerUnit Int       @map("quantity_per_unit")
+
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([productId, size, ingredientId], map: "uq_recipe_ingredients_product_size_ingredient")
+  @@index([ingredientId], map: "ix_recipe_ingredients_ingredient_id")
+  @@map("recipe_ingredients")
+}
+
+/// Positive canonical-unit quantity CHECK is maintained in SQL.
+model ToppingIngredient {
+  id                 String @id @default(uuid()) @db.Uuid
+  toppingId          String @map("topping_id") @db.Uuid
+  ingredientId       String @map("ingredient_id") @db.Uuid
+  quantityPerTopping Int    @map("quantity_per_topping")
+
+  topping    Topping    @relation(fields: [toppingId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([toppingId, ingredientId], map: "uq_topping_ingredients_topping_ingredient")
+  @@index([ingredientId], map: "ix_topping_ingredients_ingredient_id")
+  @@map("topping_ingredients")
+}
+
+/// D-06 Option A: aggregate snapshot, never recalculate from mutable recipes.
+/// SQL enforces positive quantity and released_at >= created_at when released.
+/// These CHECKs are maintained in SQL migrations, not Prisma validation.
+/// Transaction logic must enforce immutability,
+/// integrity and one-time release (SCRUM-123/124), not this marker alone.
+model OrderIngredientReservation {
+  id               String    @id @default(uuid()) @db.Uuid
+  orderId          String    @map("order_id") @db.Uuid
+  ingredientId     String    @map("ingredient_id") @db.Uuid
+  quantityReserved Int       @map("quantity_reserved")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  releasedAt       DateTime? @map("released_at") @db.Timestamptz(6)
+
+  order      Order      @relation(fields: [orderId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([orderId, ingredientId], map: "uq_order_ingredient_reservations_order_ingredient")
+  @@index([ingredientId], map: "ix_order_ingredient_reservations_ingredient_id")
+  @@map("order_ingredient_reservations")
 }
